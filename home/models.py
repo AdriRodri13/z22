@@ -44,5 +44,10 @@ class Equipacion(models.Model):
 
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='equipaciones')
     temporada = models.ForeignKey(Temporada, on_delete=models.CASCADE, related_name='equipaciones')
-    imagen = models.ImageField(upload_to='equipaciones/')
+    imagen = models.ImageField(
+        storage=seleccionar_storage(),
+        upload_to='equipaciones/',
+        blank=True,
+        null=True
+    )
 
