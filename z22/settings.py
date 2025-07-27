@@ -2,23 +2,18 @@ from pathlib import Path
 import os
 import dj_database_url
 
-# === BASE DIR ===
+# === VARIABLES DE ENTORNO ===
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# === VARIABLES FIJAS PARA PRODUCCIÓN DESDE LOCAL ===
-SECRET_KEY = "clave_segura"
-DEBUG = False
-ALLOWED_HOSTS = ["web-production-f968.up.railway.app", "www.web-production-f968.up.railway.app"]
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-valor-por-defecto-solo-desarrollo')
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
-DATABASES = {
-    'default': dj_database_url.config(default="postgresql://postgres:bGFsLExHFpqITDgROTJgUNZzylyVULFq@interchange.proxy.rlwy.net:28561/railway")
-}
+CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
+CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
+CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
 
-CLOUDINARY_CLOUD_NAME = "dwl0lbes7"
-CLOUDINARY_API_KEY = "227498335462626"
-CLOUDINARY_API_SECRET = "L9wZH_YO0j9XB-v1BfRtFMHp2cw"
-
-# === APPS ===
+# === APLICACIONES ===
 APPS_PROPIAS = [
     'home',
     'panel_admin',
@@ -51,7 +46,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# === GENERAL ===
+# === CONFIGURACIÓN GENERAL ===
 ROOT_URLCONF = 'z22.urls'
 
 TEMPLATES = [
@@ -71,7 +66,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'z22.wsgi.application'
 
-# === PASSWORD VALIDATORS ===
+# === BASE DE DATOS ===
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    }
+
+# === VALIDACIÓN DE CONTRASEÑAS ===
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -85,21 +93,30 @@ TIME_ZONE = "Europe/Madrid"
 USE_I18N = True
 USE_TZ = True
 
-# === STATIC FILES ===
+# === ARCHIVOS ESTÁTICOS ===
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# === MEDIA ===
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
-    "API_KEY": CLOUDINARY_API_KEY,
-    "API_SECRET": CLOUDINARY_API_SECRET,
-}
-if not all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]):
-    raise Exception("❌ Cloudinary no está configurado correctamente. Revisa tus claves.")
+if DEBUG:
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+else:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# === FINAL ===
+# === ARCHIVOS MEDIA ===
+if DEBUG:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+else:
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
+        "API_KEY": CLOUDINARY_API_KEY,
+        "API_SECRET": CLOUDINARY_API_SECRET,
+    }
+    if not all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]):
+        raise Exception("❌ Cloudinary no está configurado correctamente. Revisa tus variables de entorno.")
+
+# === CONFIGURACIÓN FINAL ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
