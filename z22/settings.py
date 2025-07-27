@@ -2,16 +2,18 @@ from pathlib import Path
 import os
 import dj_database_url
 
-# === VARIABLES DE ENTORNO ===
+# === BASE DIR ===
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-valor-por-defecto-solo-desarrollo')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+# === VARIABLES DE ENTORNO ===
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-valor-por-defecto-solo-desarrollo")
+DEBUG = os.getenv("DEBUG", "True") == "True"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
-CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
-CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
-CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
+# === CLOUDINARY (solo usado si DEBUG=False) ===
+CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")
 
 # === APLICACIONES ===
 APPS_PROPIAS = [
@@ -46,7 +48,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# === CONFIGURACIÓN GENERAL ===
 ROOT_URLCONF = 'z22.urls'
 
 TEMPLATES = [
@@ -79,7 +80,7 @@ else:
         'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
     }
 
-# === VALIDACIÓN DE CONTRASEÑAS ===
+# === VALIDADORES DE CONTRASEÑA ===
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -118,5 +119,5 @@ else:
     if not all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]):
         raise Exception("❌ Cloudinary no está configurado correctamente. Revisa tus variables de entorno.")
 
-# === CONFIGURACIÓN FINAL ===
+# === ID AUTO POR DEFECTO ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

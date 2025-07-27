@@ -493,8 +493,7 @@ def mostrar_resumen():
     print(f"   📋 Total equipos: {total_equipos_global}")
     print(f"   👕 Total equipaciones: {total_equipaciones_global}")
     print(f"{'='*60}")
-    print("📂 Contenido de Equipos/:", os.listdir(os.path.join(BASE_DIR, "Equipos")))
-
+    
 if __name__ == '__main__':
     print("🚀 Iniciando carga de datos de fútbol...")
     print("📊 Script mejorado para todas las ligas")
