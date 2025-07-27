@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ equipo.nombre }} - Equipaciones{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'home/css/equipo.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Header del Equipo -->
+<section class="equipo-header py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Botón volver -->
+                <a href="{% url 'home:liga_detail' liga.id %}" class="btn-volver mb-3">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    <span>Volver a {{ liga.nombre }}</span>
+                </a>
+                
+                <!-- Info del equipo -->
+                <div class="equipo-info-header">
+                    <div class="equipo-logo-header">
+                        {% if equipo.logo %}
+                            <img src="{{ equipo.logo.url }}" alt="{{ equipo.nombre }}" class="equipo-logo-img">
+                        {% else %}
+                            <div class="equipo-logo-placeholder-header">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="equipo-details">
+                        <h1 class="equipo-nombre-header">{{ equipo.nombre }}</h1>
+                        <p class="equipo-liga-info">
+                            <i class="fas fa-trophy me-2"></i>{{ liga.nombre }}
+                        </p>
+                        <p class="equipo-stats">
+                            <i class="fas fa-tshirt me-2"></i>
+                            {{ total_equipaciones }} equipación{{ total_equipaciones|pluralize:"es" }} disponible{{ total_equipaciones|pluralize:"s" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Equipaciones -->
+<section class="equipaciones-section pb-4">
+    <div class="container">
+        {% if equipaciones %}
+        <div class="row g-3">
+            {% for equipacion in equipaciones %}
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <div class="equipacion-card" data-equipacion-id="{{ equipacion.id }}">
+                    <!-- Imagen de la equipación -->
+                    <div class="equipacion-img-container">
+                        <img src="{{ equipacion.imagen.url }}" alt="Equipación {{ equipo.nombre }}" class="equipacion-img" loading="lazy">
+                        
+                        <!-- Overlay con botón de contacto -->
+                        <div class="equipacion-overlay">
+                            <button class="btn-contactar">
+                                <i class="fab fa-whatsapp me-1"></i>
+                                Contactar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <div class="empty-state">
+                    <i class="fas fa-tshirt text-muted mb-3" style="font-size: 3rem;"></i>
+                    <h4 class="text-white">No hay equipaciones disponibles</h4>
+                    <p class="text-muted">Este equipo aún no tiene equipaciones cargadas.</p>
+                    <a href="{% url 'home:liga_detail' liga.id %}" class="btn btn-outline-light mt-3">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver a {{ liga.nombre }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Modal para imagen ampliada -->
+<div class="modal fade" id="equipacionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white">{{ equipo.nombre }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-2">
+                <img id="modalEquipacionImg" src="" alt="" class="img-fluid rounded">
+                <div class="mt-3">
+                    <button class="btn btn-success btn-lg" onclick="contactarWhatsApp()">
+                        <i class="fab fa-whatsapp me-2"></i>
+                        Contactar por WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'home/js/equipo.js' %}"></script>
+{% endblock %}

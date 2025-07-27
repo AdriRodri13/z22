@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Inicio - Catálogo de Equipos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'home/css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Ligas Section -->
+<section class="ligas-section py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-3">
+                <h2 class="section-title">
+                    Ligas {{ temporada.nombre }}
+                </h2>
+                <p class="section-subtitle">{{ ligas.count }} liga{{ ligas.count|pluralize:"s" }} disponible{{ ligas.count|pluralize:"s" }}</p>
+            </div>
+        </div>
+        
+        <div class="row g-3">
+            {% for liga in ligas %}
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="liga-card" data-liga-id="{{ liga.id }}">
+                    <!-- Logo de la liga -->
+                    <div class="liga-logo-container">
+                        {% if liga.logo %}
+                            <img src="{{ liga.logo.url }}" alt="{{ liga.nombre }}" class="liga-logo">
+                        {% else %}
+                            <div class="liga-logo-placeholder">
+                                <i class="fas fa-futbol"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Info de la liga -->
+                    <div class="liga-info">
+                        <h3 class="liga-name">{{ liga.nombre }}</h3>
+                        <p class="liga-equipos">
+                            <i class="fas fa-users"></i>
+                            {{ liga.equipos.count }} equipo{{ liga.equipos.count|pluralize:"s" }}
+                        </p>
+                    </div>
+                    
+                    <!-- Preview de equipos -->
+                    <div class="equipos-preview">
+                        {% for equipo in liga.equipos.all|slice:":3" %}
+                        <div class="equipo-mini">
+                            {% if equipo.logo %}
+                                <img src="{{ equipo.logo.url }}" alt="{{ equipo.nombre }}" class="equipo-logo">
+                            {% else %}
+                                <div class="equipo-logo-placeholder">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <div class="no-equipos">
+                            <i class="fas fa-plus text-muted"></i>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if liga.equipos.count > 3 %}
+                        <div class="equipos-more">
+                            <span>+{{ liga.equipos.count|add:"-3" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Botón de acción -->
+                    <button class="btn-explorar">
+                        Ver Equipos
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-4">
+                <div class="empty-state">
+                    <i class="fas fa-futbol text-muted mb-2"></i>
+                    <h4 class="text-white">No hay ligas disponibles</h4>
+                    <p class="text-muted">Las ligas aparecerán aquí cuando estén disponibles.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'home/js/home.js' %}"></script>
+{% endblock %}

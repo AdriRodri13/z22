@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ liga.nombre }} - Equipos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'home/css/liga.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Header de la Liga -->
+<section class="liga-header py-3">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-12">
+                <!-- Botón volver -->
+                <a href="{% url 'home:index' %}" class="btn-volver mb-3">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    <span>Volver a Ligas</span>
+                </a>
+                
+                <!-- Info de la liga -->
+                <div class="liga-info-header">
+                    <div class="liga-logo-header">
+                        {% if liga.logo %}
+                            <img src="{{ liga.logo.url }}" alt="{{ liga.nombre }}" class="liga-logo-img">
+                        {% else %}
+                            <div class="liga-logo-placeholder-header">
+                                <i class="fas fa-futbol"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="liga-details">
+                        <h1 class="liga-nombre">{{ liga.nombre }}</h1>
+                        <p class="liga-stats">
+                            <i class="fas fa-users me-2"></i>
+                            {{ total_equipos }} equipo{{ total_equipos|pluralize:"s" }}
+                            {% if search_query and equipos.count != total_equipos %}
+                            <span class="search-results"> • {{ equipos.count }} resultado{{ equipos.count|pluralize:"s" }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Buscador -->
+<section class="search-section py-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <form method="GET" class="search-form">
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input 
+                                type="text" 
+                                name="search" 
+                                value="{{ search_query }}" 
+                                placeholder="Buscar equipo..." 
+                                class="search-input"
+                                autocomplete="off"
+                                autocapitalize="off"
+                            >
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Equipos -->
+<section class="equipos-section pb-4">
+    <div class="container">
+        {% if equipos %}
+        <div class="row g-3">
+            {% for equipo in equipos %}
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                <div class="equipo-card" data-equipo-id="{{ equipo.id }}">
+                    <!-- Logo del equipo -->
+                    <div class="equipo-logo-container">
+                        {% if equipo.logo %}
+                            <img src="{{ equipo.logo.url }}" alt="{{ equipo.nombre }}" class="equipo-logo">
+                        {% else %}
+                            <div class="equipo-logo-placeholder">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Nombre del equipo -->
+                    <h3 class="equipo-nombre">{{ equipo.nombre }}</h3>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="empty-state">
+                {% if search_query %}
+                    <i class="fas fa-search text-muted mb-3"></i>
+                    <h4 class="text-white">No se encontraron equipos</h4>
+                    <p class="text-muted mb-4">No hay equipos que coincidan con "{{ search_query }}"</p>
+                    <button onclick="clearSearch()" class="btn btn-outline-light">
+                        <i class="fas fa-times me-2"></i>
+                        Limpiar búsqueda
+                    </button>
+                {% else %}
+                    <i class="fas fa-users text-muted mb-3"></i>
+                    <h4 class="text-white">No hay equipos</h4>
+                    <p class="text-muted">Esta liga aún no tiene equipos disponibles.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'home/js/liga.js' %}"></script>
+{% endblock %}
