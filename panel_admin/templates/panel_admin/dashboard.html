@@ -1,0 +1,215 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/dashboard.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tachometer-alt"></i>{% endblock %}
+{% block content_title %}Dashboard{% endblock %}
+
+{% block panel_content %}
+
+<!-- Acciones rápidas -->
+<div class="quick-actions">
+    <h4>
+        <i class="fas fa-bolt"></i>Acciones Rápidas
+    </h4>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'panel_admin:temporada_create' %}" class="quick-action-card">
+                <i class="fas fa-plus-circle quick-action-icon"></i>
+                <h5 class="quick-action-title">Nueva Temporada</h5>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'panel_admin:liga_create' %}" class="quick-action-card">
+                <i class="fas fa-plus-circle quick-action-icon"></i>
+                <h5 class="quick-action-title">Nueva Liga</h5>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'panel_admin:equipo_create' %}" class="quick-action-card">
+                <i class="fas fa-plus-circle quick-action-icon"></i>
+                <h5 class="quick-action-title">Nuevo Equipo</h5>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'panel_admin:equipacion_create' %}" class="quick-action-card">
+                <i class="fas fa-plus-circle quick-action-icon"></i>
+                <h5 class="quick-action-title">Nueva Equipación</h5>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Actividad reciente -->
+<div class="activity-section">
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="activity-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar"></i>Últimas Temporadas</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if ultimas_temporadas %}
+                        {% for temporada in ultimas_temporadas %}
+                            <div class="activity-item">
+                                <div class="flex-grow-1">
+                                    <h6 class="activity-name">{{ temporada.nombre }}</h6>
+                                    <p class="activity-meta">{{ temporada.creado_en|date:"d/m/Y H:i" }}</p>
+                                </div>
+                                <span class="activity-badge">Temporada</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar"></i>
+                            <h5>No hay temporadas</h5>
+                            <p>Comienza creando tu primera temporada</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="activity-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-trophy"></i>Últimas Ligas</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if ultimas_ligas %}
+                        {% for liga in ultimas_ligas %}
+                            <div class="activity-item">
+                                <div class="flex-grow-1">
+                                    <h6 class="activity-name">{{ liga.nombre }}</h6>
+                                    <p class="activity-meta">{{ liga.temporada.nombre }}</p>
+                                </div>
+                                <span class="activity-badge">Liga</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-trophy"></i>
+                            <h5>No hay ligas</h5>
+                            <p>Añade algunas ligas a tu catálogo</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mt-2">
+        <div class="col-lg-6">
+            <div class="activity-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-shield-alt"></i>Últimos Equipos</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if ultimos_equipos %}
+                        {% for equipo in ultimos_equipos %}
+                            <div class="activity-item">
+                                <div class="flex-grow-1">
+                                    <h6 class="activity-name">{{ equipo.nombre }}</h6>
+                                    <p class="activity-meta">{{ equipo.liga.nombre }}</p>
+                                </div>
+                                <span class="activity-badge">Equipo</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-shield-alt"></i>
+                            <h5>No hay equipos</h5>
+                            <p>Agrega equipos a tus ligas</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="activity-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-tshirt"></i>Últimas Equipaciones</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if ultimas_equipaciones %}
+                        {% for equipacion in ultimas_equipaciones %}
+                            <div class="activity-item">
+                                <div class="flex-grow-1">
+                                    <h6 class="activity-name">{{ equipacion.equipo.nombre }}</h6>
+                                    <p class="activity-meta">{{ equipacion.temporada.nombre }}</p>
+                                </div>
+                                <span class="activity-badge">Equipación</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-tshirt"></i>
+                            <h5>No hay equipaciones</h5>
+                            <p>Sube las primeras equipaciones</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Hacer las stat-cards clicables
+    document.querySelector('.stat-temporadas').addEventListener('click', function() {
+        window.location.href = '{% url "panel_admin:temporada_list" %}';
+    });
+    
+    document.querySelector('.stat-ligas').addEventListener('click', function() {
+        window.location.href = '{% url "panel_admin:liga_list" %}';
+    });
+    
+    document.querySelector('.stat-equipos').addEventListener('click', function() {
+        window.location.href = '{% url "panel_admin:equipo_list" %}';
+    });
+    
+    document.querySelector('.stat-equipaciones').addEventListener('click', function() {
+        window.location.href = '{% url "panel_admin:equipacion_list" %}';
+    });
+    
+    // Efecto de counter para los números
+    function animateCounter(element, target) {
+        let current = 0;
+        const increment = target / 50;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            element.textContent = Math.floor(current);
+        }, 20);
+    }
+    
+    // Animar los contadores cuando aparezcan en pantalla
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const number = entry.target.querySelector('.stat-number');
+                const target = parseInt(number.textContent);
+                animateCounter(number, target);
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.stat-card').forEach(card => {
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}

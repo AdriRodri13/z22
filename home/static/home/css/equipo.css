@@ -148,7 +148,7 @@
 }
 
 .btn-contactar {
-  background: #25D366;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -161,12 +161,64 @@
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-contactar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-contactar:hover::before {
+  left: 100%;
 }
 
 .btn-contactar:hover {
-  background: #128C7E;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(37, 211, 102, 0.3);
+  box-shadow: 0 4px 15px rgba(240, 148, 51, 0.4);
+}
+
+/* Botón Instagram en modal */
+.btn-instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-instagram::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-instagram:hover::before {
+  left: 100%;
+}
+
+.btn-instagram:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(240, 148, 51, 0.4);
 }
 
 /* Empty state */
@@ -260,77 +312,5 @@
   
   .equipo-nombre-header {
     font-size: 2rem;
-  }
-  
-  .equipacion-overlay {
-    padding: 1.25rem 1rem 1rem;
-  }
-  
-  .btn-contactar {
-    padding: 0.65rem 1.25rem;
-    font-size: 0.85rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .equipacion-card {
-    aspect-ratio: 3/4;
-  }
-}
-
-/* Estados de carga */
-.equipacion-img.loading {
-  opacity: 0.6;
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.3; }
-}
-
-/* Focus states */
-.equipacion-card:focus-visible {
-  outline: 2px solid #25D366;
-  outline-offset: 2px;
-}
-
-.btn-contactar:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 2px;
-}
-
-/* Efectos especiales para hover */
-@media (min-width: 768px) {
-  .equipacion-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transform: translateX(-100%);
-    transition: transform 0.6s ease;
-    z-index: 1;
-  }
-  
-  .equipacion-card:hover::before {
-    transform: translateX(100%);
-  }
-}
-
-/* Grid optimization */
-@media (max-width: 575.98px) {
-  .row.g-3 {
-    --bs-gutter-x: 0.75rem;
-    --bs-gutter-y: 0.75rem;
-  }
-}
-
-@media (min-width: 576px) {
-  .row.g-3 {
-    --bs-gutter-x: 1rem;
-    --bs-gutter-y: 1rem;
   }
 }

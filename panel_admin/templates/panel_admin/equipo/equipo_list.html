@@ -1,0 +1,217 @@
+/* ================================
+   EQUIPO BY LIGA STYLES
+   ================================ */
+
+.liga-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.liga-card {
+    background: var(--gradient-secondary);
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    text-align: center;
+    transition: var(--transition-normal);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.liga-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-info), var(--color-success));
+    transform: scaleX(0);
+    transition: transform var(--transition-normal);
+    transform-origin: left;
+}
+
+.liga-card:hover::before {
+    transform: scaleX(1);
+}
+
+.liga-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-accent);
+    color: inherit;
+    text-decoration: none;
+}
+
+.liga-logo-container {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-hover-primary);
+    transition: var(--transition-normal);
+}
+
+.liga-card:hover .liga-logo-container {
+    border-color: var(--color-accent);
+    transform: scale(1.05);
+}
+
+.liga-logo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.liga-placeholder {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+    font-size: 2rem;
+    border: 2px solid var(--color-hover-primary);
+    transition: var(--transition-normal);
+}
+
+.liga-card:hover .liga-placeholder {
+    border-color: var(--color-accent);
+    transform: scale(1.05);
+}
+
+.liga-name {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.liga-info {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.liga-stat {
+    text-align: center;
+}
+
+.liga-stat-number {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.5rem;
+    display: block;
+}
+
+.liga-stat-label {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.liga-temporada {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* ================================
+   HEADER ACTIONS
+   ================================ */
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn-outline-info {
+    color: var(--color-info);
+    border-color: var(--color-info);
+    background: transparent;
+}
+
+.btn-outline-info:hover {
+    background-color: var(--color-info);
+    color: white;
+    border-color: var(--color-info);
+}
+
+/* ================================
+   EMPTY STATE
+   ================================ */
+.empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--color-text-muted);
+}
+
+.empty-state i {
+    font-size: 5rem;
+    margin-bottom: 2rem;
+    color: var(--color-info);
+}
+
+.empty-state h4 {
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+    font-weight: var(--font-weight-bold);
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    margin-bottom: 2rem;
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+    .liga-cards-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .liga-card {
+        padding: 1.5rem;
+    }
+    
+    .liga-logo-container,
+    .liga-placeholder {
+        width: 60px;
+        height: 60px;
+        padding: 0.75rem;
+    }
+    
+    .liga-info {
+        gap: 1rem;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
+    }
+}

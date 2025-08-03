@@ -1,0 +1,158 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/equipo/equipo_list_in_liga.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-shield-alt"></i>{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'panel_admin:equipo_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+    <a href="{% url 'panel_admin:equipo_create' %}" class="btn btn-admin">
+        <i class="fas fa-plus me-2"></i>Nuevo Equipo
+    </a>
+</div>
+{% endblock %}
+
+{% block panel_content %}
+<!-- Liga Header -->
+<div class="liga-header">
+    {% if liga.logo %}
+        <div class="liga-header-logo">
+            <img src="{{ liga.logo.url }}" alt="{{ liga.nombre }}">
+        </div>
+    {% else %}
+        <div class="liga-header-placeholder">
+            <i class="fas fa-trophy"></i>
+        </div>
+    {% endif %}
+    
+    <div class="liga-header-info flex-grow-1">
+        <h3>{{ liga.nombre }}</h3>
+        <p>Temporada {{ liga.temporada.nombre }}</p>
+    </div>
+</div>
+
+<!-- Búsqueda -->
+<div class="search-card">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <input type="text" 
+                       class="form-control" 
+                       name="search" 
+                       value="{{ search }}" 
+                       placeholder="Buscar equipo en {{ liga.nombre }}...">
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-admin flex-fill">
+                        <i class="fas fa-search me-2"></i>Buscar
+                    </button>
+                    <a href="{% url 'panel_admin:equipo_list_in_liga' liga.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Equipos Grid -->
+{% if equipos %}
+    <div class="equipos-grid">
+        {% for equipo in equipos %}
+            <div class="equipo-card">
+                {% if equipo.logo %}
+                    <div class="equipo-logo-container">
+                        <img src="{{ equipo.logo.url }}" alt="{{ equipo.nombre }}">
+                    </div>
+                {% else %}
+                    <div class="equipo-placeholder">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                {% endif %}
+                
+                <h5 class="equipo-name">{{ equipo.nombre }}</h5>
+                
+                <div class="equipo-stats">
+                    <div class="equipo-stat">
+                        <span class="equipo-stat-number">{{ equipo.total_equipaciones }}</span>
+                        <span class="equipo-stat-label">Equipaciones</span>
+                    </div>
+                </div>
+                
+                <div class="equipo-actions">
+                    <a href="{% url 'panel_admin:equipo_edit' equipo.pk %}" 
+                       class="btn btn-sm btn-outline-warning"
+                       title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'panel_admin:equipo_delete' equipo.pk %}" 
+                       class="btn btn-sm btn-outline-danger"
+                       title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if equipos.has_other_pages %}
+        <div class="d-flex justify-content-center">
+            <nav>
+                <ul class="pagination">
+                    {% if equipos.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ equipos.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {{ equipos.number }} de {{ equipos.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if equipos.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ equipos.next_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ equipos.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <i class="fas fa-shield-alt"></i>
+        <h4>No hay equipos en {{ liga.nombre }}</h4>
+        <p>Comienza añadiendo el primer equipo a esta liga</p>
+        <a href="{% url 'panel_admin:equipo_create' %}" class="btn btn-admin">
+            <i class="fas fa-plus me-2"></i>Crear Primer Equipo
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

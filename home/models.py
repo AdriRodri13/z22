@@ -23,7 +23,7 @@ class Liga(models.Model):
     temporada = models.ForeignKey(Temporada, on_delete=models.CASCADE, related_name='ligas')
 
     def __str__(self):
-        return f"{self.nombre} ({self.pais.nombre})"
+        return f"{self.nombre}"
 
 
 class Equipo(models.Model):

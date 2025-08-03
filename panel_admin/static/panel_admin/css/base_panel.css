@@ -1,0 +1,438 @@
+/* ================================
+   BASE PANEL ADMIN STYLES - DARK THEME
+   ================================ */
+
+.admin-wrapper {
+    background: var(--gradient-primary);
+    min-height: 100vh;
+    position: relative;
+}
+
+/* ================================
+   SIDEBAR STYLES
+   ================================ */
+.admin-sidebar {
+    background: var(--gradient-secondary);
+    border-right: 1px solid var(--color-secondary);
+    box-shadow: var(--shadow-lg);
+    min-height: 100vh;
+    position: relative;
+    z-index: 10;
+    padding: 0;
+}
+
+.sidebar-header {
+    background: var(--gradient-primary);
+    color: var(--color-accent);
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--color-secondary);
+}
+
+.sidebar-header h5 {
+    margin: 0;
+    font-weight: var(--font-weight-bold);
+    font-size: 1.1rem;
+}
+
+.sidebar-header i {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+.admin-nav {
+    padding: 0 1rem;
+}
+
+.admin-nav-link {
+    color: var(--color-text-secondary);
+    padding: 1rem 1.25rem;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 0.5rem;
+    transition: var(--transition-normal);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    font-weight: var(--font-weight-medium);
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: var(--transition-normal);
+}
+
+.admin-nav-link:hover::before {
+    left: 100%;
+}
+
+.admin-nav-link i {
+    margin-right: 0.75rem;
+    width: 20px;
+    text-align: center;
+    transition: var(--transition-normal);
+}
+
+.admin-nav-link:hover,
+.admin-nav-link.active {
+    background-color: var(--color-hover-primary);
+    color: var(--color-accent);
+    transform: translateX(8px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+}
+
+.nav-divider {
+    border-color: var(--color-secondary);
+    margin: 1.5rem 0;
+}
+
+.admin-nav-link.text-danger:hover {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+/* ================================
+   MAIN CONTENT STYLES
+   ================================ */
+.admin-main-content {
+    background: var(--color-primary);
+    position: relative;
+    z-index: 5;
+    min-height: 100vh;
+}
+
+.content-header {
+    background: var(--gradient-secondary);
+    border-bottom: 1px solid var(--color-secondary);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.content-title {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    font-size: 2rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.content-title i {
+    margin-right: 1rem;
+    color: var(--color-text-secondary);
+}
+
+.user-info {
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-medium);
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-info i {
+    margin-right: 0.5rem;
+}
+
+/* ================================
+   CARD STYLES
+   ================================ */
+.admin-card {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
+    overflow: hidden;
+    position: relative;
+}
+
+.admin-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-text-secondary));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.admin-card:hover::before {
+    opacity: 1;
+}
+
+.admin-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-text-secondary);
+}
+
+.card-header {
+    background: var(--color-hover-primary);
+    border-bottom: 1px solid var(--color-secondary);
+    padding: 1.5rem;
+}
+
+.card-header h5 {
+    margin: 0;
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    display: flex;
+    align-items: center;
+}
+
+.card-header h5 i {
+    margin-right: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+/* ================================
+   BUTTON STYLES
+   ================================ */
+.btn-admin {
+    background: linear-gradient(45deg, var(--color-secondary), var(--color-hover-primary));
+    border: 1px solid var(--color-text-secondary);
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-admin::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: var(--transition-normal);
+}
+
+.btn-admin:hover::before {
+    left: 100%;
+}
+
+.btn-admin:hover {
+    background: linear-gradient(45deg, var(--color-hover-primary), var(--color-focus));
+    color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+}
+
+.btn-admin i {
+    margin-right: 0.5rem;
+}
+
+/* ================================
+   STAT CARD STYLES
+   ================================ */
+.stat-card {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    text-align: center;
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--stat-color, var(--color-accent)), rgba(255,255,255,0.3));
+    transform: scaleX(0);
+    transition: transform var(--transition-normal);
+    transform-origin: left;
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-text-secondary);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+    transition: var(--transition-normal);
+}
+
+.stat-card:hover .stat-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-accent);
+    margin: 0.5rem 0;
+    transition: color var(--transition-normal);
+}
+
+.stat-label {
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-medium);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Colores específicos para diferentes stats */
+.stat-card.stat-temporadas { --stat-color: var(--color-info); }
+.stat-card.stat-temporadas .stat-icon { color: var(--color-info); }
+
+.stat-card.stat-ligas { --stat-color: var(--color-warning); }
+.stat-card.stat-ligas .stat-icon { color: var(--color-warning); }
+
+.stat-card.stat-equipos { --stat-color: var(--color-info); }
+.stat-card.stat-equipos .stat-icon { color: var(--color-info); }
+
+.stat-card.stat-equipaciones { --stat-color: var(--color-success); }
+.stat-card.stat-equipaciones .stat-icon { color: var(--color-success); }
+
+/* ================================
+   ALERT STYLES
+   ================================ */
+.alert {
+    border: none;
+    border-radius: var(--border-radius-md);
+    padding: 1rem 1.5rem;
+    border: 1px solid;
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.alert-warning {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+    .content-header {
+        padding: 1.5rem;
+    }
+    
+    .content-title {
+        font-size: 1.5rem;
+    }
+    
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        z-index: 1000;
+        transition: left var(--transition-normal);
+    }
+    
+    .admin-sidebar.show {
+        left: 0;
+    }
+    
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-normal);
+    }
+    
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+@keyframes slideInRight {
+    from {
+        transform: translateX(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.admin-main-content {
+    animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-card {
+    animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-card:nth-child(2) { animation-delay: 0.1s; }
+.admin-card:nth-child(3) { animation-delay: 0.2s; }
+.admin-card:nth-child(4) { animation-delay: 0.3s; }

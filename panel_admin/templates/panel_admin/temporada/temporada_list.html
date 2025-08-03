@@ -1,0 +1,145 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/temporada/temporada_list.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-calendar"></i>{% endblock %}
+{% block content_title %}Gestión de Temporadas{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:temporada_create' %}" class="btn btn-admin">
+    <i class="fas fa-plus me-2"></i>Nueva Temporada
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<!-- Filtros de búsqueda -->
+<div class="filters-card">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <input type="text" 
+                       class="form-control" 
+                       name="search" 
+                       value="{{ search }}" 
+                       placeholder="Buscar temporada...">
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-admin flex-fill">
+                        <i class="fas fa-search me-2"></i>Buscar
+                    </button>
+                    <a href="{% url 'panel_admin:temporada_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de temporadas -->
+<div class="table-container">
+    {% if temporadas %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Ligas</th>
+                        <th>Equipaciones</th>
+                        <th>Fecha Creación</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for temporada in temporadas %}
+                        <tr>
+                            <td>{{ temporada.id }}</td>
+                            <td>
+                                <strong>{{ temporada.nombre }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ temporada.total_ligas }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">{{ temporada.total_equipaciones }}</span>
+                            </td>
+                            <td>{{ temporada.creado_en|date:"d/m/Y H:i" }}</td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{% url 'panel_admin:temporada_edit' temporada.pk %}" 
+                                       class="btn btn-sm btn-outline-warning"
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'panel_admin:temporada_delete' temporada.pk %}" 
+                                       class="btn btn-sm btn-outline-danger"
+                                       title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if temporadas.has_other_pages %}
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if temporadas.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ temporadas.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ temporadas.number }} de {{ temporadas.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if temporadas.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ temporadas.next_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ temporadas.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-calendar"></i>
+            <h4>No hay temporadas</h4>
+            <p>Comienza creando tu primera temporada para organizar tu catálogo</p>
+            <a href="{% url 'panel_admin:temporada_create' %}" class="btn btn-admin">
+                <i class="fas fa-plus me-2"></i>Crear Primera Temporada
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

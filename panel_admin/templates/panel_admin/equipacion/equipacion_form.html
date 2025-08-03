@@ -1,0 +1,285 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}
+    {% if action == 'crear' %}
+        Crear Equipación
+    {% else %}
+        Editar Equipación
+    {% endif %}
+{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/equipacion/equipacion_form.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tshirt"></i>{% endblock %}
+{% block content_title %}
+    {% if action == 'crear' %}
+        Crear Equipación
+    {% else %}
+        Editar Equipación
+    {% endif %}
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:equipacion_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i>Volver
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<div class="form-container">
+    <div class="card admin-card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Por favor, corrige los errores a continuación.
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.equipo.id_for_label }}" class="form-label">
+                                <i class="fas fa-shield-alt"></i>{{ form.equipo.label }}
+                            </label>
+                            {{ form.equipo }}
+                            {% if form.equipo.errors %}
+                                <div class="text-danger">
+                                    {{ form.equipo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.temporada.id_for_label }}" class="form-label">
+                                <i class="fas fa-calendar"></i>{{ form.temporada.label }}
+                            </label>
+                            {{ form.temporada }}
+                            {% if form.temporada.errors %}
+                                <div class="text-danger">
+                                    {{ form.temporada.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.imagen.id_for_label }}" class="form-label">
+                        <i class="fas fa-image"></i>{{ form.imagen.label }}
+                    </label>
+                    
+                    {% if action == 'editar' and equipacion.imagen %}
+                        <div class="current-image-container">
+                            <p class="text-muted">Imagen actual:</p>
+                            <img src="{{ equipacion.imagen.url }}" 
+                                 alt="Equipación {{ equipacion.equipo.nombre }}" 
+                                 class="img-thumbnail" 
+                                 style="max-width: 200px; max-height: 200px;"
+                                 onclick="openImageModal(this.src)">
+                        </div>
+                    {% endif %}
+                    
+                    <div class="file-input-wrapper">
+                        <div class="file-input-custom" onclick="document.getElementById('{{ form.imagen.id_for_label }}').click()">
+                            <i class="fas fa-cloud-upload-alt file-input-icon"></i>
+                            <div class="file-input-text">
+                                <strong>Haz clic para seleccionar</strong> o arrastra la imagen aquí
+                                <br>
+                                <small>JPG, PNG, GIF - Máximo 5MB</small>
+                            </div>
+                        </div>
+                        {{ form.imagen }}
+                    </div>
+                    
+                    {% if form.imagen.errors %}
+                        <div class="text-danger">
+                            {{ form.imagen.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">
+                        <i class="fas fa-info-circle"></i>
+                        Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB.
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'panel_admin:equipacion_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-admin" id="submitBtn">
+                        <i class="fas fa-spinner fa-spin spinner"></i>
+                        <i class="fas fa-save"></i>
+                        <span class="btn-text">
+                            {% if action == 'crear' %}
+                                Crear Equipación
+                            {% else %}
+                                Guardar Cambios
+                            {% endif %}
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para vista ampliada de imagen -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vista ampliada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    const fileInput = document.querySelector('input[type="file"]');
+    const fileInputCustom = document.querySelector('.file-input-custom');
+    
+    // Ocultar el input file original
+    if (fileInput) {
+        fileInput.style.display = 'none';
+        
+        // Preview de imagen seleccionada
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Crear o actualizar preview
+                    let preview = document.querySelector('.image-preview');
+                    if (!preview) {
+                        preview = document.createElement('div');
+                        preview.className = 'current-image-container image-preview';
+                        preview.innerHTML = `
+                            <p class="text-muted">Previsualización:</p>
+                            <img class="img-thumbnail" style="max-width: 200px; max-height: 200px;" onclick="openImageModal(this.src)">
+                        `;
+                        fileInput.parentNode.parentNode.insertBefore(preview, fileInput.parentNode);
+                    }
+                    preview.querySelector('img').src = e.target.result;
+                    preview.style.display = 'block';
+                    
+                    // Actualizar texto del file input
+                    updateFileInputText(file.name);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Drag and drop functionality
+    if (fileInputCustom) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileInputCustom.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInputCustom.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInputCustom.addEventListener(eventName, unhighlight, false);
+        });
+        
+        fileInputCustom.addEventListener('drop', handleDrop, false);
+    }
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight(e) {
+        fileInputCustom.classList.add('dragover');
+    }
+    
+    function unhighlight(e) {
+        fileInputCustom.classList.remove('dragover');
+    }
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    }
+    
+    function updateFileInputText(filename) {
+        const textDiv = fileInputCustom.querySelector('.file-input-text');
+        textDiv.innerHTML = `
+            <strong>Archivo seleccionado:</strong> ${filename}
+            <br>
+            <small>Haz clic para cambiar</small>
+        `;
+    }
+    
+    // Validación del formulario
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            // Deshabilitar el botón para evitar doble envío
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            
+            // Re-habilitar después de 5 segundos por si hay error
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+            }, 5000);
+        });
+    }
+
+    // Efecto de focus mejorado para los campos
+    const formControls = document.querySelectorAll('.form-control, .form-select');
+    formControls.forEach(control => {
+        control.addEventListener('focus', function() {
+            this.parentNode.classList.add('field-focused');
+        });
+        
+        control.addEventListener('blur', function() {
+            this.parentNode.classList.remove('field-focused');
+        });
+    });
+
+    // Validación en tiempo real
+    formControls.forEach(control => {
+        control.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+            }
+        });
+    });
+});
+
+// Función para abrir modal de imagen
+function openImageModal(imageSrc) {
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    document.getElementById('modalImage').src = imageSrc;
+    modal.show();
+}
+</script>
+{% endblock %}

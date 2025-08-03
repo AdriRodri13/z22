@@ -1,0 +1,217 @@
+/* ================================
+   TEMPORADA LIST STYLES
+   ================================ */
+
+.filters-card {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 2rem;
+}
+
+.filters-card .card-body {
+    padding: 1.5rem;
+}
+
+.form-control {
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-hover-primary);
+    color: var(--color-accent);
+    border-radius: var(--border-radius-sm);
+}
+
+.form-control:focus {
+    background-color: var(--color-primary);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.form-control::placeholder {
+    color: var(--color-text-muted);
+}
+
+.btn-outline-secondary {
+    color: var(--color-text-secondary);
+    border-color: var(--color-text-secondary);
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--color-text-secondary);
+    color: var(--color-primary);
+    border-color: var(--color-text-secondary);
+}
+
+/* ================================
+   TABLE STYLES
+   ================================ */
+.table-container {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+}
+
+.table {
+    margin: 0;
+    color: var(--color-accent);
+}
+
+.table th {
+    background-color: var(--color-hover-primary);
+    color: var(--color-accent);
+    border-color: var(--color-secondary);
+    font-weight: var(--font-weight-bold);
+    padding: 1rem;
+}
+
+.table td {
+    background-color: var(--color-secondary);
+    border-color: var(--color-hover-primary);
+    color: var(--color-text-secondary);
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table tbody tr:hover td {
+    background-color: var(--color-hover-primary);
+    color: var(--color-accent);
+}
+
+.table strong {
+    color: var(--color-accent);
+}
+
+/* ================================
+   BADGES
+   ================================ */
+.badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, var(--color-info), #0ea5e9) !important;
+    color: white;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, var(--color-success), #10b981) !important;
+    color: white;
+}
+
+/* ================================
+   ACTION BUTTONS
+   ================================ */
+.btn-group .btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius-sm);
+    margin: 0 0.125rem;
+}
+
+.btn-outline-warning {
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+    background: transparent;
+}
+
+.btn-outline-warning:hover {
+    background-color: var(--color-warning);
+    color: var(--color-primary);
+    border-color: var(--color-warning);
+}
+
+.btn-outline-danger {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
+}
+
+/* ================================
+   PAGINATION
+   ================================ */
+.pagination {
+    margin: 2rem 0 0 0;
+}
+
+.pagination .page-item .page-link {
+    background-color: var(--color-secondary);
+    border-color: var(--color-hover-primary);
+    color: var(--color-text-secondary);
+    padding: 0.75rem 1rem;
+    margin: 0 0.125rem;
+    border-radius: var(--border-radius-sm);
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: var(--color-hover-primary);
+    color: var(--color-accent);
+    border-color: var(--color-text-secondary);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-primary);
+}
+
+/* ================================
+   EMPTY STATE
+   ================================ */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--color-text-muted);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+    color: var(--color-text-secondary);
+}
+
+.empty-state h4 {
+    color: var(--color-text-secondary);
+    margin-bottom: 1rem;
+    font-weight: var(--font-weight-bold);
+}
+
+.empty-state p {
+    margin-bottom: 2rem;
+    color: var(--color-text-muted);
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+@media (max-width: 768px) {
+    .table-responsive {
+        border-radius: var(--border-radius-lg);
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .btn-group .btn {
+        margin: 0;
+        width: 100%;
+    }
+}

@@ -35,7 +35,7 @@ function initEquipacionCards() {
         if (btnContactar) {
             btnContactar.addEventListener('click', (e) => {
                 e.stopPropagation();
-                contactarWhatsApp(equipacionImg);
+                contactarInstagram(equipacionImg);
             });
         }
         
@@ -109,38 +109,15 @@ function openEquipacionModal(imgElement) {
 }
 
 /**
- * FUNCIONALIDAD DE WHATSAPP
- * =========================
+ * FUNCIONALIDAD DE INSTAGRAM
+ * ==========================
  */
-function contactarWhatsApp(imgElement = null) {
-    // Obtener información del equipo
-    const equipoNombre = document.querySelector('.equipo-nombre-header').textContent;
-    const ligaNombre = document.querySelector('.equipo-liga-info').textContent.replace('🏆', '').trim();
+function contactarInstagram(imgElement = null) {
+    // URL de Instagram
+    const instagramUrl = 'https://www.instagram.com/zone22._?igsh=cXpvbmYxYm80Z3B3';
     
-    // Crear mensaje
-    let mensaje = `¡Hola! Me interesa una equipación de ${equipoNombre}`;
-    
-    if (ligaNombre) {
-        mensaje += ` de ${ligaNombre}`;
-    }
-    
-    if (imgElement) {
-        mensaje += `. La equipación que me interesa es la que aparece en la imagen.`;
-    }
-    
-    mensaje += ` ¿Podrías darme más información sobre precios y disponibilidad?`;
-    
-    // Codificar mensaje para URL
-    const mensajeCodificado = encodeURIComponent(mensaje);
-    
-    // Número de WhatsApp (cambiar por el real)
-    const numeroWhatsApp = '34123456789'; // Cambiar por tu número real
-    
-    // Crear URL de WhatsApp
-    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
-    
-    // Abrir WhatsApp
-    window.open(urlWhatsApp, '_blank');
+    // Abrir Instagram en nueva pestaña
+    window.open(instagramUrl, '_blank');
     
     // Cerrar modal si está abierto
     const modal = document.getElementById('equipacionModal');
@@ -150,11 +127,11 @@ function contactarWhatsApp(imgElement = null) {
     }
     
     // Feedback visual
-    showFeedback('Abriendo WhatsApp...', 'success');
+    showFeedback('Abriendo Instagram...', 'success');
 }
 
 // Función global para el botón del modal
-window.contactarWhatsApp = contactarWhatsApp;
+window.contactarInstagram = contactarInstagram;
 
 /**
  * LAZY LOADING DE IMÁGENES
@@ -452,7 +429,3 @@ function announceToScreenReader(message) {
     }, 1000);
 }
 
-// Log de inicialización
-console.log('🚀 Equipo.js cargado correctamente');
-console.log('📱 Optimizaciones móviles:', window.innerWidth <= 768 ? 'activadas' : 'desactivadas');
-console.log('🎭 Animaciones:', window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reducidas' : 'completas');

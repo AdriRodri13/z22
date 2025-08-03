@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-valor-por-defecto-solo-desarrollo')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = ['*']
 
 CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
 CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
@@ -120,3 +120,7 @@ else:
 
 # === CONFIGURACIÓN FINAL ===
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = '/panel_admin/login/'
+LOGIN_REDIRECT_URL = '/panel_admin/'
+LOGOUT_REDIRECT_URL = '/panel_admin/login/'

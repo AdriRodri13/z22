@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="admin-card">
+        <div class="card-body">
+            <!-- Icono y título -->
+            <div class="login-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            
+            <h3 class="card-title">Panel de Administración</h3>
+            <p class="login-subtitle">Acceso restringido al sistema</p>
+
+            <!-- Mensaje de error -->
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Usuario o contraseña incorrectos.
+                </div>
+            {% endif %}
+
+            <!-- Formulario -->
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="fas fa-user"></i>Usuario
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="{{ form.username.id_for_label }}"
+                           name="{{ form.username.name }}"
+                           placeholder="Introduce tu nombre de usuario"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock"></i>Contraseña
+                    </label>
+                    <input type="password" 
+                           class="form-control" 
+                           id="{{ form.password.id_for_label }}"
+                           name="{{ form.password.name }}"
+                           placeholder="Introduce tu contraseña"
+                           required>
+                </div>
+
+                <button type="submit" class="btn btn-admin w-100 mb-4">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <!-- Enlace de regreso -->
+            <div class="text-center">
+                <a href="{% url 'home:home' %}" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

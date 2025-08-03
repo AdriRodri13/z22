@@ -24,7 +24,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
                 <!-- Logo -->
-                <a class="navbar-brand" href="{% url 'home:index' %}">
+                <a class="navbar-brand" href="{% url 'home:home' %}">
                     <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo">
                 </a>
                 
@@ -37,20 +37,38 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'home:index' %}">
+                            <a class="nav-link" href="{% url 'home:home' %}">
                                 <i class="fas fa-home me-2 d-lg-none"></i>Inicio
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-envelope me-2 d-lg-none"></i>Contacto
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-info-circle me-2 d-lg-none"></i>Sobre nosotros
-                            </a>
-                        </li>
+                        <!-- Botón de acceso admin -->
+                        {% if user.is_authenticated and user.is_staff %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle admin-access" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog me-2"></i>Admin
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'panel_admin:dashboard' %}">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Panel Admin
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="post" action="{% url 'panel_admin:logout' %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link admin-access" href="{% url 'panel_admin:login' %}">
+                                    <i class="fas fa-user-shield me-2 d-lg-none"></i>Acceso Admin
+                                </a>
+                            </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
@@ -75,29 +93,14 @@
                     </p>
                 </div>
                 
-                <!-- Enlaces -->
-                <div class="col-md-4 mb-4 mb-md-0">
-                    <h5 class="footer-title mb-3 text-center">Enlaces</h5>
-                    <ul class="list-unstyled text-center">
-                        <li class="d-inline-block mx-2 mb-2"><a href="{% url 'home:index' %}" class="footer-link">Inicio</a></li>
-                        <li class="d-inline-block mx-2 mb-2"><a href="#" class="footer-link">Contacto</a></li>
-                        <li class="d-inline-block mx-2 mb-2"><a href="#" class="footer-link">Sobre nosotros</a></li>
-                    </ul>
-                </div>
-                
                 <!-- Redes sociales -->
                 <div class="col-md-4 text-center text-md-end">
                     <h5 class="footer-title mb-3">Síguenos</h5>
                     <div class="d-flex justify-content-center justify-content-md-end gap-3 mb-3">
-                        <a href="#" class="social-link">
+                        <a href="https://www.instagram.com/zone22._?igsh=cXpvbmYxYm80Z3B3" class="social-link">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="#" class="social-link">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
                     </div>
-                    <p class="footer-text small">contacto@tutienda.com</p>
-                    <p class="footer-text small">+34 123 456 789</p>
                 </div>
             </div>
             

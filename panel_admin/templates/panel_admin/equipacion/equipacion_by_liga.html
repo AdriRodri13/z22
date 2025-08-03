@@ -1,0 +1,160 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/equipacion/equipacion_by_liga.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tshirt"></i>{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2 align-items-center">
+    <!-- Selector de temporada -->
+    <form method="get" class="d-flex align-items-center gap-2">
+        <label for="temporada" class="form-label mb-0">Temporada:</label>
+        <select name="temporada" id="temporada" class="form-select form-select-sm" onchange="this.form.submit()">
+            {% for temporada in temporadas %}
+                <option value="{{ temporada.id }}" 
+                        {% if selected_temporada == temporada.id|stringformat:"s" %}selected{% endif %}>
+                    {{ temporada.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <a href="{% url 'panel_admin:equipacion_create' %}" class="btn btn-admin">
+        <i class="fas fa-plus"></i>Nueva Equipación
+    </a>
+</div>
+{% endblock %}
+
+{% block panel_content %}
+{% if not temporada_actual %}
+    <div class="empty-state-container">
+        <div class="empty-state">
+            <i class="fas fa-calendar fa-4x text-muted mb-4"></i>
+            <h3>No hay temporadas</h3>
+            <p class="text-muted">Necesitas crear al menos una temporada antes de gestionar equipaciones.</p>
+            <a href="{% url 'panel_admin:temporada_create' %}" class="btn btn-admin">
+                <i class="fas fa-plus me-2"></i>Crear Temporada
+            </a>
+        </div>
+    </div>
+{% elif not ligas %}
+    <div class="empty-state-container">
+        <div class="empty-state">
+            <i class="fas fa-trophy fa-4x text-muted mb-4"></i>
+            <h3>No hay ligas en {{ temporada_actual.nombre }}</h3>
+            <p class="text-muted">Crea algunas ligas para empezar a gestionar equipaciones.</p>
+            <a href="{% url 'panel_admin:liga_create' %}" class="btn btn-admin">
+                <i class="fas fa-plus me-2"></i>Crear Liga
+            </a>
+        </div>
+    </div>
+{% else %}
+    <!-- Información de la temporada actual -->
+    <div class="season-info mb-4">
+        <div class="card admin-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar me-2"></i>
+                            Temporada: {{ temporada_actual.nombre }}
+                        </h5>
+                        <p class="text-muted mb-0">
+                            {{ ligas|length }} liga{{ ligas|length|pluralize }} 
+                            - {{ ligas|length|add:"0" }} equipaciones totales
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <span class="badge bg-primary fs-6">Activa</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de ligas -->
+    <div class="ligas-grid">
+        {% for liga in ligas %}
+            <div class="liga-card">
+                <div class="card admin-card h-100">
+                    <div class="card-body">
+                        <div class="liga-header">
+                            {% if liga.logo %}
+                                <div class="liga-logo">
+                                    <img src="{{ liga.logo.url }}" alt="{{ liga.nombre }}" class="img-fluid">
+                                </div>
+                            {% else %}
+                                <div class="liga-logo-placeholder">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                            {% endif %}
+                            <div class="liga-info">
+                                <h5 class="liga-name">{{ liga.nombre }}</h5>
+                                <div class="liga-stats">
+                                    <span class="stat-item">
+                                        <i class="fas fa-shield-alt"></i>
+                                        {{ liga.total_equipos }} equipo{{ liga.total_equipos|pluralize }}
+                                    </span>
+                                    <span class="stat-item">
+                                        <i class="fas fa-tshirt"></i>
+                                        {{ liga.total_equipaciones }} equipación{{ liga.total_equipaciones|pluralize:"es" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="liga-actions">
+                            {% if liga.total_equipos > 0 %}
+                                <a href="{% url 'panel_admin:equipacion_list_by_equipo' liga.pk %}" 
+                                   class="btn btn-admin btn-block">
+                                    <i class="fas fa-eye me-2"></i>
+                                    Ver Equipos ({{ liga.total_equipos }})
+                                </a>
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    No hay equipos en esta liga
+                                </div>
+                                <a href="{% url 'panel_admin:equipo_create' %}" 
+                                   class="btn btn-outline-secondary btn-block btn-sm mt-2">
+                                    <i class="fas fa-plus me-1"></i>Crear Equipo
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de entrada para las tarjetas
+    const cards = document.querySelectorAll('.liga-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in-up');
+    });
+    
+    // Efecto hover para las tarjetas
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

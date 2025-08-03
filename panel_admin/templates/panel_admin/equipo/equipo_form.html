@@ -1,0 +1,193 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}
+    {% if action == 'crear' %}
+        Crear Equipo
+    {% else %}
+        Editar Equipo
+    {% endif %}
+{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/equipo/equipo_form.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-shield-alt"></i>{% endblock %}
+{% block content_title %}
+    {% if action == 'crear' %}
+        Crear Equipo
+    {% else %}
+        Editar Equipo
+    {% endif %}
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:equipo_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i>Volver
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<div class="form-container">
+    <div class="card admin-card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Por favor, corrige los errores a continuación.
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                <i class="fas fa-shield-alt"></i>{{ form.nombre.label }}
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.liga.id_for_label }}" class="form-label">
+                                <i class="fas fa-trophy"></i>{{ form.liga.label }}
+                            </label>
+                            {{ form.liga }}
+                            {% if form.liga.errors %}
+                                <div class="text-danger">
+                                    {{ form.liga.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.logo.id_for_label }}" class="form-label">
+                        <i class="fas fa-image"></i>{{ form.logo.label }}
+                    </label>
+                    
+                    {% if action == 'editar' and equipo.logo %}
+                        <div class="current-logo-container">
+                            <p class="text-muted">Logo actual:</p>
+                            <div class="logo-container">
+                                <img src="{{ equipo.logo.url }}" 
+                                     alt="{{ equipo.nombre }}" 
+                                     class="img-thumbnail" 
+                                     style="max-width: 100px; max-height: 100px;">
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {{ form.logo }}
+                    {% if form.logo.errors %}
+                        <div class="text-danger">
+                            {{ form.logo.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">
+                        <i class="fas fa-info-circle"></i>
+                        Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB.
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'panel_admin:equipo_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fas fa-save"></i>
+                        {% if action == 'crear' %}
+                            Crear Equipo
+                        {% else %}
+                            Guardar Cambios
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Previsualización de imagen
+    const logoInput = document.querySelector('input[type="file"]');
+    if (logoInput) {
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Crear o actualizar la previsualización
+                    let preview = document.querySelector('.logo-preview');
+                    if (!preview) {
+                        preview = document.createElement('div');
+                        preview.className = 'current-logo-container logo-preview';
+                        preview.innerHTML = `
+                            <p class="text-muted">Previsualización:</p>
+                            <div class="logo-container">
+                                <img class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                            </div>
+                        `;
+                        logoInput.parentNode.insertBefore(preview, logoInput);
+                    }
+                    preview.querySelector('.logo-container img').src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Validación del formulario
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('.btn-admin');
+    
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            // Deshabilitar el botón para evitar doble envío
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+            
+            // Re-habilitar después de 5 segundos por si hay error
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '{% if action == "crear" %}<i class="fas fa-save me-2"></i>Crear Equipo{% else %}<i class="fas fa-save me-2"></i>Guardar Cambios{% endif %}';
+            }, 5000);
+        });
+    }
+
+    // Efecto de focus mejorado para los campos
+    const formControls = document.querySelectorAll('.form-control, .form-select');
+    formControls.forEach(control => {
+        control.addEventListener('focus', function() {
+            this.parentNode.classList.add('field-focused');
+        });
+        
+        control.addEventListener('blur', function() {
+            this.parentNode.classList.remove('field-focused');
+        });
+    });
+
+    // Auto-resize para textareas si las hay
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+});
+</script>
+{% endblock %}
