@@ -452,11 +452,8 @@ def equipacion_create(request):
             equipacion = form.save()
             messages.success(request, 'Equipación creada exitosamente.')
             
-            # Redirigir según desde dónde vino
-            if equipo_id:
-                return redirect('panel_admin:equipacion_list_in_equipo', equipo_id)
-            else:
-                return redirect('panel_admin:equipacion_list')
+            # Redirigir siempre al equipo de la equipación creada
+            return redirect('panel_admin:equipacion_list_in_equipo', equipacion.equipo.id)
     else:
         form = EquipacionForm(initial=initial_data)
     
@@ -479,7 +476,8 @@ def equipacion_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Equipación actualizada exitosamente.')
-            return redirect('panel_admin:equipacion_list')
+            # Redirigir al equipo de la equipación editada
+            return redirect('panel_admin:equipacion_list_in_equipo', equipacion.equipo.id)
     else:
         form = EquipacionForm(instance=equipacion)
     
@@ -496,11 +494,13 @@ def equipacion_edit(request, pk):
 @user_passes_test(is_staff_user)
 def equipacion_delete(request, pk):
     equipacion = get_object_or_404(Equipacion, pk=pk)
+    equipo_id = equipacion.equipo.id  # Guardar el ID antes de eliminar
     
     if request.method == 'POST':
         equipacion.delete()
         messages.success(request, 'Equipación eliminada exitosamente.')
-        return redirect('panel_admin:equipacion_list')
+        # Redirigir al equipo de la equipación eliminada
+        return redirect('panel_admin:equipacion_list_in_equipo', equipo_id)
     
     context = {
         'title': 'Eliminar Equipación',
