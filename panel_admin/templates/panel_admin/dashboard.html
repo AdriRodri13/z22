@@ -19,27 +19,27 @@
     </h4>
     <div class="row g-4">
         <div class="col-md-6 col-lg-3">
-            <a href="{% url 'panel_admin:temporada_create' %}" class="quick-action-card">
+            <a href="{% url 'panel_admin:seccion_create' %}" class="quick-action-card">
                 <i class="fas fa-plus-circle quick-action-icon"></i>
-                <h5 class="quick-action-title">Nueva Temporada</h5>
+                <h5 class="quick-action-title">Nueva Sección</h5>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
-            <a href="{% url 'panel_admin:liga_create' %}" class="quick-action-card">
+            <a href="{% url 'panel_admin:subseccion_create' %}" class="quick-action-card">
                 <i class="fas fa-plus-circle quick-action-icon"></i>
-                <h5 class="quick-action-title">Nueva Liga</h5>
+                <h5 class="quick-action-title">Nueva Subsección</h5>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
-            <a href="{% url 'panel_admin:equipo_create' %}" class="quick-action-card">
+            <a href="{% url 'panel_admin:subsubseccion_create' %}" class="quick-action-card">
                 <i class="fas fa-plus-circle quick-action-icon"></i>
-                <h5 class="quick-action-title">Nuevo Equipo</h5>
+                <h5 class="quick-action-title">Nueva Subsubsección</h5>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
-            <a href="{% url 'panel_admin:equipacion_create' %}" class="quick-action-card">
+            <a href="{% url 'panel_admin:prenda_create' %}" class="quick-action-card">
                 <i class="fas fa-plus-circle quick-action-icon"></i>
-                <h5 class="quick-action-title">Nueva Equipación</h5>
+                <h5 class="quick-action-title">Nueva Prenda</h5>
             </a>
         </div>
     </div>
@@ -51,24 +51,24 @@
         <div class="col-lg-6">
             <div class="activity-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-calendar"></i>Últimas Temporadas</h5>
+                    <h5><i class="fas fa-folder"></i>Últimas Secciones</h5>
                 </div>
                 <div class="card-body p-0">
-                    {% if ultimas_temporadas %}
-                        {% for temporada in ultimas_temporadas %}
+                    {% if ultimas_secciones %}
+                        {% for seccion in ultimas_secciones %}
                             <div class="activity-item">
                                 <div class="flex-grow-1">
-                                    <h6 class="activity-name">{{ temporada.nombre }}</h6>
-                                    <p class="activity-meta">{{ temporada.creado_en|date:"d/m/Y H:i" }}</p>
+                                    <h6 class="activity-name">{{ seccion.nombre }}</h6>
+                                    <p class="activity-meta">{{ seccion.creado_en|date:"d/m/Y H:i" }}</p>
                                 </div>
-                                <span class="activity-badge">Temporada</span>
+                                <span class="activity-badge">Sección</span>
                             </div>
                         {% endfor %}
                     {% else %}
                         <div class="empty-state">
-                            <i class="fas fa-calendar"></i>
-                            <h5>No hay temporadas</h5>
-                            <p>Comienza creando tu primera temporada</p>
+                            <i class="fas fa-folder"></i>
+                            <h5>No hay secciones</h5>
+                            <p>Comienza creando tu primera sección</p>
                         </div>
                     {% endif %}
                 </div>
@@ -78,24 +78,24 @@
         <div class="col-lg-6">
             <div class="activity-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-trophy"></i>Últimas Ligas</h5>
+                    <h5><i class="fas fa-layer-group"></i>Últimas Subsecciones</h5>
                 </div>
                 <div class="card-body p-0">
-                    {% if ultimas_ligas %}
-                        {% for liga in ultimas_ligas %}
+                    {% if ultimas_subsecciones %}
+                        {% for subseccion in ultimas_subsecciones %}
                             <div class="activity-item">
                                 <div class="flex-grow-1">
-                                    <h6 class="activity-name">{{ liga.nombre }}</h6>
-                                    <p class="activity-meta">{{ liga.temporada.nombre }}</p>
+                                    <h6 class="activity-name">{{ subseccion.nombre }}</h6>
+                                    <p class="activity-meta">{{ subseccion.seccion.nombre }}</p>
                                 </div>
-                                <span class="activity-badge">Liga</span>
+                                <span class="activity-badge">Subsección</span>
                             </div>
                         {% endfor %}
                     {% else %}
                         <div class="empty-state">
-                            <i class="fas fa-trophy"></i>
-                            <h5>No hay ligas</h5>
-                            <p>Añade algunas ligas a tu catálogo</p>
+                            <i class="fas fa-layer-group"></i>
+                            <h5>No hay subsecciones</h5>
+                            <p>Añade algunas subsecciones a tu catálogo</p>
                         </div>
                     {% endif %}
                 </div>
@@ -107,24 +107,24 @@
         <div class="col-lg-6">
             <div class="activity-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-shield-alt"></i>Últimos Equipos</h5>
+                    <h5><i class="fas fa-tags"></i>Últimas Subsubsecciones</h5>
                 </div>
                 <div class="card-body p-0">
-                    {% if ultimos_equipos %}
-                        {% for equipo in ultimos_equipos %}
+                    {% if ultimas_subsubsecciones %}
+                        {% for subsubseccion in ultimas_subsubsecciones %}
                             <div class="activity-item">
                                 <div class="flex-grow-1">
-                                    <h6 class="activity-name">{{ equipo.nombre }}</h6>
-                                    <p class="activity-meta">{{ equipo.liga.nombre }}</p>
+                                    <h6 class="activity-name">{{ subsubseccion.nombre }}</h6>
+                                    <p class="activity-meta">{{ subsubseccion.subseccion.nombre }}</p>
                                 </div>
-                                <span class="activity-badge">Equipo</span>
+                                <span class="activity-badge">Subsubsección</span>
                             </div>
                         {% endfor %}
                     {% else %}
                         <div class="empty-state">
-                            <i class="fas fa-shield-alt"></i>
-                            <h5>No hay equipos</h5>
-                            <p>Agrega equipos a tus ligas</p>
+                            <i class="fas fa-tags"></i>
+                            <h5>No hay subsubsecciones</h5>
+                            <p>Agrega subsubsecciones a tus subsecciones</p>
                         </div>
                     {% endif %}
                 </div>
@@ -134,24 +134,24 @@
         <div class="col-lg-6">
             <div class="activity-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-tshirt"></i>Últimas Equipaciones</h5>
+                    <h5><i class="fas fa-tshirt"></i>Últimas Prendas</h5>
                 </div>
                 <div class="card-body p-0">
-                    {% if ultimas_equipaciones %}
-                        {% for equipacion in ultimas_equipaciones %}
+                    {% if ultimas_prendas %}
+                        {% for prenda in ultimas_prendas %}
                             <div class="activity-item">
                                 <div class="flex-grow-1">
-                                    <h6 class="activity-name">{{ equipacion.equipo.nombre }}</h6>
-                                    <p class="activity-meta">{{ equipacion.temporada.nombre }}</p>
+                                    <h6 class="activity-name">{{ prenda.subsubseccion.nombre }}</h6>
+                                    <p class="activity-meta">{{ prenda.nombre }}</p>
                                 </div>
-                                <span class="activity-badge">Equipación</span>
+                                <span class="activity-badge">Prenda</span>
                             </div>
                         {% endfor %}
                     {% else %}
                         <div class="empty-state">
                             <i class="fas fa-tshirt"></i>
-                            <h5>No hay equipaciones</h5>
-                            <p>Sube las primeras equipaciones</p>
+                            <h5>No hay prendas</h5>
+                            <p>Sube las primeras prendas</p>
                         </div>
                     {% endif %}
                 </div>
@@ -165,20 +165,20 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Hacer las stat-cards clicables
-    document.querySelector('.stat-temporadas').addEventListener('click', function() {
-        window.location.href = '{% url "panel_admin:temporada_list" %}';
+    document.querySelector('.stat-secciones').addEventListener('click', function() {
+        window.location.href = '{% url "panel_admin:seccion_list" %}';
     });
     
-    document.querySelector('.stat-ligas').addEventListener('click', function() {
-        window.location.href = '{% url "panel_admin:liga_list" %}';
+    document.querySelector('.stat-subsecciones').addEventListener('click', function() {
+        window.location.href = '{% url "panel_admin:subseccion_list" %}';
     });
     
-    document.querySelector('.stat-equipos').addEventListener('click', function() {
-        window.location.href = '{% url "panel_admin:equipo_list" %}';
+    document.querySelector('.stat-subsubsecciones').addEventListener('click', function() {
+        window.location.href = '{% url "panel_admin:subsubseccion_list" %}';
     });
     
-    document.querySelector('.stat-equipaciones').addEventListener('click', function() {
-        window.location.href = '{% url "panel_admin:equipacion_list" %}';
+    document.querySelector('.stat-prendas').addEventListener('click', function() {
+        window.location.href = '{% url "panel_admin:prenda_list" %}';
     });
     
     // Efecto de counter para los números

@@ -1,0 +1,201 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/prenda/prenda_in_subsubseccion.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tshirt"></i>{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2 align-items-center flex-wrap">
+    <a href="{% url 'panel_admin:prenda_list_by_subsubseccion' subsubseccion.subseccion.pk %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+    <a href="{% url 'panel_admin:prenda_multiple_upload' subsubseccion.id %}" class="btn btn-success">
+        <i class="fas fa-upload me-2"></i>Subida Múltiple
+    </a>
+    <a href="{% url 'panel_admin:prenda_create' %}?subsubseccion={{ subsubseccion.id }}" class="btn btn-admin">
+        <i class="fas fa-plus me-2"></i>Nueva Prenda
+    </a>
+</div>
+{% endblock %}
+
+{% block panel_content %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-container mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}">
+                    <i class="fas fa-tshirt me-1"></i>Prendas
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'panel_admin:prenda_list_by_subsubseccion' subsubseccion.subseccion.pk %}">
+                    {{ subsubseccion.subseccion.nombre }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active">{{ subsubseccion.nombre }}</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Información de la subsubsección -->
+<div class="subsubseccion-info-card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            {% if subsubseccion.logo %}
+                <div class="subsubseccion-logo-large me-3">
+                    <img src="{{ subsubseccion.logo.url }}" alt="{{ subsubseccion.nombre }}" class="img-fluid">
+                </div>
+            {% else %}
+                <div class="subsubseccion-placeholder-large me-3">
+                    <i class="fas fa-tags"></i>
+                </div>
+            {% endif %}
+            <div>
+                <h3 class="mb-1">{{ subsubseccion.nombre }}</h3>
+                <p class="text-muted mb-2">{{ subsubseccion.subseccion.nombre }} - {{ subsubseccion.subseccion.seccion.nombre }}</p>
+                {% if subsubseccion.descripcion %}
+                    <p class="text-muted">{{ subsubseccion.descripcion }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="filters-card">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <select name="disponible" class="form-select">
+                    <option value="">Todas las prendas</option>
+                    <option value="1" {% if selected_disponible == '1' %}selected{% endif %}>Solo disponibles</option>
+                    <option value="0" {% if selected_disponible == '0' %}selected{% endif %}>Solo no disponibles</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fas fa-filter me-2"></i>Filtrar
+                    </button>
+                    <a href="{% url 'panel_admin:prenda_list_in_subsubseccion' subsubseccion.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Grid de prendas -->
+<div class="prendas-container">
+    {% if prendas %}
+        <div class="prendas-grid">
+            {% for prenda in prendas %}
+                <div class="prenda-card">
+                    <div class="prenda-image-container">
+                        {% if prenda.imagen %}
+                            <img src="{{ prenda.imagen.url }}" alt="{{ prenda.nombre }}" class="prenda-image">
+                        {% else %}
+                            <div class="prenda-placeholder">
+                                <i class="fas fa-tshirt"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="prenda-content">
+                        <h6 class="prenda-name">
+                            {% if prenda.nombre %}
+                                {{ prenda.nombre }}
+                            {% else %}
+                                Prenda sin nombre
+                            {% endif %}
+                        </h6>
+                        
+                        {% if prenda.precio %}
+                            <div class="prenda-precio">
+                                <span class="precio">{{ prenda.precio }}€</span>
+                            </div>
+                        {% endif %}
+                        
+                        {% if prenda.descripcion %}
+                            <p class="prenda-descripcion">{{ prenda.descripcion|truncatechars:80 }}</p>
+                        {% endif %}
+                        
+                        <div class="prenda-actions">
+                            <div class="btn-group w-100">
+                                <a href="{% url 'panel_admin:prenda_edit' prenda.pk %}" 
+                                   class="btn btn-sm btn-outline-warning"
+                                   title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'panel_admin:prenda_delete' prenda.pk %}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if prendas.has_other_pages %}
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if prendas.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if selected_disponible %}&disponible={{ selected_disponible }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ prendas.previous_page_number }}{% if selected_disponible %}&disponible={{ selected_disponible }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ prendas.number }} de {{ prendas.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if prendas.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ prendas.next_page_number }}{% if selected_disponible %}&disponible={{ selected_disponible }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ prendas.paginator.num_pages }}{% if selected_disponible %}&disponible={{ selected_disponible }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-tshirt"></i>
+            <h4>No hay prendas</h4>
+            <p>Esta subsubsección no tiene prendas todavía</p>
+            <a href="{% url 'panel_admin:prenda_create' %}?subsubseccion={{ subsubseccion.id }}" class="btn btn-admin">
+                <i class="fas fa-plus me-2"></i>Crear Primera Prenda
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

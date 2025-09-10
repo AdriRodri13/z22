@@ -1,0 +1,183 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}
+{% if action == 'crear' %}
+    Crear Subsubsección
+{% else %}
+    Editar Subsubsección
+{% endif %}
+{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/subsubseccion/subsubseccion_form.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tags"></i>{% endblock %}
+{% block content_title %}
+{% if action == 'crear' %}
+    Crear Subsubsección
+{% else %}
+    Editar Subsubsección
+{% endif %}
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:subsubseccion_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>Volver
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Por favor, corrige los errores a continuación.
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                <i class="fas fa-tags"></i>{{ form.nombre.label }}
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.subseccion.id_for_label }}" class="form-label">
+                                <i class="fas fa-layer-group"></i>{{ form.subseccion.label }}
+                            </label>
+                            {{ form.subseccion }}
+                            {% if form.subseccion.errors %}
+                                <div class="text-danger">
+                                    {{ form.subseccion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.logo.id_for_label }}" class="form-label">
+                        <i class="fas fa-image"></i>{{ form.logo.label }}
+                    </label>
+                    
+                    {% if action == 'editar' and subsubseccion.logo %}
+                        <div class="current-image">
+                            <p>Logo actual:</p>
+                            <img src="{{ subsubseccion.logo.url }}" 
+                                 alt="{{ subsubseccion.nombre }}" 
+                                 class="img-thumbnail" 
+                                 style="max-width: 100px; max-height: 100px;">
+                        </div>
+                    {% endif %}
+                    
+                    {{ form.logo }}
+                    
+                    <div class="image-preview-container mt-3" id="logo-preview-container" style="display: none;">
+                        <p class="mb-2">Vista previa:</p>
+                        <img id="logo-preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" alt="Vista previa">
+                    </div>
+                    
+                    {% if form.logo.errors %}
+                        <div class="text-danger">
+                            {{ form.logo.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">
+                        Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB.
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                        <i class="fas fa-align-left"></i>{{ form.descripcion.label }}
+                    </label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <div class="text-danger">
+                            {{ form.descripcion.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                    <a href="{% url 'panel_admin:subsubseccion_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fas fa-save me-2"></i>
+                        {% if action == 'crear' %}
+                            Crear Subsubsección
+                        {% else %}
+                            Guardar Cambios
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const logoInput = document.getElementById('{{ form.logo.id_for_label }}');
+    const previewContainer = document.getElementById('logo-preview-container');
+    const previewImg = document.getElementById('logo-preview');
+    
+    if (logoInput) {
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                // Validar tipo de archivo
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Por favor, selecciona un archivo de imagen válido (JPG, PNG, GIF)');
+                    logoInput.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Validar tamaño (5MB máximo)
+                const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+                if (file.size > maxSize) {
+                    alert('El archivo es demasiado grande. El tamaño máximo es 5MB');
+                    logoInput.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Crear preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

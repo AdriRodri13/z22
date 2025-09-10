@@ -1,0 +1,264 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/prenda/prenda_multiple_upload.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-upload"></i>{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:prenda_list_in_subsubseccion' subsubseccion.id %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>Volver a {{ subsubseccion.nombre }}
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<!-- Información de contexto -->
+<div class="context-info-card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            {% if subsubseccion.logo %}
+                <div class="subsubseccion-logo me-3">
+                    <img src="{{ subsubseccion.logo.url }}" alt="{{ subsubseccion.nombre }}" class="img-fluid">
+                </div>
+            {% else %}
+                <div class="subsubseccion-placeholder me-3">
+                    <i class="fas fa-tags"></i>
+                </div>
+            {% endif %}
+            <div>
+                <h5 class="mb-1">Subida múltiple de prendas</h5>
+                <p class="text-muted mb-0">{{ subsubseccion.subseccion.seccion.nombre }} → {{ subsubseccion.subseccion.nombre }} → {{ subsubseccion.nombre }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de subida múltiple -->
+<div class="upload-form-container">
+    <div class="form-card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" id="multiple-upload-form">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Por favor, corrige los errores a continuación.
+                        {% for field, errors in form.errors.items %}
+                            <ul class="mb-0 mt-2">
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Seleccionar imágenes -->
+                <div class="form-group mb-4">
+                    <label for="{{ form.imagenes.id_for_label }}" class="form-label">
+                        <i class="fas fa-images me-2"></i>{{ form.imagenes.label }}
+                    </label>
+                    {{ form.imagenes }}
+                    <div class="form-text">{{ form.imagenes.help_text }}</div>
+                    
+                    <!-- Vista previa de imágenes -->
+                    <div id="images-preview-container" class="images-preview mt-3" style="display: none;">
+                        <h6><i class="fas fa-eye me-2"></i>Vista previa de imágenes seleccionadas:</h6>
+                        <div id="images-preview-grid" class="images-grid"></div>
+                        <div class="images-summary mt-3">
+                            <span class="badge bg-info" id="images-count">0 imágenes seleccionadas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Precio para todas -->
+                <div class="form-group mb-4">
+                    <label for="{{ form.precio.id_for_label }}" class="form-label">
+                        <i class="fas fa-euro-sign me-2"></i>{{ form.precio.label }}
+                    </label>
+                    {{ form.precio }}
+                    <div class="form-text">{{ form.precio.help_text }}</div>
+                </div>
+
+                <!-- Subsubsección (oculto ya que viene preseleccionado) -->
+                <div class="form-group mb-4" style="display: none;">
+                    {{ form.subsubseccion }}
+                </div>
+
+                <!-- Información de nomenclatura -->
+                <div class="nomenclature-info-card mb-4">
+                    <div class="card-body">
+                        <h6><i class="fas fa-info-circle me-2"></i>Nomenclatura automática</h6>
+                        <p class="mb-2">Las prendas se crearán automáticamente con los siguientes nombres:</p>
+                        <div class="nomenclature-example">
+                            <code id="nomenclature-preview">{{ subsubseccion.nombre|lower }}-dd-mm-yyyy-1</code>
+                            <code id="nomenclature-preview-2">{{ subsubseccion.nombre|lower }}-dd-mm-yyyy-2</code>
+                            <span class="text-muted">...</span>
+                        </div>
+                        <small class="text-muted">Donde "dd-mm-yyyy" será la fecha actual y el número final será secuencial.</small>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                    <a href="{% url 'panel_admin:prenda_list_in_subsubseccion' subsubseccion.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-admin" id="submit-btn">
+                        <i class="fas fa-upload me-2"></i>Subir Prendas
+                        <span class="upload-count" style="display: none;">(0)</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.imagenes.id_for_label }}');
+    const previewContainer = document.getElementById('images-preview-container');
+    const previewGrid = document.getElementById('images-preview-grid');
+    const imagesCount = document.getElementById('images-count');
+    const submitBtn = document.getElementById('submit-btn');
+    const uploadCount = submitBtn.querySelector('.upload-count');
+    
+    // Array para mantener los archivos válidos
+    let validFiles = [];
+    
+    fileInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        
+        if (files.length === 0) {
+            validFiles = [];
+            previewContainer.style.display = 'none';
+            updateSubmitButton(0);
+            return;
+        }
+        
+        // Validar archivos
+        validFiles = [];
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        
+        files.forEach((file, index) => {
+            if (!validTypes.includes(file.type)) {
+                alert(`El archivo "${file.name}" no es una imagen válida. Solo se permiten JPG, PNG y GIF.`);
+                return;
+            }
+            
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                alert(`El archivo "${file.name}" es demasiado grande. Tamaño máximo: 5MB.`);
+                return;
+            }
+            
+            validFiles.push(file);
+        });
+        
+        if (validFiles.length === 0) {
+            previewContainer.style.display = 'none';
+            fileInput.value = '';
+            updateSubmitButton(0);
+            return;
+        }
+        
+        renderPreviews();
+    });
+    
+    function renderPreviews() {
+        // Limpiar previsualizaciones anteriores
+        previewGrid.innerHTML = '';
+        
+        if (validFiles.length === 0) {
+            previewContainer.style.display = 'none';
+            updateSubmitButton(0);
+            return;
+        }
+        
+        // Crear previsualizaciones
+        validFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.dataset.index = index;
+                previewItem.innerHTML = `
+                    <div class="preview-image">
+                        <img src="${e.target.result}" alt="Vista previa ${index + 1}">
+                        <button type="button" class="remove-image-btn" data-index="${index}" title="Eliminar imagen">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="preview-info">
+                        <small class="preview-name">${file.name}</small>
+                        <small class="preview-size">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                    </div>
+                `;
+                previewGrid.appendChild(previewItem);
+                
+                // Añadir event listener al botón de eliminar
+                const removeBtn = previewItem.querySelector('.remove-image-btn');
+                removeBtn.addEventListener('click', function() {
+                    removeImage(parseInt(this.dataset.index));
+                });
+            };
+            
+            reader.readAsDataURL(file);
+        });
+        
+        // Mostrar container y actualizar contador
+        previewContainer.style.display = 'block';
+        updateImageCount();
+        updateSubmitButton(validFiles.length);
+    }
+    
+    function removeImage(index) {
+        // Eliminar el archivo del array
+        validFiles.splice(index, 1);
+        
+        // Actualizar el input file con los archivos restantes
+        updateFileInput();
+        
+        // Re-renderizar las previsualizaciones
+        renderPreviews();
+    }
+    
+    function updateFileInput() {
+        // Crear un nuevo DataTransfer para actualizar el input
+        const dt = new DataTransfer();
+        validFiles.forEach(file => {
+            dt.items.add(file);
+        });
+        fileInput.files = dt.files;
+    }
+    
+    function updateImageCount() {
+        const count = validFiles.length;
+        imagesCount.textContent = `${count} imagen${count !== 1 ? 'es' : ''} seleccionada${count !== 1 ? 's' : ''}`;
+    }
+    
+    function updateSubmitButton(count) {
+        if (count > 0) {
+            uploadCount.textContent = `(${count})`;
+            uploadCount.style.display = 'inline';
+            submitBtn.disabled = false;
+        } else {
+            uploadCount.style.display = 'none';
+            submitBtn.disabled = true;
+        }
+    }
+    
+    // Inicializar estado del botón
+    updateSubmitButton(0);
+});
+</script>
+{% endblock %}

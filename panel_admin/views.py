@@ -5,10 +5,12 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, F
 from django.urls import reverse_lazy
-from home.models import Temporada, Liga, Equipo, Equipacion
-from .forms import TemporadaForm, LigaForm, EquipoForm, EquipacionForm
+from home.models import Seccion, Subseccion, Subsubseccion, Prenda
+from .forms import SeccionForm, SubseccionForm, SubsubseccionForm, PrendaForm, PrendaMultipleUploadForm
 from django.contrib.auth.views import LogoutView
 from django.utils.decorators import method_decorator
+from datetime import datetime
+from django.http import JsonResponse
 
 
 def is_staff_user(user):
@@ -56,565 +58,567 @@ class AdminLogoutView(LogoutView):
 def dashboard(request):
     # Estadísticas generales
     stats = {
-        'total_temporadas': Temporada.objects.count(),
-        'total_ligas': Liga.objects.count(),
-        'total_equipos': Equipo.objects.count(),
-        'total_equipaciones': Equipacion.objects.count(),
+        'total_secciones': Seccion.objects.count(),
+        'total_subsecciones': Subseccion.objects.count(),
+        'total_subsubsecciones': Subsubseccion.objects.count(),
+        'total_prendas': Prenda.objects.count(),
     }
     
     # Últimas incorporaciones
-    ultimas_temporadas = Temporada.objects.order_by('-creado_en')[:5]
-    ultimas_ligas = Liga.objects.order_by('-id')[:5]
-    ultimos_equipos = Equipo.objects.order_by('-id')[:5]
-    ultimas_equipaciones = Equipacion.objects.order_by('-id')[:5]
+    ultimas_secciones = Seccion.objects.order_by('-creado_en')[:5]
+    ultimas_subsecciones = Subseccion.objects.order_by('-creado_en')[:5]
+    ultimas_subsubsecciones = Subsubseccion.objects.order_by('-creado_en')[:5]
+    ultimas_prendas = Prenda.objects.order_by('-creado_en')[:5]
     
     context = {
         'title': 'Panel de Administración',
         'stats': stats,
-        'ultimas_temporadas': ultimas_temporadas,
-        'ultimas_ligas': ultimas_ligas,
-        'ultimos_equipos': ultimos_equipos,
-        'ultimas_equipaciones': ultimas_equipaciones,
+        'ultimas_secciones': ultimas_secciones,
+        'ultimas_subsecciones': ultimas_subsecciones,
+        'ultimas_subsubsecciones': ultimas_subsubsecciones,
+        'ultimas_prendas': ultimas_prendas,
     }
     return render(request, 'panel_admin/dashboard.html', context)
 
 
-# =================== TEMPORADAS ===================
+# =================== SECCIONES ===================
 @login_required
 @user_passes_test(is_staff_user)
-def temporada_list(request):
-    temporadas = Temporada.objects.annotate(
-        total_ligas=Count('ligas', distinct=True),
-        total_equipaciones=Count('ligas__equipos__equipaciones', 
-                               filter=Q(ligas__equipos__equipaciones__temporada_id=F('id')), 
-                               distinct=True)
-    ).order_by('-creado_en')
+def seccion_list(request):
+    secciones = Seccion.objects.annotate(
+        total_subsecciones=Count('subsecciones', distinct=True),
+        total_prendas=Count('subsecciones__subsubsecciones__prendas', distinct=True)
+    ).order_by('nombre')
     
     # Búsqueda
     search = request.GET.get('search', '')
     if search:
-        temporadas = temporadas.filter(nombre__icontains=search)
+        secciones = secciones.filter(
+            Q(nombre__icontains=search) |
+            Q(descripcion__icontains=search)
+        )
     
     # Paginación
-    paginator = Paginator(temporadas, 10)
+    paginator = Paginator(secciones, 10)
     page = request.GET.get('page')
-    temporadas = paginator.get_page(page)
+    secciones = paginator.get_page(page)
     
     context = {
-        'title': 'Gestión de Temporadas',
-        'temporadas': temporadas,
+        'title': 'Gestión de Secciones',
+        'secciones': secciones,
         'search': search,
     }
-    return render(request, 'panel_admin/temporada/temporada_list.html', context)
+    return render(request, 'panel_admin/seccion/seccion_list.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def temporada_create(request):
+def seccion_create(request):
     if request.method == 'POST':
-        form = TemporadaForm(request.POST)
+        form = SeccionForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Temporada creada exitosamente.')
-            return redirect('panel_admin:temporada_list')
+            messages.success(request, 'Sección creada exitosamente.')
+            return redirect('panel_admin:seccion_list')
     else:
-        form = TemporadaForm()
+        form = SeccionForm()
     
     context = {
-        'title': 'Crear Temporada',
+        'title': 'Crear Sección',
         'form': form,
         'action': 'crear'
     }
-    return render(request, 'panel_admin/temporada/temporada_form.html', context)
+    return render(request, 'panel_admin/seccion/seccion_form.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def temporada_edit(request, pk):
-    temporada = get_object_or_404(Temporada, pk=pk)
+def seccion_edit(request, pk):
+    seccion = get_object_or_404(Seccion, pk=pk)
     
     if request.method == 'POST':
-        form = TemporadaForm(request.POST, instance=temporada)
+        form = SeccionForm(request.POST, instance=seccion)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Temporada actualizada exitosamente.')
-            return redirect('panel_admin:temporada_list')
+            messages.success(request, 'Sección actualizada exitosamente.')
+            return redirect('panel_admin:seccion_list')
     else:
-        form = TemporadaForm(instance=temporada)
+        form = SeccionForm(instance=seccion)
     
     context = {
-        'title': 'Editar Temporada',
+        'title': 'Editar Sección',
         'form': form,
-        'temporada': temporada,
+        'seccion': seccion,
         'action': 'editar'
     }
-    return render(request, 'panel_admin/temporada/temporada_form.html', context)
+    return render(request, 'panel_admin/seccion/seccion_form.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def temporada_delete(request, pk):
-    temporada = get_object_or_404(Temporada, pk=pk)
+def seccion_delete(request, pk):
+    seccion = get_object_or_404(Seccion, pk=pk)
     
     if request.method == 'POST':
-        temporada.delete()
-        messages.success(request, 'Temporada eliminada exitosamente.')
-        return redirect('panel_admin:temporada_list')
+        seccion.delete()
+        messages.success(request, 'Sección eliminada exitosamente.')
+        return redirect('panel_admin:seccion_list')
     
     context = {
-        'title': 'Eliminar Temporada',
-        'temporada': temporada,
+        'title': 'Eliminar Sección',
+        'seccion': seccion,
     }
-    return render(request, 'panel_admin/temporada/temporada_delete.html', context)
+    return render(request, 'panel_admin/seccion/seccion_delete.html', context)
 
 
-# =================== LIGAS ===================
+# =================== SUBSECCIONES ===================
 @login_required
 @user_passes_test(is_staff_user)
-def liga_list(request):
-    ligas = Liga.objects.select_related('temporada').annotate(
-        total_equipos=Count('equipos')
-    ).order_by('temporada__nombre', 'nombre')
+def subseccion_list(request):
+    subsecciones = Subseccion.objects.select_related('seccion').annotate(
+        total_subsubsecciones=Count('subsubsecciones')
+    ).order_by('seccion__nombre', 'nombre')
     
     # Filtros
     search = request.GET.get('search', '')
-    temporada_id = request.GET.get('temporada', '')
+    seccion_id = request.GET.get('seccion', '')
     
     if search:
-        ligas = ligas.filter(
+        subsecciones = subsecciones.filter(
             Q(nombre__icontains=search) |
-            Q(temporada__nombre__icontains=search)
+            Q(seccion__nombre__icontains=search) |
+            Q(descripcion__icontains=search)
         )
     
-    if temporada_id:
-        ligas = ligas.filter(temporada_id=temporada_id)
+    if seccion_id:
+        subsecciones = subsecciones.filter(seccion_id=seccion_id)
     
     # Paginación
-    paginator = Paginator(ligas, 10)
+    paginator = Paginator(subsecciones, 10)
     page = request.GET.get('page')
-    ligas = paginator.get_page(page)
+    subsecciones = paginator.get_page(page)
     
-    temporadas = Temporada.objects.order_by('-creado_en')
+    secciones = Seccion.objects.all().order_by('nombre')
     
     context = {
-        'title': 'Gestión de Ligas',
-        'ligas': ligas,
-        'temporadas': temporadas,
+        'title': 'Gestión de Subsecciones',
+        'subsecciones': subsecciones,
+        'secciones': secciones,
         'search': search,
-        'selected_temporada': temporada_id,
+        'selected_seccion': seccion_id,
     }
-    return render(request, 'panel_admin/liga/liga_list.html', context)
+    return render(request, 'panel_admin/subseccion/subseccion_list.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def liga_create(request):
+def subseccion_create(request):
     if request.method == 'POST':
-        form = LigaForm(request.POST, request.FILES)
+        form = SubseccionForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Liga creada exitosamente.')
-            return redirect('panel_admin:liga_list')
+            messages.success(request, 'Subsección creada exitosamente.')
+            return redirect('panel_admin:subseccion_list')
     else:
-        form = LigaForm()
+        form = SubseccionForm()
     
     context = {
-        'title': 'Crear Liga',
+        'title': 'Crear Subsección',
         'form': form,
         'action': 'crear'
     }
-    return render(request, 'panel_admin/liga/liga_form.html', context)
+    return render(request, 'panel_admin/subseccion/subseccion_form.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def liga_edit(request, pk):
-    liga = get_object_or_404(Liga, pk=pk)
+def subseccion_edit(request, pk):
+    subseccion = get_object_or_404(Subseccion, pk=pk)
     
     if request.method == 'POST':
-        form = LigaForm(request.POST, request.FILES, instance=liga)
+        form = SubseccionForm(request.POST, request.FILES, instance=subseccion)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Liga actualizada exitosamente.')
-            return redirect('panel_admin:liga_list')
+            messages.success(request, 'Subsección actualizada exitosamente.')
+            return redirect('panel_admin:subseccion_list')
     else:
-        form = LigaForm(instance=liga)
+        form = SubseccionForm(instance=subseccion)
     
     context = {
-        'title': 'Editar Liga',
+        'title': 'Editar Subsección',
         'form': form,
-        'liga': liga,
+        'subseccion': subseccion,
         'action': 'editar'
     }
-    return render(request, 'panel_admin/liga/liga_form.html', context)
+    return render(request, 'panel_admin/subseccion/subseccion_form.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def liga_delete(request, pk):
-    liga = get_object_or_404(Liga, pk=pk)
+def subseccion_delete(request, pk):
+    subseccion = get_object_or_404(Subseccion, pk=pk)
     
     if request.method == 'POST':
-        liga.delete()
-        messages.success(request, 'Liga eliminada exitosamente.')
-        return redirect('panel_admin:liga_list')
+        subseccion.delete()
+        messages.success(request, 'Subsección eliminada exitosamente.')
+        return redirect('panel_admin:subseccion_list')
     
     context = {
-        'title': 'Eliminar Liga',
-        'liga': liga,
+        'title': 'Eliminar Subsección',
+        'subseccion': subseccion,
     }
-    return render(request, 'panel_admin/liga/liga_delete.html', context)
+    return render(request, 'panel_admin/subseccion/subseccion_delete.html', context)
 
 
-# =================== EQUIPOS ===================
+# =================== SUBSUBSECCIONES ===================
 @login_required
 @user_passes_test(is_staff_user)
-def equipo_list(request):
-    equipos = Equipo.objects.select_related('liga', 'liga__temporada').annotate(
-        total_equipaciones=Count('equipaciones')
-    ).order_by('liga__temporada__nombre', 'liga__nombre', 'nombre')
+def subsubseccion_list(request):
+    subsubsecciones = Subsubseccion.objects.select_related('subseccion', 'subseccion__seccion').annotate(
+        total_prendas=Count('prendas')
+    ).order_by('subseccion__seccion__nombre', 'subseccion__nombre', 'nombre')
     
     # Filtros
     search = request.GET.get('search', '')
-    liga_id = request.GET.get('liga', '')
-    temporada_id = request.GET.get('temporada', '')
+    subseccion_id = request.GET.get('subseccion', '')
+    seccion_id = request.GET.get('seccion', '')
     
     if search:
-        equipos = equipos.filter(
+        subsubsecciones = subsubsecciones.filter(
             Q(nombre__icontains=search) |
-            Q(liga__nombre__icontains=search)
+            Q(subseccion__nombre__icontains=search) |
+            Q(descripcion__icontains=search)
         )
     
-    if liga_id:
-        equipos = equipos.filter(liga_id=liga_id)
-    elif temporada_id:
-        equipos = equipos.filter(liga__temporada_id=temporada_id)
+    if subseccion_id:
+        subsubsecciones = subsubsecciones.filter(subseccion_id=subseccion_id)
+    elif seccion_id:
+        subsubsecciones = subsubsecciones.filter(subseccion__seccion_id=seccion_id)
     
     # Paginación
-    paginator = Paginator(equipos, 15)
+    paginator = Paginator(subsubsecciones, 15)
     page = request.GET.get('page')
-    equipos = paginator.get_page(page)
+    subsubsecciones = paginator.get_page(page)
     
-    temporadas = Temporada.objects.order_by('-creado_en')
-    ligas = Liga.objects.select_related('temporada').order_by('temporada__nombre', 'nombre')
+    secciones = Seccion.objects.all().order_by('nombre')
+    subsecciones = Subseccion.objects.select_related('seccion').all().order_by('seccion__nombre', 'nombre')
     
     context = {
-        'title': 'Gestión de Equipos',
-        'equipos': equipos,
-        'temporadas': temporadas,
-        'ligas': ligas,
+        'title': 'Gestión de Subsubsecciones',
+        'subsubsecciones': subsubsecciones,
+        'secciones': secciones,
+        'subsecciones': subsecciones,
         'search': search,
-        'selected_liga': liga_id,
-        'selected_temporada': temporada_id,
+        'selected_subseccion': subseccion_id,
+        'selected_seccion': seccion_id,
     }
-    return render(request, 'panel_admin/equipo/equipo_list.html', context)
+    return render(request, 'panel_admin/subsubseccion/subsubseccion_list.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipo_create(request):
+def subsubseccion_create(request):
     if request.method == 'POST':
-        form = EquipoForm(request.POST, request.FILES)
+        form = SubsubseccionForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Equipo creado exitosamente.')
-            return redirect('panel_admin:equipo_list')
+            messages.success(request, 'Subsubsección creada exitosamente.')
+            return redirect('panel_admin:subsubseccion_list')
     else:
-        form = EquipoForm()
+        form = SubsubseccionForm()
     
     context = {
-        'title': 'Crear Equipo',
+        'title': 'Crear Subsubsección',
         'form': form,
         'action': 'crear'
     }
-    return render(request, 'panel_admin/equipo/equipo_form.html', context)
+    return render(request, 'panel_admin/subsubseccion/subsubseccion_form.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipo_edit(request, pk):
-    equipo = get_object_or_404(Equipo, pk=pk)
+def subsubseccion_edit(request, pk):
+    subsubseccion = get_object_or_404(Subsubseccion, pk=pk)
     
     if request.method == 'POST':
-        form = EquipoForm(request.POST, request.FILES, instance=equipo)
+        form = SubsubseccionForm(request.POST, request.FILES, instance=subsubseccion)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Equipo actualizado exitosamente.')
-            return redirect('panel_admin:equipo_list')
+            messages.success(request, 'Subsubsección actualizada exitosamente.')
+            return redirect('panel_admin:subsubseccion_list')
     else:
-        form = EquipoForm(instance=equipo)
+        form = SubsubseccionForm(instance=subsubseccion)
     
     context = {
-        'title': 'Editar Equipo',
+        'title': 'Editar Subsubsección',
         'form': form,
-        'equipo': equipo,
+        'subsubseccion': subsubseccion,
         'action': 'editar'
     }
-    return render(request, 'panel_admin/equipo/equipo_form.html', context)
+    return render(request, 'panel_admin/subsubseccion/subsubseccion_form.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipo_delete(request, pk):
-    equipo = get_object_or_404(Equipo, pk=pk)
+def subsubseccion_delete(request, pk):
+    subsubseccion = get_object_or_404(Subsubseccion, pk=pk)
     
     if request.method == 'POST':
-        equipo.delete()
-        messages.success(request, 'Equipo eliminado exitosamente.')
-        return redirect('panel_admin:equipo_list')
+        subsubseccion.delete()
+        messages.success(request, 'Subsubsección eliminada exitosamente.')
+        return redirect('panel_admin:subsubseccion_list')
     
     context = {
-        'title': 'Eliminar Equipo',
-        'equipo': equipo,
+        'title': 'Eliminar Subsubsección',
+        'subsubseccion': subsubseccion,
     }
-    return render(request, 'panel_admin/equipo/equipo_delete.html', context)
+    return render(request, 'panel_admin/subsubseccion/subsubseccion_delete.html', context)
 
-# =================== EQUIPOS - VISTA POR LIGAS ===================
+# =================== SUBSUBSECCIONES - VISTA POR SUBSECCIONES ===================
 @login_required
 @user_passes_test(is_staff_user)
-def equipo_list_by_liga(request):
-    # Obtener la última temporada
-    ultima_temporada = Temporada.objects.order_by('-creado_en').first()
-    
-    if not ultima_temporada:
-        context = {
-            'title': 'Gestión de Equipos por Liga',
-            'ligas': [],
-            'temporada_actual': None,
-        }
-        return render(request, 'panel_admin/equipo/equipo_by_liga.html', context)
-    
-    # Obtener ligas de la última temporada con sus equipos
-    ligas = Liga.objects.filter(temporada=ultima_temporada).prefetch_related(
-        'equipos'
+def subsubseccion_list_by_subseccion(request):
+    # Obtener secciones activas con sus subsecciones
+    secciones = Seccion.objects.all().prefetch_related(
+        'subsecciones'
     ).annotate(
-        total_equipos=Count('equipos')
+        total_subsecciones=Count('subsecciones', distinct=True)
     ).order_by('nombre')
     
     context = {
-        'title': 'Gestión de Equipos por Liga',
-        'ligas': ligas,
-        'temporada_actual': ultima_temporada,
+        'title': 'Gestión de Subsubsecciones por Subsección',
+        'secciones': secciones,
     }
-    return render(request, 'panel_admin/equipo/equipo_by_liga.html', context)
+    return render(request, 'panel_admin/subsubseccion/subsubseccion_by_subseccion.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipo_list_in_liga(request, liga_id):
-    liga = get_object_or_404(Liga, pk=liga_id)
+def subsubseccion_list_in_subseccion(request, subseccion_id):
+    subseccion = get_object_or_404(Subseccion, pk=subseccion_id)
     
-    # Obtener equipos de esta liga
-    equipos = Equipo.objects.filter(liga=liga).annotate(
-        total_equipaciones=Count('equipaciones')
+    # Obtener subsubsecciones de esta subsección
+    subsubsecciones = Subsubseccion.objects.filter(subseccion=subseccion).annotate(
+        total_prendas=Count('prendas')
     ).order_by('nombre')
     
     # Búsqueda
     search = request.GET.get('search', '')
     if search:
-        equipos = equipos.filter(nombre__icontains=search)
+        subsubsecciones = subsubsecciones.filter(nombre__icontains=search)
     
     # Paginación
-    paginator = Paginator(equipos, 15)
+    paginator = Paginator(subsubsecciones, 15)
     page = request.GET.get('page')
-    equipos = paginator.get_page(page)
+    subsubsecciones = paginator.get_page(page)
     
     context = {
-        'title': f'Equipos de {liga.nombre}',
-        'liga': liga,
-        'equipos': equipos,
+        'title': f'Subsubsecciones de {subseccion.nombre}',
+        'subseccion': subseccion,
+        'subsubsecciones': subsubsecciones,
         'search': search,
     }
-    return render(request, 'panel_admin/equipo/equipo_list_in_liga.html', context)
+    return render(request, 'panel_admin/subsubseccion/subsubseccion_list_in_subseccion.html', context)
 
 
-# =================== EQUIPACIONES ===================
+# =================== PRENDAS ===================
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipacion_create(request):
-    # Obtener equipo preseleccionado si viene desde navegación jerárquica
-    equipo_id = request.GET.get('equipo')
+def prenda_create(request):
+    # Obtener subsubsección preseleccionada si viene desde navegación jerárquica
+    subsubseccion_id = request.GET.get('subsubseccion')
     initial_data = {}
     
-    if equipo_id:
+    if subsubseccion_id:
         try:
-            equipo = Equipo.objects.get(pk=equipo_id)
-            initial_data['equipo'] = equipo
-            # También podemos preseleccionar la temporada de la liga del equipo
-            initial_data['temporada'] = equipo.liga.temporada
-        except Equipo.DoesNotExist:
+            subsubseccion = Subsubseccion.objects.get(pk=subsubseccion_id)
+            initial_data['subsubseccion'] = subsubseccion
+        except Subsubseccion.DoesNotExist:
             pass
     
     if request.method == 'POST':
-        form = EquipacionForm(request.POST, request.FILES)
+        form = PrendaForm(request.POST, request.FILES)
         if form.is_valid():
-            equipacion = form.save()
-            messages.success(request, 'Equipación creada exitosamente.')
+            prenda = form.save()
+            messages.success(request, 'Prenda creada exitosamente.')
             
-            # Redirigir siempre al equipo de la equipación creada
-            return redirect('panel_admin:equipacion_list_in_equipo', equipacion.equipo.id)
+            # Redirigir siempre a la subsubsección de la prenda creada
+            return redirect('panel_admin:prenda_list_in_subsubseccion', prenda.subsubseccion.id)
     else:
-        form = EquipacionForm(initial=initial_data)
+        form = PrendaForm(initial=initial_data)
     
     context = {
-        'title': 'Crear Equipación',
+        'title': 'Crear Prenda',
         'form': form,
         'action': 'crear',
-        'equipo_preseleccionado': equipo_id
+        'subsubseccion_preseleccionada': subsubseccion_id
     }
-    return render(request, 'panel_admin/equipacion/equipacion_form.html', context)
+    return render(request, 'panel_admin/prenda/prenda_form.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipacion_edit(request, pk):
-    equipacion = get_object_or_404(Equipacion, pk=pk)
+def prenda_edit(request, pk):
+    prenda = get_object_or_404(Prenda, pk=pk)
     
     if request.method == 'POST':
-        form = EquipacionForm(request.POST, request.FILES, instance=equipacion)
+        form = PrendaForm(request.POST, request.FILES, instance=prenda)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Equipación actualizada exitosamente.')
-            # Redirigir al equipo de la equipación editada
-            return redirect('panel_admin:equipacion_list_in_equipo', equipacion.equipo.id)
+            messages.success(request, 'Prenda actualizada exitosamente.')
+            # Redirigir a la subsubsección de la prenda editada
+            return redirect('panel_admin:prenda_list_in_subsubseccion', prenda.subsubseccion.id)
     else:
-        form = EquipacionForm(instance=equipacion)
+        form = PrendaForm(instance=prenda)
     
     context = {
-        'title': 'Editar Equipación',
+        'title': 'Editar Prenda',
         'form': form,
-        'equipacion': equipacion,
+        'prenda': prenda,
         'action': 'editar'
     }
-    return render(request, 'panel_admin/equipacion/equipacion_form.html', context)
+    return render(request, 'panel_admin/prenda/prenda_form.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipacion_delete(request, pk):
-    equipacion = get_object_or_404(Equipacion, pk=pk)
-    equipo_id = equipacion.equipo.id  # Guardar el ID antes de eliminar
+def prenda_delete(request, pk):
+    prenda = get_object_or_404(Prenda, pk=pk)
+    subsubseccion_id = prenda.subsubseccion.id  # Guardar el ID antes de eliminar
     
     if request.method == 'POST':
-        equipacion.delete()
-        messages.success(request, 'Equipación eliminada exitosamente.')
-        # Redirigir al equipo de la equipación eliminada
-        return redirect('panel_admin:equipacion_list_in_equipo', equipo_id)
+        prenda.delete()
+        messages.success(request, 'Prenda eliminada exitosamente.')
+        # Redirigir a la subsubsección de la prenda eliminada
+        return redirect('panel_admin:prenda_list_in_subsubseccion', subsubseccion_id)
     
     context = {
-        'title': 'Eliminar Equipación',
-        'equipacion': equipacion,
+        'title': 'Eliminar Prenda',
+        'prenda': prenda,
     }
-    return render(request, 'panel_admin/equipacion/equipacion_delete.html', context)
+    return render(request, 'panel_admin/prenda/prenda_delete.html', context)
 
-# =================== EQUIPACIONES - VISTA JERÁRQUICA ===================
+# =================== PRENDAS - VISTA JERÁRQUICA ===================
 @login_required
 @user_passes_test(is_staff_user)
-def equipacion_list_by_liga(request):
-    """Vista principal de equipaciones organizadas por liga"""
-    # Obtener la última temporada
-    ultima_temporada = Temporada.objects.order_by('-creado_en').first()
-    
-    # Permitir seleccionar temporada
-    temporada_id = request.GET.get('temporada', '')
-    if temporada_id:
-        try:
-            temporada_seleccionada = Temporada.objects.get(pk=temporada_id)
-        except Temporada.DoesNotExist:
-            temporada_seleccionada = ultima_temporada
-    else:
-        temporada_seleccionada = ultima_temporada
-    
-    if not temporada_seleccionada:
-        context = {
-            'title': 'Gestión de Equipaciones por Liga',
-            'ligas': [],
-            'temporada_actual': None,
-            'temporadas': Temporada.objects.order_by('-creado_en'),
-        }
-        return render(request, 'panel_admin/equipacion/equipacion_by_liga.html', context)
-    
-    # Obtener ligas de la temporada seleccionada con conteo correcto
-    ligas = Liga.objects.filter(temporada=temporada_seleccionada).annotate(
-        total_equipos=Count('equipos', distinct=True),
-        total_equipaciones=Count('equipos__equipaciones', 
-                               filter=Q(equipos__equipaciones__temporada=temporada_seleccionada),
-                               distinct=True)
+def prenda_list_by_subseccion(request):
+    """Vista principal de prendas organizadas por subsección"""
+    # Obtener secciones activas con conteo correcto
+    secciones = Seccion.objects.all().annotate(
+        total_subsecciones=Count('subsecciones', distinct=True),
+        total_prendas=Count('subsecciones__subsubsecciones__prendas', distinct=True)
     ).order_by('nombre')
     
-    temporadas = Temporada.objects.order_by('-creado_en')
-    
     context = {
-        'title': 'Gestión de Equipaciones por Liga',
-        'ligas': ligas,
-        'temporada_actual': temporada_seleccionada,
-        'temporadas': temporadas,
-        'selected_temporada': str(temporada_seleccionada.id) if temporada_seleccionada else '',
+        'title': 'Gestión de Prendas por Subsección',
+        'secciones': secciones,
     }
-    return render(request, 'panel_admin/equipacion/equipacion_by_liga.html', context)
+    return render(request, 'panel_admin/prenda/prenda_by_subseccion.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipacion_list_by_equipo(request, liga_id):
-    """Vista de equipos de una liga con sus equipaciones"""
-    liga = get_object_or_404(Liga, pk=liga_id)
+def prenda_list_by_subsubseccion(request, subseccion_id):
+    """Vista de subsubsecciones de una subsección con sus prendas"""
+    subseccion = get_object_or_404(Subseccion, pk=subseccion_id)
     
-    # Obtener equipos de esta liga con conteo de equipaciones
-    equipos = Equipo.objects.filter(liga=liga).prefetch_related(
-        'equipaciones'
+    # Obtener subsubsecciones de esta subsección con conteo de prendas
+    subsubsecciones = Subsubseccion.objects.filter(subseccion=subseccion).prefetch_related(
+        'prendas'
     ).annotate(
-        total_equipaciones=Count('equipaciones', filter=Q(equipaciones__temporada=liga.temporada))
+        total_prendas=Count('prendas', )
     ).order_by('nombre')
     
     # Búsqueda
     search = request.GET.get('search', '')
     if search:
-        equipos = equipos.filter(nombre__icontains=search)
+        subsubsecciones = subsubsecciones.filter(nombre__icontains=search)
     
     # Paginación
-    paginator = Paginator(equipos, 12)
+    paginator = Paginator(subsubsecciones, 12)
     page = request.GET.get('page')
-    equipos = paginator.get_page(page)
+    subsubsecciones = paginator.get_page(page)
     
     context = {
-        'title': f'Equipaciones de {liga.nombre}',
-        'liga': liga,
-        'equipos': equipos,
+        'title': f'Prendas de {subseccion.nombre}',
+        'subseccion': subseccion,
+        'subsubsecciones': subsubsecciones,
         'search': search,
     }
-    return render(request, 'panel_admin/equipacion/equipacion_by_equipo.html', context)
+    return render(request, 'panel_admin/prenda/prenda_by_subsubseccion.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
-def equipacion_list_in_equipo(request, equipo_id):
-    """Vista de equipaciones de un equipo específico"""
-    equipo = get_object_or_404(Equipo, pk=equipo_id)
+def prenda_list_in_subsubseccion(request, subsubseccion_id):
+    """Vista de prendas de una subsubsección específica"""
+    subsubseccion = get_object_or_404(Subsubseccion, pk=subsubseccion_id)
     
-    # Obtener equipaciones de este equipo
-    equipaciones = Equipacion.objects.filter(equipo=equipo).select_related(
-        'temporada'
-    ).order_by('-temporada__creado_en')
-    
-    # Filtro por temporada
-    temporada_id = request.GET.get('temporada', '')
-    if temporada_id:
-        equipaciones = equipaciones.filter(temporada_id=temporada_id)
+    # Obtener prendas de esta subsubsección
+    prendas = Prenda.objects.filter(subsubseccion=subsubseccion).order_by('-creado_en')
     
     # Paginación
-    paginator = Paginator(equipaciones, 12)
+    paginator = Paginator(prendas, 12)
     page = request.GET.get('page')
-    equipaciones = paginator.get_page(page)
-    
-    temporadas = Temporada.objects.order_by('-creado_en')
+    prendas = paginator.get_page(page)
     
     context = {
-        'title': f'Equipaciones de {equipo.nombre}',
-        'equipo': equipo,
-        'equipaciones': equipaciones,
-        'temporadas': temporadas,
-        'selected_temporada': temporada_id,
+        'title': f'Prendas de {subsubseccion.nombre}',
+        'subsubseccion': subsubseccion,
+        'prendas': prendas,
     }
-    return render(request, 'panel_admin/equipacion/equipacion_in_equipo.html', context)
+    return render(request, 'panel_admin/prenda/prenda_in_subsubseccion.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def prenda_multiple_upload(request, subsubseccion_id):
+    """Vista para subida múltiple de prendas"""
+    subsubseccion = get_object_or_404(Subsubseccion, pk=subsubseccion_id)
+    
+    if request.method == 'POST':
+        form = PrendaMultipleUploadForm(request.POST, request.FILES, subsubseccion_id=subsubseccion_id)
+        
+        if form.is_valid():
+            images = request.FILES.getlist('imagenes')
+            precio = form.cleaned_data['precio']
+            target_subsubseccion = form.cleaned_data['subsubseccion']
+            
+            # Generar fecha para el nombre
+            today = datetime.now()
+            fecha_str = f"{today.day:02d}-{today.month:02d}-{today.year}"
+            
+            prendas_creadas = []
+            for i, image in enumerate(images, 1):
+                # Generar nombre único: nombresubsubseccion-dia-mes-año-numero
+                nombre = f"{target_subsubseccion.nombre.lower().replace(' ', '-')}-{fecha_str}-{i}"
+                
+                # Crear la prenda
+                prenda = Prenda.objects.create(
+                    nombre=nombre,
+                    subsubseccion=target_subsubseccion,
+                    imagen=image,
+                    precio=precio
+                )
+                prendas_creadas.append(prenda)
+            
+            messages.success(
+                request, 
+                f'Se han creado exitosamente {len(prendas_creadas)} prendas en {target_subsubseccion.nombre}.'
+            )
+            return redirect('panel_admin:prenda_list_in_subsubseccion', subsubseccion_id=target_subsubseccion.id)
+        
+        else:
+            messages.error(request, 'Por favor, corrige los errores en el formulario.')
+    
+    else:
+        form = PrendaMultipleUploadForm(subsubseccion_id=subsubseccion_id)
+    
+    context = {
+        'title': f'Subida múltiple - {subsubseccion.nombre}',
+        'subsubseccion': subsubseccion,
+        'form': form,
+        'action': 'subida_multiple'
+    }
+    return render(request, 'panel_admin/prenda/prenda_multiple_upload.html', context)

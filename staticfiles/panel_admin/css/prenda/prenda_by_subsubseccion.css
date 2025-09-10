@@ -1,0 +1,366 @@
+/* ================================
+    PRENDA BY SUBSUBSECCION STYLES
+================================ */
+
+/* Breadcrumb */
+.breadcrumb-container {
+    background: var(--color-hover-primary);
+    border-radius: var(--border-radius-sm);
+    padding: 1rem;
+    border: 1px solid var(--color-secondary);
+}
+
+.breadcrumb {
+    margin-bottom: 0;
+    background: transparent;
+    padding: 0;
+}
+
+.breadcrumb-item a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: var(--transition-normal);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--color-accent);
+}
+
+.breadcrumb-item.active {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Subseccion Info Card */
+.subseccion-info-card {
+    background: var(--color-primary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-md);
+}
+
+.subseccion-info-card .card-body {
+    padding: 1.5rem;
+}
+
+.subseccion-info-card h3 {
+    color: var(--color-accent);
+}
+
+.subseccion-info-card p {
+    color: var(--color-text-secondary);
+}
+
+.subseccion-logo-large {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    background: #ffffff;
+    border: 2px solid var(--color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subseccion-logo-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.subseccion-placeholder-large {
+    width: 80px;
+    height: 80px;
+    background: var(--color-hover-primary);
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: 2rem;
+}
+
+/* Filters Card */
+.filters-card {
+    background: var(--color-primary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-md);
+    margin-bottom: 1.5rem;
+}
+
+.filters-card .card-body {
+    padding: 1.25rem;
+}
+
+.input-group-text {
+    background-color: var(--color-hover-primary);
+    border-color: var(--color-secondary);
+    color: var(--color-text-secondary);
+}
+
+.form-control {
+    background-color: var(--color-primary);
+    border-color: var(--color-secondary);
+    color: var(--color-accent);
+}
+
+.form-control:focus {
+    background-color: var(--color-primary);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.15);
+}
+
+/* Subsubsecciones Grid */
+.subsubsecciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.subsubseccion-card {
+    background: var(--color-primary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    transition: var(--transition-normal);
+}
+
+.subsubseccion-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+}
+
+/* Subsubseccion Logo */
+.subsubseccion-logo-container {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    background: #ffffff;
+    border: 2px solid var(--color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.subsubseccion-logo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.subsubseccion-placeholder {
+    width: 60px;
+    height: 60px;
+    background: var(--color-hover-primary);
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+    margin: 0 auto 1rem;
+}
+
+/* Subsubseccion Content */
+.subsubseccion-content {
+    text-align: center;
+}
+
+.subsubseccion-name {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.subsubseccion-stats {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.subsubseccion-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.subsubseccion-stat-number {
+    font-size: 1.25rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-accent);
+}
+
+.subsubseccion-stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+/* Subsubseccion Actions */
+.subsubseccion-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-block {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+/* Empty State */
+.empty-state-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    max-width: 500px;
+}
+
+.empty-state h3 {
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: var(--color-text-secondary);
+}
+
+/* Pagination */
+.pagination {
+    --bs-pagination-bg: var(--color-primary);
+    --bs-pagination-border-color: var(--color-secondary);
+    --bs-pagination-color: var(--color-accent);
+    --bs-pagination-hover-bg: var(--color-hover-primary);
+    --bs-pagination-hover-border-color: var(--color-accent);
+    --bs-pagination-active-bg: var(--color-accent);
+    --bs-pagination-active-color: var(--color-primary);
+    --bs-pagination-active-border-color: var(--color-accent);
+}
+
+/* Animations */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* ================================
+    DARK THEME ADAPTATIONS
+================================ */
+
+@media (prefers-color-scheme: dark) {
+    .breadcrumb-item a,
+    .input-group-text,
+    .subsubseccion-placeholder,
+    .subsubseccion-stat-label,
+    .empty-state p,
+    .subseccion-info-card p {
+        color: #e0e0e0 !important;
+    }
+    
+    .breadcrumb-item.active,
+    .subseccion-info-card h3,
+    .subsubseccion-name,
+    .subsubseccion-stat-number,
+    .empty-state h3 {
+        color: #ffffff !important;
+    }
+}
+
+.dark-theme .breadcrumb-item a,
+.theme-dark .breadcrumb-item a,
+.dark-theme .input-group-text,
+.theme-dark .input-group-text,
+.dark-theme .subsubseccion-placeholder,
+.theme-dark .subsubseccion-placeholder,
+.dark-theme .subsubseccion-stat-label,
+.theme-dark .subsubseccion-stat-label,
+.dark-theme .empty-state p,
+.theme-dark .empty-state p,
+.dark-theme .subseccion-info-card p,
+.theme-dark .subseccion-info-card p {
+    color: #e0e0e0 !important;
+}
+
+.dark-theme .breadcrumb-item.active,
+.theme-dark .breadcrumb-item.active,
+.dark-theme .subseccion-info-card h3,
+.theme-dark .subseccion-info-card h3,
+.dark-theme .subsubseccion-name,
+.theme-dark .subsubseccion-name,
+.dark-theme .subsubseccion-stat-number,
+.theme-dark .subsubseccion-stat-number,
+.dark-theme .empty-state h3,
+.theme-dark .empty-state h3 {
+    color: #ffffff !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .subsubsecciones-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+    
+    .subseccion-info-card .d-flex {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .filters-card .row {
+        text-align: center;
+    }
+    
+    .filters-card .d-flex {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .subsubsecciones-grid {
+        grid-template-columns: 1fr;
+        margin: 0 -0.5rem;
+    }
+    
+    .subsubseccion-card {
+        margin-bottom: 1rem;
+    }
+    
+    .breadcrumb-container {
+        margin: 0 -0.5rem 1rem;
+    }
+    
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+}
+
+/* Subsubsecciones Container */
+.subsubsecciones-container {
+    margin-top: 1.5rem;
+}
+   

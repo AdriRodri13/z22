@@ -1,0 +1,179 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/subsubseccion/subsubseccion_list.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tags"></i>{% endblock %}
+{% block content_title %}Gestión de Subsubsecciones{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:subsubseccion_create' %}" class="btn btn-admin">
+    <i class="fas fa-plus me-2"></i>Nueva Subsubsección
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<!-- Filtros de búsqueda -->
+<div class="filters-card">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" 
+                       class="form-control" 
+                       name="search" 
+                       value="{{ search }}" 
+                       placeholder="Buscar subsubsección...">
+            </div>
+            <div class="col-md-3">
+                <select name="seccion" class="form-select">
+                    <option value="">Todas las secciones</option>
+                    {% for seccion in secciones %}
+                        <option value="{{ seccion.id }}" 
+                                {% if selected_seccion == seccion.id|stringformat:"s" %}selected{% endif %}>
+                            {{ seccion.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="subseccion" class="form-select">
+                    <option value="">Todas las subsecciones</option>
+                    {% for subseccion in subsecciones %}
+                        <option value="{{ subseccion.id }}" 
+                                {% if selected_subseccion == subseccion.id|stringformat:"s" %}selected{% endif %}>
+                            {{ subseccion.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-admin flex-fill">
+                        <i class="fas fa-search me-2"></i>Buscar
+                    </button>
+                    <a href="{% url 'panel_admin:subsubseccion_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de subsubsecciones -->
+<div class="table-container">
+    {% if subsubsecciones %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Logo</th>
+                        <th>Nombre</th>
+                        <th>Subsección</th>
+                        <th>Sección</th>
+                        <th>Prendas</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subsubseccion in subsubsecciones %}
+                        <tr>
+                            <td>
+                                {% if subsubseccion.logo %}
+                                    <div class="logo-container">
+                                        <img src="{{ subsubseccion.logo.url }}" alt="{{ subsubseccion.nombre }}">
+                                    </div>
+                                {% else %}
+                                    <div class="logo-placeholder">
+                                        <i class="fas fa-tags"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ subsubseccion.nombre }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ subsubseccion.subseccion.nombre }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ subsubseccion.subseccion.seccion.nombre }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">{{ subsubseccion.total_prendas }}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{% url 'panel_admin:subsubseccion_edit' subsubseccion.pk %}" 
+                                       class="btn btn-sm btn-outline-warning"
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'panel_admin:subsubseccion_delete' subsubseccion.pk %}" 
+                                       class="btn btn-sm btn-outline-danger"
+                                       title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if subsubsecciones.has_other_pages %}
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if subsubsecciones.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}{% if selected_subseccion %}&subseccion={{ selected_subseccion }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ subsubsecciones.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}{% if selected_subseccion %}&subseccion={{ selected_subseccion }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ subsubsecciones.number }} de {{ subsubsecciones.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if subsubsecciones.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ subsubsecciones.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}{% if selected_subseccion %}&subseccion={{ selected_subseccion }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ subsubsecciones.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}{% if selected_subseccion %}&subseccion={{ selected_subseccion }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-tags"></i>
+            <h4>No hay subsubsecciones</h4>
+            <p>Comienza creando tu primera subsubsección para organizar las prendas</p>
+            <a href="{% url 'panel_admin:subsubseccion_create' %}" class="btn btn-admin">
+                <i class="fas fa-plus me-2"></i>Crear Primera Subsubsección
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

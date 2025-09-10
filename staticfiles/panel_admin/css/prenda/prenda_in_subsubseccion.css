@@ -1,0 +1,493 @@
+/* ================================
+   PRENDA IN SUBSUBSECCION STYLES
+   ================================ */
+
+/* Breadcrumb Styles */
+.breadcrumb-container {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.breadcrumb {
+    background: none;
+    margin-bottom: 0;
+}
+
+.breadcrumb-item a {
+    color: var(--color-info);
+    text-decoration: none;
+    transition: var(--transition-normal);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--color-accent);
+}
+
+.breadcrumb-item.active {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--color-text-muted);
+}
+
+/* Subsubsección Info Card */
+.subsubseccion-info-card {
+    background: var(--gradient-secondary);
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
+}
+
+.subsubseccion-info-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.subsubseccion-info-card .card-body {
+    padding: 2rem;
+}
+
+.subsubseccion-logo-large {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    border: 2px solid var(--color-hover-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
+}
+
+.subsubseccion-info-card:hover .subsubseccion-logo-large {
+    border-color: var(--color-accent);
+    transform: scale(1.02);
+}
+
+.subsubseccion-logo-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.subsubseccion-placeholder-large {
+    width: 100px;
+    height: 100px;
+    background: var(--color-hover-primary);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-size: 2.5rem;
+    border: 2px solid var(--color-secondary);
+    transition: var(--transition-normal);
+}
+
+.subsubseccion-info-card:hover .subsubseccion-placeholder-large {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    transform: scale(1.02);
+}
+
+.subsubseccion-info-card h3 {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 0.5rem;
+}
+
+.subsubseccion-info-card .text-muted {
+    color: var(--color-text-secondary) !important;
+    font-size: 1rem;
+}
+
+/* Filters Card */
+.filters-card {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.filters-card .card-body {
+    padding: 1.5rem;
+}
+
+.form-select {
+    background-color: var(--color-primary);
+    border: 2px solid var(--color-hover-primary);
+    color: var(--color-accent);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    font-weight: var(--font-weight-medium);
+}
+
+.form-select:focus {
+    background-color: var(--color-primary);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.15);
+}
+
+.form-select option {
+    background-color: var(--color-primary);
+    color: var(--color-accent);
+}
+
+/* Prendas Container */
+.prendas-container {
+    margin-bottom: 2rem;
+}
+
+.prendas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Prenda Card */
+.prenda-card {
+    background: var(--gradient-secondary);
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    transition: var(--transition-normal);
+    position: relative;
+    box-shadow: var(--shadow-md);
+}
+
+.prenda-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-success), var(--color-info));
+    transform: scaleX(0);
+    transition: transform var(--transition-normal);
+    transform-origin: left;
+}
+
+.prenda-card:hover::before {
+    transform: scaleX(1);
+}
+
+.prenda-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-accent);
+}
+
+/* Prenda Image Container */
+.prenda-image-container {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: white;
+    border-bottom: 2px solid var(--color-hover-primary);
+}
+
+.prenda-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-normal);
+}
+
+.prenda-card:hover .prenda-image {
+    transform: scale(1.05);
+}
+
+.prenda-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--color-hover-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-size: 3rem;
+    transition: var(--transition-normal);
+}
+
+.prenda-card:hover .prenda-placeholder {
+    background: var(--color-accent);
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Prenda Overlay */
+.prenda-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-normal);
+}
+
+.prenda-card:hover .prenda-overlay {
+    opacity: 1;
+}
+
+.prenda-overlay .badge {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius-md);
+}
+
+/* Prenda Content */
+.prenda-content {
+    padding: 1.5rem;
+    position: relative;
+}
+
+.prenda-name {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    min-height: 1.5rem;
+}
+
+.prenda-precio {
+    margin-bottom: 1rem;
+}
+
+.precio {
+    color: var(--color-success);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.25rem;
+}
+
+.prenda-descripcion {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 1.5rem;
+    min-height: 2.4rem;
+}
+
+/* Prenda Actions */
+.prenda-actions {
+    margin-top: auto;
+}
+
+.prenda-actions .btn-group {
+    width: 100%;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.prenda-actions .btn {
+    border: none;
+    padding: 0.75rem 1rem;
+    font-weight: var(--font-weight-medium);
+    transition: var(--transition-normal);
+}
+
+.btn-outline-warning {
+    background: var(--gradient-primary);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+
+.btn-outline-warning:hover {
+    background: var(--color-warning);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.btn-outline-danger {
+    background: var(--gradient-primary);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+}
+
+.btn-outline-danger:hover {
+    background: var(--color-danger);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--color-text-muted);
+    background: var(--gradient-secondary);
+    border: 2px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-state i {
+    font-size: 5rem;
+    margin-bottom: 2rem;
+    color: var(--color-info);
+    opacity: 0.5;
+    transition: var(--transition-normal);
+}
+
+.empty-state:hover i {
+    color: var(--color-accent);
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.empty-state h4 {
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+    font-weight: var(--font-weight-bold);
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    margin-bottom: 2rem;
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+}
+
+/* Paginación */
+.pagination {
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.page-link {
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-hover-primary);
+    color: var(--color-accent);
+    padding: 0.75rem 1rem;
+    margin: 0 0.125rem;
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition-normal);
+}
+
+.page-link:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.page-item.active .page-link {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+}
+
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .prendas-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .prenda-card {
+        margin-bottom: 1rem;
+    }
+    
+    .prenda-image-container {
+        height: 180px;
+    }
+    
+    .prenda-content {
+        padding: 1.25rem;
+    }
+    
+    .subsubseccion-info-card .d-flex {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .subsubseccion-logo-large,
+    .subsubseccion-placeholder-large {
+        align-self: center;
+        width: 80px;
+        height: 80px;
+    }
+    
+    .filters-card .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .filters-card .btn {
+        width: 100%;
+    }
+    
+    .prenda-actions .btn-group {
+        flex-direction: column;
+    }
+    
+    .prenda-actions .btn {
+        border-radius: 0;
+        margin-bottom: 1px;
+    }
+    
+    .prenda-actions .btn:first-child {
+        border-top-left-radius: var(--border-radius-sm);
+        border-top-right-radius: var(--border-radius-sm);
+    }
+    
+    .prenda-actions .btn:last-child {
+        border-bottom-left-radius: var(--border-radius-sm);
+        border-bottom-right-radius: var(--border-radius-sm);
+        margin-bottom: 0;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .prendas-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .subsubseccion-info-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .filters-card .card-body {
+        padding: 1rem;
+    }
+    
+    .prenda-image-container {
+        height: 160px;
+    }
+    
+    .prenda-content {
+        padding: 1rem;
+    }
+    
+    .empty-state {
+        padding: 3rem 1.5rem;
+    }
+    
+    .empty-state i {
+        font-size: 3.5rem;
+    }
+}

@@ -1,0 +1,84 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/subsubseccion/subsubseccion_by_subseccion.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tags"></i>{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2 align-items-center">
+    <a href="{% url 'panel_admin:subsubseccion_create' %}" class="btn btn-admin">
+        <i class="fas fa-plus"></i>Nueva Subsubsección
+    </a>
+</div>
+{% endblock %}
+
+{% block panel_content %}
+{% if secciones %}
+    <div class="secciones-cards-container">
+        {% for seccion in secciones %}
+            <div class="seccion-card">
+                <div class="seccion-header">
+                    {% if seccion.icono %}
+                        <div class="seccion-icono">
+                            <i class="{{ seccion.icono }}"></i>
+                        </div>
+                    {% endif %}
+                    <div class="seccion-info">
+                        <h4 class="seccion-name">{{ seccion.nombre }}</h4>
+                        <div class="seccion-stats">
+                            <span class="badge bg-info">{{ seccion.total_subsecciones }} subsecciones</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subsecciones-grid">
+                    {% for subseccion in seccion.subsecciones.all %}
+                        <a href="{% url 'panel_admin:subsubseccion_list_in_subseccion' subseccion.id %}" 
+                           class="subseccion-card">
+                            {% if subseccion.logo %}
+                                <div class="subseccion-logo-container">
+                                    <img src="{{ subseccion.logo.url }}" alt="{{ subseccion.nombre }}">
+                                </div>
+                            {% else %}
+                                <div class="subseccion-placeholder">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <h5 class="subseccion-name">{{ subseccion.nombre }}</h5>
+                            
+                            <div class="subseccion-stats">
+                                <div class="subseccion-stat">
+                                    <span class="subseccion-stat-number">{{ subseccion.subsubsecciones.count }}</span>
+                                    <span class="subseccion-stat-label">Subsubsecciones</span>
+                                </div>
+                            </div>
+                        </a>
+                    {% empty %}
+                        <div class="empty-subseccion">
+                            <p>No hay subsecciones en esta sección</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state-container">
+        <div class="empty-state">
+            <i class="fas fa-folder fa-4x text-muted mb-4"></i>
+            <h3>No hay secciones</h3>
+            <p class="text-muted">Necesitas crear secciones y subsecciones antes de gestionar subsubsecciones.</p>
+            <a href="{% url 'panel_admin:seccion_create' %}" class="btn btn-admin">
+                <i class="fas fa-plus me-2"></i>Crear Sección
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'panel_admin/dashboard.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 admin-sidebar p-3">
+            <h5 class="text-center mb-4">
+                <i class="fas fa-cog me-2"></i>Panel Admin
+            </h5>
+            
+            <nav class="nav flex-column">
+                <a href="{% url 'panel_admin:dashboard' %}" class="admin-nav-link">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a href="{% url 'panel_admin:temporada_list' %}" class="admin-nav-link">
+                    <i class="fas fa-calendar me-2"></i>Temporadas
+                </a>
+                <a href="{% url 'panel_admin:liga_list' %}" class="admin-nav-link">
+                    <i class="fas fa-trophy me-2"></i>Ligas
+                </a>
+                <a href="{% url 'panel_admin:equipo_list' %}" class="admin-nav-link active">
+                    <i class="fas fa-shield-alt me-2"></i>Equipos
+                </a>
+                <a href="{% url 'panel_admin:equipacion_list' %}" class="admin-nav-link">
+                    <i class="fas fa-tshirt me-2"></i>Equipaciones
+                </a>
+                <hr class="my-3">
+                <a href="{% url 'home:index' %}" class="admin-nav-link">
+                    <i class="fas fa-home me-2"></i>Ver Web
+                </a>
+                <a href="{% url 'panel_admin:logout' %}" class="admin-nav-link text-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                </a>
+            </nav>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="col-md-9 col-lg-10">
+            <div class="p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>
+                        <i class="fas fa-trash me-2 text-danger"></i>Eliminar Equipo
+                    </h2>
+                    <a href="{% url 'panel_admin:equipo_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </a>
+                </div>
+
+                <!-- Confirmación -->
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="card admin-card border-danger">
+                            <div class="card-body text-center">
+                                <i class="fas fa-exclamation-triangle fa-4x text-danger mb-4"></i>
+                                
+                                <h4 class="mb-3">¿Estás seguro?</h4>
+                                
+                                <div class="mb-4">
+                                    {% if equipo.logo %}
+                                        <img src="{{ equipo.logo.url }}" 
+                                             alt="{{ equipo.nombre }}" 
+                                             class="img-thumbnail mb-3" 
+                                             style="max-width: 80px; max-height: 80px;">
+                                    {% endif %}
+                                    <p>
+                                        Estás a punto de eliminar el equipo <strong>"{{ equipo.nombre }}"</strong> 
+                                        de la liga <strong>{{ equipo.liga.nombre }}</strong>.
+                                        Esta acción no se puede deshacer y eliminará también:
+                                    </p>
+                                </div>
+
+                                <div class="alert alert-warning text-start">
+                                    <ul class="mb-0">
+                                        <li>Todas las equipaciones de este equipo</li>
+                                    </ul>
+                                </div>
+
+                                <form method="post" class="mt-4">
+                                    {% csrf_token %}
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                        <a href="{% url 'panel_admin:equipo_list' %}" class="btn btn-outline-secondary me-md-2">
+                                            <i class="fas fa-times me-2"></i>Cancelar
+                                        </a>
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fas fa-trash me-2"></i>Sí, Eliminar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/prenda/prenda_by_subsubseccion.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tshirt"></i>{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2 align-items-center">
+    <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+    <a href="{% url 'panel_admin:prenda_create' %}?subsubseccion={{ subsubseccion.id }}" class="btn btn-admin">
+        <i class="fas fa-plus"></i>Nueva Prenda
+    </a>
+</div>
+{% endblock %}
+
+{% block panel_content %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-container mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}">
+                    <i class="fas fa-tshirt me-1"></i>Prendas
+                </a>
+            </li>
+            <li class="breadcrumb-item active">{{ subseccion.nombre }}</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Información de la subsección -->
+<div class="subseccion-info-card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            {% if subseccion.logo %}
+                <div class="subseccion-logo-large me-3">
+                    <img src="{{ subseccion.logo.url }}" alt="{{ subseccion.nombre }}" class="img-fluid">
+                </div>
+            {% else %}
+                <div class="subseccion-placeholder-large me-3">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+            {% endif %}
+            <div>
+                <h3 class="mb-1">{{ subseccion.nombre }}</h3>
+                <p class="text-muted mb-2">{{ subseccion.seccion.nombre }}</p>
+                <div class="subseccion-meta">
+                    <span class="badge bg-info me-2">{{ subsubsecciones.count }} subsubsecciones</span>
+                    <span class="badge bg-success">{{ total_prendas }} prendas totales</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros de búsqueda -->
+<div class="filters-card">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <input type="text" 
+                       class="form-control" 
+                       name="search" 
+                       value="{{ search }}" 
+                       placeholder="Buscar subsubsección...">
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-admin flex-fill">
+                        <i class="fas fa-search me-2"></i>Buscar
+                    </button>
+                    <a href="{% url 'panel_admin:prenda_list_by_subsubseccion' subseccion.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Grid de subsubsecciones -->
+<div class="subsubsecciones-container">
+    {% if subsubsecciones %}
+        <div class="subsubsecciones-grid">
+            {% for subsubseccion in subsubsecciones %}
+                <div class="subsubseccion-card">
+                    {% if subsubseccion.logo %}
+                        <div class="subsubseccion-logo-container">
+                            <img src="{{ subsubseccion.logo.url }}" alt="{{ subsubseccion.nombre }}">
+                        </div>
+                    {% else %}
+                        <div class="subsubseccion-placeholder">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="subsubseccion-content">
+                        <h5 class="subsubseccion-name">{{ subsubseccion.nombre }}</h5>
+                        
+                        <div class="subsubseccion-stats">
+                            <div class="subsubseccion-stat">
+                                <span class="subsubseccion-stat-number">{{ subsubseccion.total_prendas }}</span>
+                                <span class="subsubseccion-stat-label">Prendas</span>
+                            </div>
+                        </div>
+                        
+                        <div class="subsubseccion-actions">
+                            <a href="{% url 'panel_admin:prenda_list_in_subsubseccion' subsubseccion.id %}" 
+                               class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-eye me-1"></i>Ver Prendas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginación -->
+        {% if subsubsecciones.has_other_pages %}
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if subsubsecciones.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ subsubsecciones.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ subsubsecciones.number }} de {{ subsubsecciones.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if subsubsecciones.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ subsubsecciones.next_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ subsubsecciones.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-tags"></i>
+            <h4>No hay subsubsecciones</h4>
+            <p>Esta subsección no tiene subsubsecciones todavía</p>
+            <a href="{% url 'panel_admin:subsubseccion_create' %}?subseccion={{ subseccion.id }}" class="btn btn-admin">
+                <i class="fas fa-plus me-2"></i>Crear Primera Subsubsección
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% extends 'panel_admin/dashboard.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 admin-sidebar p-3">
+            <h5 class="text-center mb-4">
+                <i class="fas fa-cog me-2"></i>Panel Admin
+            </h5>
+            
+            <nav class="nav flex-column">
+                <a href="{% url 'panel_admin:dashboard' %}" class="admin-nav-link">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <a href="{% url 'panel_admin:temporada_list' %}" class="admin-nav-link">
+                    <i class="fas fa-calendar me-2"></i>Temporadas
+                </a>
+                <a href="{% url 'panel_admin:liga_list' %}" class="admin-nav-link">
+                    <i class="fas fa-trophy me-2"></i>Ligas
+                </a>
+                <a href="{% url 'panel_admin:equipo_list' %}" class="admin-nav-link active">
+                    <i class="fas fa-shield-alt me-2"></i>Equipos
+                </a>
+                <a href="{% url 'panel_admin:equipacion_list' %}" class="admin-nav-link">
+                    <i class="fas fa-tshirt me-2"></i>Equipaciones
+                </a>
+                <hr class="my-3">
+                <a href="{% url 'home:index' %}" class="admin-nav-link">
+                    <i class="fas fa-home me-2"></i>Ver Web
+                </a>
+                <a href="{% url 'panel_admin:logout' %}" class="admin-nav-link text-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                </a>
+            </nav>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="col-md-9 col-lg-10">
+            <div class="p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>
+                        <i class="fas fa-shield-alt me-2"></i>Gestión de Equipos
+                    </h2>
+                    <a href="{% url 'panel_admin:equipo_create' %}" class="btn btn-admin">
+                        <i class="fas fa-plus me-2"></i>Nuevo Equipo
+                    </a>
+                </div>
+
+                <!-- Mensajes -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            <i class="fas fa-check-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Filtros -->
+                <div class="card admin-card mb-4">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-3">
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="search" 
+                                       value="{{ search }}" 
+                                       placeholder="Buscar equipo...">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="temporada" class="form-select">
+                                    <option value="">Todas las temporadas</option>
+                                    {% for temporada in temporadas %}
+                                        <option value="{{ temporada.id }}" 
+                                                {% if selected_temporada == temporada.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ temporada.nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="liga" class="form-select">
+                                    <option value="">Todas las ligas</option>
+                                    {% for liga in ligas %}
+                                        <option value="{{ liga.id }}" 
+                                                {% if selected_liga == liga.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ liga.nombre }} ({{ liga.temporada.nombre }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-admin me-2">
+                                    <i class="fas fa-search me-2"></i>Buscar
+                                </button>
+                                <a href="{% url 'panel_admin:equipo_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Limpiar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tabla de equipos -->
+                <div class="card admin-card">
+                    <div class="card-body">
+                        {% if equipos %}
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Logo</th>
+                                            <th>Nombre</th>
+                                            <th>Liga</th>
+                                            <th>Temporada</th>
+                                            <th>Equipaciones</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for equipo in equipos %}
+                                            <tr>
+                                                <td>
+                                                    {% if equipo.logo %}
+                                                        <img src="{{ equipo.logo.url }}" 
+                                                             alt="{{ equipo.nombre }}" 
+                                                             class="img-thumbnail" 
+                                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                                    {% else %}
+                                                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
+                                                             style="width: 40px; height: 40px;">
+                                                            <i class="fas fa-shield-alt"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <strong>{{ equipo.nombre }}</strong>
+                                                </td>
+                                                <td>{{ equipo.liga.nombre }}</td>
+                                                <td>
+                                                    <span class="badge bg-primary">{{ equipo.liga.temporada.nombre }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success">{{ equipo.total_equipaciones }}</span>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <a href="{% url 'panel_admin:equipo_edit' equipo.pk %}" 
+                                                           class="btn btn-sm btn-outline-warning">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="{% url 'panel_admin:equipo_delete' equipo.pk %}" 
+                                                           class="btn btn-sm btn-outline-danger">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Paginación -->
+                            {% if equipos.has_other_pages %}
+                                <nav class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        {% if equipos.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if selected_temporada %}&temporada={{ selected_temporada }}{% endif %}{% if selected_liga %}&liga={{ selected_liga }}{% endif %}">Primera</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ equipos.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_temporada %}&temporada={{ selected_temporada }}{% endif %}{% if selected_liga %}&liga={{ selected_liga }}{% endif %}">Anterior</a>
+                                            </li>
+                                        {% endif %}
+
+                                        <li class="page-item active">
+                                            <span class="page-link">
+                                                Página {{ equipos.number }} de {{ equipos.paginator.num_pages }}
+                                            </span>
+                                        </li>
+
+                                        {% if equipos.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ equipos.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_temporada %}&temporada={{ selected_temporada }}{% endif %}{% if selected_liga %}&liga={{ selected_liga }}{% endif %}">Siguiente</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ equipos.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if selected_temporada %}&temporada={{ selected_temporada }}{% endif %}{% if selected_liga %}&liga={{ selected_liga }}{% endif %}">Última</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                                <h4>No hay equipos</h4>
+                                <p class="text-muted">Comienza creando tu primer equipo</p>
+                                <a href="{% url 'panel_admin:equipo_create' %}" class="btn btn-admin">
+                                    <i class="fas fa-plus me-2"></i>Crear Equipo
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

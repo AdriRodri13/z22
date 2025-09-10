@@ -25,17 +25,17 @@
                         <a href="{% url 'panel_admin:dashboard' %}" class="admin-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                             <i class="fas fa-tachometer-alt"></i>Dashboard
                         </a>
-                        <a href="{% url 'panel_admin:temporada_list' %}" class="admin-nav-link {% if 'temporada' in request.resolver_match.url_name %}active{% endif %}">
-                            <i class="fas fa-calendar"></i>Temporadas
+                        <a href="{% url 'panel_admin:seccion_list' %}" class="admin-nav-link {% if 'seccion' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-folder"></i>Secciones
                         </a>
-                        <a href="{% url 'panel_admin:liga_list' %}" class="admin-nav-link {% if 'liga' in request.resolver_match.url_name %}active{% endif %}">
-                            <i class="fas fa-trophy"></i>Ligas
+                        <a href="{% url 'panel_admin:subseccion_list' %}" class="admin-nav-link {% if 'subseccion' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-layer-group"></i>Subsecciones
                         </a>
-                        <a href="{% url 'panel_admin:equipo_list' %}" class="admin-nav-link {% if 'equipo' in request.resolver_match.url_name %}active{% endif %}">
-                            <i class="fas fa-shield-alt"></i>Equipos
+                        <a href="{% url 'panel_admin:subsubseccion_list_by_subseccion' %}" class="admin-nav-link {% if 'subsubseccion' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-tags"></i>Subsubsecciones
                         </a>
-                        <a href="{% url 'panel_admin:equipacion_list' %}" class="admin-nav-link {% if 'equipacion' in request.resolver_match.url_name %}active{% endif %}">
-                            <i class="fas fa-tshirt"></i>Equipaciones
+                        <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="admin-nav-link {% if 'prenda' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-tshirt"></i>Prendas
                         </a>
                         
                         <hr class="nav-divider">

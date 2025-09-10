@@ -1,0 +1,183 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}
+{% if action == 'crear' %}
+    Crear Prenda
+{% else %}
+    Editar Prenda
+{% endif %}
+{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/prenda/prenda_form.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-tshirt"></i>{% endblock %}
+{% block content_title %}
+{% if action == 'crear' %}
+    Crear Prenda
+{% else %}
+    Editar Prenda
+{% endif %}
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>Volver
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Por favor, corrige los errores a continuación.
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                <i class="fas fa-tag"></i>{{ form.nombre.label }}
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.subsubseccion.id_for_label }}" class="form-label">
+                                <i class="fas fa-tags"></i>{{ form.subsubseccion.label }}
+                            </label>
+                            {{ form.subsubseccion }}
+                            {% if form.subsubseccion.errors %}
+                                <div class="text-danger">
+                                    {{ form.subsubseccion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.imagen.id_for_label }}" class="form-label">
+                        <i class="fas fa-image"></i>{{ form.imagen.label }}
+                    </label>
+                    
+                    {% if action == 'editar' and prenda.imagen %}
+                        <div class="current-image">
+                            <p>Imagen actual:</p>
+                            <img src="{{ prenda.imagen.url }}" 
+                                 alt="{{ prenda.nombre }}" 
+                                 class="img-thumbnail" 
+                                 style="max-width: 200px; max-height: 200px;">
+                        </div>
+                    {% endif %}
+                    
+                    {{ form.imagen }}
+                    
+                    <div class="image-preview-container mt-3" id="imagen-preview-container" style="display: none;">
+                        <p class="mb-2">Vista previa:</p>
+                        <img id="imagen-preview" class="img-thumbnail" style="max-width: 250px; max-height: 250px;" alt="Vista previa">
+                    </div>
+                    
+                    {% if form.imagen.errors %}
+                        <div class="text-danger">
+                            {{ form.imagen.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">
+                        Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.precio.id_for_label }}" class="form-label">
+                        <i class="fas fa-euro-sign"></i>{{ form.precio.label }}
+                    </label>
+                    {{ form.precio }}
+                    {% if form.precio.errors %}
+                        <div class="text-danger">
+                            {{ form.precio.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+
+                <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                    <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fas fa-save me-2"></i>
+                        {% if action == 'crear' %}
+                            Crear Prenda
+                        {% else %}
+                            Guardar Cambios
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imagenInput = document.getElementById('{{ form.imagen.id_for_label }}');
+    const previewContainer = document.getElementById('imagen-preview-container');
+    const previewImg = document.getElementById('imagen-preview');
+    
+    if (imagenInput) {
+        imagenInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                // Validar tipo de archivo
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Por favor, selecciona un archivo de imagen válido (JPG, PNG, GIF)');
+                    imagenInput.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Validar tamaño (5MB máximo)
+                const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+                if (file.size > maxSize) {
+                    alert('El archivo es demasiado grande. El tamaño máximo es 5MB');
+                    imagenInput.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Crear preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

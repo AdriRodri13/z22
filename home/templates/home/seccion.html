@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ seccion.nombre }} - Subsecciones{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'home/css/seccion.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="subseccion-page">
+    <!-- Main Section -->
+    <section class="main-section">
+        <div class="container">
+            <!-- Botón volver -->
+            <a href="{% url 'home:home' %}" class="btn-volver mb-3" style="display: inline-flex; align-items: center; padding: 0.625rem 1rem; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                <i class="fas fa-arrow-left me-2"></i>
+                <span>Volver al inicio</span>
+            </a>
+            
+            <!-- Title -->
+            <h1 class="page-title">{{ seccion.nombre }}</h1>
+            {% if seccion.descripcion %}
+                <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: 2rem;">{{ seccion.descripcion }}</p>
+            {% endif %}
+            
+            <!-- Search Bar -->
+            <div class="search-container">
+                <form method="get" class="search-form">
+                    <div class="search-input-group">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" 
+                                   name="search" 
+                                   value="{{ search_query }}" 
+                                   placeholder="Buscar..."
+                                   class="search-input"
+                                   autocomplete="off">
+                            {% if search_query %}
+                                <button type="button" class="clear-search" onclick="clearSearch()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Results Section -->
+            {% if search_query %}
+                <div class="search-results-header">
+                    <h2>Resultados de búsqueda</h2>
+                    <p>{{ subsecciones.count }} resultado{{ subsecciones.count|pluralize:"s" }} para <strong>"{{ search_query }}"</strong></p>
+                </div>
+            {% endif %}
+            
+            {% if subsecciones %}
+                <div class="subsecciones-grid" data-animation="fade-up">
+                    {% for subseccion in subsecciones %}
+                        <article class="subseccion-card" data-subseccion="{{ subseccion.id }}">
+                            <a href="{% url 'home:subseccion_detail' subseccion.id %}" class="card-link">
+                                <!-- Card Header -->
+                                <div class="card-header">
+                                    <div class="card-icon">
+                                        {% if subseccion.logo %}
+                                            <img src="{{ subseccion.logo.url }}" 
+                                                 alt="{{ subseccion.nombre }}" 
+                                                 class="subseccion-logo"
+                                                 loading="lazy">
+                                        {% else %}
+                                            <div class="logo-placeholder">
+                                                <i class="fas fa-layer-group"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="card-badge">
+                                        <span>{{ subseccion.subsubsecciones.count }}</span>
+                                        <small>elemento{{ subseccion.subsubsecciones.count|pluralize:"s" }}</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <h3 class="card-title">{{ subseccion.nombre }}</h3>
+                                    {% if subseccion.descripcion %}
+                                        <p class="card-description">{{ subseccion.descripcion|truncatewords:12 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Card Footer -->
+                                <div class="card-footer">
+                                    <span class="explore-btn">
+                                        <span>Explorar</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                </div>
+                            </a>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-content">
+                        {% if search_query %}
+                            <div class="empty-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>No se encontraron resultados</h3>
+                            <p>No hay subsecciones que coincidan con tu búsqueda "<strong>{{ search_query }}</strong>"</p>
+                            <div class="empty-actions">
+                                <button onclick="clearSearch()" class="btn-primary">
+                                    <i class="fas fa-times"></i>
+                                    Limpiar búsqueda
+                                </button>
+                                <a href="{% url 'home:home' %}" class="btn-secondary">
+                                    <i class="fas fa-home"></i>
+                                    Volver al inicio
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="empty-icon">
+                                <i class="fas fa-inbox"></i>
+                            </div>
+                            <h3>No hay subsecciones disponibles</h3>
+                            <p>Esta sección no tiene subsecciones todavía.</p>
+                            <div class="empty-actions">
+                                <a href="{% url 'home:home' %}" class="btn-primary">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Volver al inicio
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'home/js/seccion.js' %}"></script>
+{% endblock %}

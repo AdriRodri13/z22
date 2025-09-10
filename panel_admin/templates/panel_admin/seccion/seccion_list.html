@@ -1,0 +1,157 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/seccion/seccion_list.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-folder"></i>{% endblock %}
+{% block content_title %}Gestión de Secciones{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:seccion_create' %}" class="btn btn-admin">
+    <i class="fas fa-plus me-2"></i>Nueva Sección
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<!-- Filtros de búsqueda -->
+<div class="filters-card">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <input type="text" 
+                       class="form-control" 
+                       name="search" 
+                       value="{{ search }}" 
+                       placeholder="Buscar sección...">
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-admin flex-fill">
+                        <i class="fas fa-search me-2"></i>Buscar
+                    </button>
+                    <a href="{% url 'panel_admin:seccion_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de secciones -->
+<div class="table-container">
+    {% if secciones %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Icono</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Subsecciones</th>
+                        <th>Prendas</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for seccion in secciones %}
+                        <tr>
+                            <td>
+                                {% if seccion.icono %}
+                                    <div class="icon-container">
+                                        <i class="{{ seccion.icono }}"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="icon-placeholder">
+                                        <i class="fas fa-folder"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ seccion.nombre }}</strong>
+                            </td>
+                            <td>
+                                <span class="text-white">{{ seccion.descripcion|truncatechars:50 }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ seccion.total_subsecciones }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">{{ seccion.total_prendas }}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{% url 'panel_admin:seccion_edit' seccion.pk %}" 
+                                       class="btn btn-sm btn-outline-warning"
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'panel_admin:seccion_delete' seccion.pk %}" 
+                                       class="btn btn-sm btn-outline-danger"
+                                       title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if secciones.has_other_pages %}
+            <div class="d-flex justify-content-center">
+                <nav>
+                    <ul class="pagination">
+                        {% if secciones.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ secciones.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ secciones.number }} de {{ secciones.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if secciones.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ secciones.next_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ secciones.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-folder"></i>
+            <h4>No hay secciones</h4>
+            <p>Comienza creando tu primera sección para organizar tu catálogo</p>
+            <a href="{% url 'panel_admin:seccion_create' %}" class="btn btn-admin">
+                <i class="fas fa-plus me-2"></i>Crear Primera Sección
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

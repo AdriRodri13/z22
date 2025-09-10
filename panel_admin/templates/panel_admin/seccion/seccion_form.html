@@ -1,0 +1,106 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}
+{% if action == 'crear' %}
+    Crear Sección
+{% else %}
+    Editar Sección
+{% endif %}
+{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/seccion/seccion_form.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-folder"></i>{% endblock %}
+{% block content_title %}
+{% if action == 'crear' %}
+    Crear Sección
+{% else %}
+    Editar Sección
+{% endif %}
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:seccion_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>Volver
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Por favor, corrige los errores a continuación.
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                <i class="fas fa-folder"></i>{{ form.nombre.label }}
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.icono.id_for_label }}" class="form-label">
+                        <i class="fas fa-icons"></i>{{ form.icono.label }}
+                    </label>
+                    {{ form.icono }}
+                    {% if form.icono.errors %}
+                        <div class="text-danger">
+                            {{ form.icono.errors.0 }}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">
+                        Ejemplos: fas fa-tshirt, fas fa-futbol, fas fa-trophy, etc.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                        <i class="fas fa-align-left"></i>{{ form.descripcion.label }}
+                    </label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <div class="text-danger">
+                            {{ form.descripcion.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                    <a href="{% url 'panel_admin:seccion_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-admin">
+                        <i class="fas fa-save me-2"></i>
+                        {% if action == 'crear' %}
+                            Crear Sección
+                        {% else %}
+                            Guardar Cambios
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

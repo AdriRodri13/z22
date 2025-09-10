@@ -1,0 +1,63 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}Eliminar Subsubsección{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/subsubseccion/subsubseccion_delete.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-trash text-danger"></i>{% endblock %}
+{% block content_title %}Eliminar Subsubsección{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:subsubseccion_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>Volver
+</a>
+{% endblock %}
+
+{% block panel_content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <div class="card-body">
+            <i class="fas fa-exclamation-triangle fa-4x warning-icon"></i>
+            
+            <h4 class="delete-title">¿Estás seguro?</h4>
+            
+            <div class="subsubseccion-info">
+                {% if subsubseccion.logo %}
+                    <img src="{{ subsubseccion.logo.url }}" 
+                         alt="{{ subsubseccion.nombre }}" 
+                         class="subsubseccion-logo">
+                {% endif %}
+                <p class="delete-message">
+                    Estás a punto de eliminar la subsubsección <strong>"{{ subsubseccion.nombre }}"</strong> 
+                    de <strong>{{ subsubseccion.subseccion.nombre }}</strong>.
+                </p>
+            </div>
+
+            <p class="delete-message">
+                Esta acción no se puede deshacer y eliminará también:
+            </p>
+
+            <div class="alert alert-warning">
+                <ul>
+                    <li>Todas las prendas de esta subsubsección</li>
+                </ul>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-actions">
+                    <a href="{% url 'panel_admin:subsubseccion_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Sí, Eliminar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
