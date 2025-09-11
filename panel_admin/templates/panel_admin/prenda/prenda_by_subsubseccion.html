@@ -15,26 +15,10 @@
     <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left me-2"></i>Volver
     </a>
-    <a href="{% url 'panel_admin:prenda_create' %}?subsubseccion={{ subsubseccion.id }}" class="btn btn-admin">
-        <i class="fas fa-plus"></i>Nueva Prenda
-    </a>
 </div>
 {% endblock %}
 
 {% block panel_content %}
-<!-- Breadcrumb -->
-<div class="breadcrumb-container mb-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}">
-                    <i class="fas fa-tshirt me-1"></i>Prendas
-                </a>
-            </li>
-            <li class="breadcrumb-item active">{{ subseccion.nombre }}</li>
-        </ol>
-    </nav>
-</div>
 
 <!-- Información de la subsección -->
 <div class="subseccion-info-card mb-4">
@@ -61,28 +45,22 @@
     </div>
 </div>
 
-<!-- Filtros de búsqueda -->
+<!-- Filtro de búsqueda en tiempo real -->
 <div class="filters-card">
     <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-8">
-                <input type="text" 
-                       class="form-control" 
-                       name="search" 
-                       value="{{ search }}" 
-                       placeholder="Buscar subsubsección...">
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-admin flex-fill">
-                        <i class="fas fa-search me-2"></i>Buscar
-                    </button>
-                    <a href="{% url 'panel_admin:prenda_list_by_subsubseccion' subseccion.id %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i>
-                    </a>
+        <div class="row">
+            <div class="col-12">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="liveSearchSubsubsecciones"
+                           class="form-control text-white live-search" 
+                           placeholder="Buscar subsubsección en tiempo real..."
+                           autocomplete="off">
+                    <div id="searchResultsSubsubsecciones" class="search-results-count"></div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -91,7 +69,9 @@
     {% if subsubsecciones %}
         <div class="subsubsecciones-grid">
             {% for subsubseccion in subsubsecciones %}
-                <div class="subsubseccion-card">
+                <div class="subsubseccion-card" 
+                     data-name="{{ subsubseccion.nombre|lower }}" 
+                     data-description="{{ subsubseccion.descripcion|lower|default:'' }}">
                     {% if subsubseccion.logo %}
                         <div class="subsubseccion-logo-container">
                             <img src="{{ subsubseccion.logo.url }}" alt="{{ subsubseccion.nombre }}">
@@ -174,4 +154,82 @@
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('liveSearchSubsubsecciones');
+    const searchResults = document.getElementById('searchResultsSubsubsecciones');
+    const subsubseccionCards = document.querySelectorAll('.subsubseccion-card');
+    
+    let totalSubsubsecciones = subsubseccionCards.length;
+    
+    function updateResultsCount(visibleCount) {
+        if (searchInput.value.trim() === '') {
+            searchResults.textContent = `${totalSubsubsecciones} subsubsecciones`;
+        } else {
+            searchResults.textContent = `${visibleCount} de ${totalSubsubsecciones}`;
+        }
+    }
+    
+    function liveFilterSubsubsecciones() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        subsubseccionCards.forEach(card => {
+            const nombre = card.getAttribute('data-name');
+            const description = card.getAttribute('data-description') || '';
+            
+            const matchesSearch = nombre.includes(searchTerm) || description.includes(searchTerm);
+            
+            if (matchesSearch || searchTerm === '') {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        updateResultsCount(visibleCount);
+        
+        // Mostrar mensaje si no hay resultados
+        showNoResultsMessage(visibleCount === 0 && searchTerm !== '');
+    }
+    
+    function showNoResultsMessage(show) {
+        let noResultsMsg = document.querySelector('.no-results-message');
+        
+        if (show && !noResultsMsg) {
+            const container = document.querySelector('.subsubsecciones-grid');
+            if (container) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.className = 'no-results-message col-12 text-center py-4';
+                noResultsMsg.innerHTML = `
+                    <i class="fas fa-search text-muted mb-2" style="font-size: 2rem;"></i>
+                    <p class="text-muted mb-0">No se encontraron subsubsecciones que coincidan con la búsqueda</p>
+                `;
+                container.appendChild(noResultsMsg);
+            }
+        } else if (!show && noResultsMsg) {
+            noResultsMsg.remove();
+        }
+    }
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchInput.debounceTimer);
+        searchInput.debounceTimer = setTimeout(liveFilterSubsubsecciones, 200);
+    });
+    
+    searchInput.addEventListener('focus', function() {
+        this.parentElement.classList.add('search-focused');
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        this.parentElement.classList.remove('search-focused');
+    });
+    
+    updateResultsCount(totalSubsubsecciones);
+});
+</script>
 {% endblock %}

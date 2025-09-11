@@ -10,13 +10,6 @@
 {% block content_icon %}<i class="fas fa-tshirt"></i>{% endblock %}
 {% block content_title %}{{ title }}{% endblock %}
 
-{% block header_actions %}
-<div class="d-flex gap-2 align-items-center">
-    <a href="{% url 'panel_admin:prenda_create' %}" class="btn btn-admin">
-        <i class="fas fa-plus"></i>Nueva Prenda
-    </a>
-</div>
-{% endblock %}
 
 {% block panel_content %}
 {% if secciones %}

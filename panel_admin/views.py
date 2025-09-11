@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, F
+from django.db.models import Q, Count, F, Prefetch
 from django.urls import reverse_lazy
 from home.models import Seccion, Subseccion, Subsubseccion, Prenda
 from .forms import SeccionForm, SubseccionForm, SubsubseccionForm, PrendaForm, PrendaMultipleUploadForm
@@ -175,37 +175,25 @@ def seccion_delete(request, pk):
 @login_required
 @user_passes_test(is_staff_user)
 def subseccion_list(request):
-    subsecciones = Subseccion.objects.select_related('seccion').annotate(
-        total_subsubsecciones=Count('subsubsecciones')
-    ).order_by('seccion__nombre', 'nombre')
-    
-    # Filtros
-    search = request.GET.get('search', '')
-    seccion_id = request.GET.get('seccion', '')
-    
-    if search:
-        subsecciones = subsecciones.filter(
-            Q(nombre__icontains=search) |
-            Q(seccion__nombre__icontains=search) |
-            Q(descripcion__icontains=search)
+    # Obtener todas las secciones con sus subsecciones agrupadas
+    secciones_con_subsecciones = Seccion.objects.prefetch_related(
+        Prefetch(
+            'subsecciones', 
+            queryset=Subseccion.objects.annotate(
+                total_subsubsecciones=Count('subsubsecciones')
+            ).order_by('nombre')
         )
+    ).annotate(
+        total_subsecciones=Count('subsecciones', distinct=True)
+    ).order_by('nombre')
     
-    if seccion_id:
-        subsecciones = subsecciones.filter(seccion_id=seccion_id)
-    
-    # Paginación
-    paginator = Paginator(subsecciones, 10)
-    page = request.GET.get('page')
-    subsecciones = paginator.get_page(page)
-    
-    secciones = Seccion.objects.all().order_by('nombre')
+    # Filtro de búsqueda (para JavaScript)
+    search = request.GET.get('search', '')
     
     context = {
         'title': 'Gestión de Subsecciones',
-        'subsecciones': subsecciones,
-        'secciones': secciones,
+        'secciones_con_subsecciones': secciones_con_subsecciones,
         'search': search,
-        'selected_seccion': seccion_id,
     }
     return render(request, 'panel_admin/subseccion/subseccion_list.html', context)
 
@@ -213,6 +201,16 @@ def subseccion_list(request):
 @login_required
 @user_passes_test(is_staff_user)
 def subseccion_create(request):
+    # Obtener ID de sección desde parámetros GET
+    seccion_id = request.GET.get('seccion_id')
+    seccion_preseleccionada = None
+    
+    if seccion_id:
+        try:
+            seccion_preseleccionada = Seccion.objects.get(pk=seccion_id)
+        except Seccion.DoesNotExist:
+            seccion_preseleccionada = None
+    
     if request.method == 'POST':
         form = SubseccionForm(request.POST, request.FILES)
         if form.is_valid():
@@ -220,12 +218,17 @@ def subseccion_create(request):
             messages.success(request, 'Subsección creada exitosamente.')
             return redirect('panel_admin:subseccion_list')
     else:
-        form = SubseccionForm()
+        # Preseleccionar la sección si se pasa como parámetro
+        initial_data = {}
+        if seccion_preseleccionada:
+            initial_data['seccion'] = seccion_preseleccionada
+        form = SubseccionForm(initial=initial_data)
     
     context = {
         'title': 'Crear Subsección',
         'form': form,
-        'action': 'crear'
+        'action': 'crear',
+        'seccion_preseleccionada': seccion_preseleccionada
     }
     return render(request, 'panel_admin/subseccion/subseccion_form.html', context)
 
@@ -274,63 +277,96 @@ def subseccion_delete(request, pk):
 @login_required
 @user_passes_test(is_staff_user)
 def subsubseccion_list(request):
-    subsubsecciones = Subsubseccion.objects.select_related('subseccion', 'subseccion__seccion').annotate(
-        total_prendas=Count('prendas')
-    ).order_by('subseccion__seccion__nombre', 'subseccion__nombre', 'nombre')
+    # Obtener parámetro de subsección seleccionada
+    selected_subseccion_id = request.GET.get('subseccion_id')
     
-    # Filtros
-    search = request.GET.get('search', '')
-    subseccion_id = request.GET.get('subseccion', '')
-    seccion_id = request.GET.get('seccion', '')
+    if selected_subseccion_id:
+        # PASO 2: Mostrar subsubsecciones de la subsección seleccionada
+        try:
+            subseccion_seleccionada = Subseccion.objects.select_related('seccion').get(pk=selected_subseccion_id)
+        except Subseccion.DoesNotExist:
+            messages.error(request, 'Subsección no encontrada.')
+            return redirect('panel_admin:subsubseccion_list')
+        
+        # Obtener subsubsecciones de esta subsección
+        subsubsecciones = Subsubseccion.objects.filter(subseccion=subseccion_seleccionada).annotate(
+            total_prendas=Count('prendas')
+        ).order_by('nombre')
+        
+        # Filtro de búsqueda para subsubsecciones
+        search_subsubsecciones = request.GET.get('search_subsubsecciones', '')
+        if search_subsubsecciones:
+            subsubsecciones = subsubsecciones.filter(
+                Q(nombre__icontains=search_subsubsecciones) |
+                Q(descripcion__icontains=search_subsubsecciones)
+            )
+        
+        context = {
+            'title': f'Subsubsecciones de {subseccion_seleccionada.nombre}',
+            'subseccion_seleccionada': subseccion_seleccionada,
+            'subsubsecciones': subsubsecciones,
+            'search_subsubsecciones': search_subsubsecciones,
+            'step': 2,  # Indicador del paso actual
+        }
+    else:
+        # PASO 1: Mostrar subsecciones agrupadas por sección para seleccionar
+        secciones_con_subsecciones = Seccion.objects.prefetch_related(
+            Prefetch(
+                'subsecciones', 
+                queryset=Subseccion.objects.annotate(
+                    total_subsubsecciones=Count('subsubsecciones')
+                ).order_by('nombre')
+            )
+        ).annotate(
+            total_subsecciones=Count('subsecciones', distinct=True)
+        ).order_by('nombre')
+        
+        # Filtro de búsqueda para subsecciones
+        search_subsecciones = request.GET.get('search_subsecciones', '')
+        
+        context = {
+            'title': 'Seleccionar Subsección',
+            'secciones_con_subsecciones': secciones_con_subsecciones,
+            'search_subsecciones': search_subsecciones,
+            'step': 1,  # Indicador del paso actual
+        }
     
-    if search:
-        subsubsecciones = subsubsecciones.filter(
-            Q(nombre__icontains=search) |
-            Q(subseccion__nombre__icontains=search) |
-            Q(descripcion__icontains=search)
-        )
-    
-    if subseccion_id:
-        subsubsecciones = subsubsecciones.filter(subseccion_id=subseccion_id)
-    elif seccion_id:
-        subsubsecciones = subsubsecciones.filter(subseccion__seccion_id=seccion_id)
-    
-    # Paginación
-    paginator = Paginator(subsubsecciones, 15)
-    page = request.GET.get('page')
-    subsubsecciones = paginator.get_page(page)
-    
-    secciones = Seccion.objects.all().order_by('nombre')
-    subsecciones = Subseccion.objects.select_related('seccion').all().order_by('seccion__nombre', 'nombre')
-    
-    context = {
-        'title': 'Gestión de Subsubsecciones',
-        'subsubsecciones': subsubsecciones,
-        'secciones': secciones,
-        'subsecciones': subsecciones,
-        'search': search,
-        'selected_subseccion': subseccion_id,
-        'selected_seccion': seccion_id,
-    }
     return render(request, 'panel_admin/subsubseccion/subsubseccion_list.html', context)
 
 
 @login_required
 @user_passes_test(is_staff_user)
 def subsubseccion_create(request):
+    # Obtener ID de subsección desde parámetros GET
+    subseccion_id = request.GET.get('subseccion_id')
+    subseccion_preseleccionada = None
+    
+    if subseccion_id:
+        try:
+            subseccion_preseleccionada = Subseccion.objects.get(pk=subseccion_id)
+        except Subseccion.DoesNotExist:
+            subseccion_preseleccionada = None
+    
     if request.method == 'POST':
         form = SubsubseccionForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            subsubseccion = form.save()
             messages.success(request, 'Subsubsección creada exitosamente.')
-            return redirect('panel_admin:subsubseccion_list')
+            # Redirigir de vuelta a la lista de subsubsecciones de esa subsección
+            from django.urls import reverse
+            return redirect(reverse('panel_admin:subsubseccion_list') + f"?subseccion_id={subsubseccion.subseccion.id}")
     else:
-        form = SubsubseccionForm()
+        # Preseleccionar la subsección si se pasa como parámetro
+        initial_data = {}
+        if subseccion_preseleccionada:
+            initial_data['subseccion'] = subseccion_preseleccionada
+        form = SubsubseccionForm(initial=initial_data)
     
     context = {
         'title': 'Crear Subsubsección',
         'form': form,
-        'action': 'crear'
+        'action': 'crear',
+        'subseccion_preseleccionada': subseccion_preseleccionada
     }
     return render(request, 'panel_admin/subsubseccion/subsubseccion_form.html', context)
 

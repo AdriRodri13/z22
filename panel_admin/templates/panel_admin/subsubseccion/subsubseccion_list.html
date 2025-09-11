@@ -8,172 +8,403 @@
 {% endblock %}
 
 {% block content_icon %}<i class="fas fa-tags"></i>{% endblock %}
-{% block content_title %}Gestión de Subsubsecciones{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'panel_admin:subsubseccion_create' %}" class="btn btn-admin">
-    <i class="fas fa-plus me-2"></i>Nueva Subsubsección
-</a>
+{% if step == 2 %}
+    <!-- Solo mostrar el botón de volver en el paso 2 -->
+    <a href="{% url 'panel_admin:subsubseccion_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver a Subsecciones
+    </a>
+{% endif %}
 {% endblock %}
 
 {% block panel_content %}
-<!-- Filtros de búsqueda -->
-<div class="filters-card">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-3">
-                <input type="text" 
-                       class="form-control" 
-                       name="search" 
-                       value="{{ search }}" 
-                       placeholder="Buscar subsubsección...">
-            </div>
-            <div class="col-md-3">
-                <select name="seccion" class="form-select">
-                    <option value="">Todas las secciones</option>
-                    {% for seccion in secciones %}
-                        <option value="{{ seccion.id }}" 
-                                {% if selected_seccion == seccion.id|stringformat:"s" %}selected{% endif %}>
-                            {{ seccion.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select name="subseccion" class="form-select">
-                    <option value="">Todas las subsecciones</option>
-                    {% for subseccion in subsecciones %}
-                        <option value="{{ subseccion.id }}" 
-                                {% if selected_subseccion == subseccion.id|stringformat:"s" %}selected{% endif %}>
-                            {{ subseccion.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-admin flex-fill">
-                        <i class="fas fa-search me-2"></i>Buscar
-                    </button>
-                    <a href="{% url 'panel_admin:subsubseccion_list' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i>
-                    </a>
+
+{% if step == 1 %}
+    <!-- PASO 1: Seleccionar Subsección -->
+    
+    <!-- Filtro de búsqueda para subsecciones -->
+    <div class="filters-card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" 
+                               id="liveSearchSubsecciones"
+                               class="form-control text-white live-search" 
+                               placeholder="Buscar subsección en tiempo real..."
+                               autocomplete="off">
+                        <div id="searchResultsSubsecciones" class="search-results-count"></div>
+                    </div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
-</div>
 
-<!-- Tabla de subsubsecciones -->
-<div class="table-container">
-    {% if subsubsecciones %}
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Logo</th>
-                        <th>Nombre</th>
-                        <th>Subsección</th>
-                        <th>Sección</th>
-                        <th>Prendas</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for subsubseccion in subsubsecciones %}
-                        <tr>
-                            <td>
-                                {% if subsubseccion.logo %}
-                                    <div class="logo-container">
-                                        <img src="{{ subsubseccion.logo.url }}" alt="{{ subsubseccion.nombre }}">
+    <!-- Subsecciones agrupadas por sección para seleccionar -->
+    <div class="step-info-card">
+        <div class="card-body text-center">
+            <i class="fas fa-mouse-pointer mb-3" style="font-size: 2rem; color: var(--color-info);"></i>
+            <h4>Paso 1: Selecciona una Subsección</h4>
+            <p class="text-muted">Haz clic en cualquier subsección para ver y gestionar sus subsubsecciones</p>
+        </div>
+    </div>
+
+    <div class="sections-container">
+        {% if secciones_con_subsecciones %}
+            {% for seccion in secciones_con_subsecciones %}
+                <div class="section-group" data-section-name="{{ seccion.nombre|lower }}">
+                    <!-- Encabezado de sección -->
+                    <div class="section-header">
+                        <div class="section-info">
+                            <div class="section-icon">
+                                {% if seccion.icono %}
+                                    <i class="{{ seccion.icono }}"></i>
+                                {% else %}
+                                    <i class="fas fa-folder"></i>
+                                {% endif %}
+                            </div>
+                            <div class="section-details">
+                                <h3 class="section-title">{{ seccion.nombre }}</h3>
+                                <p class="section-description">{{ seccion.descripcion|default:"Sin descripción" }}</p>
+                            </div>
+                        </div>
+                        <div class="section-stats">
+                            <span class="badge bg-info">{{ seccion.total_subsecciones }} subsección{{ seccion.total_subsecciones|pluralize:"es" }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Subsecciones de esta sección (clickeables) -->
+                    {% if seccion.subsecciones.all %}
+                        <div class="subsections-grid">
+                            {% for subseccion in seccion.subsecciones.all %}
+                                <a href="?subseccion_id={{ subseccion.id }}" class="subsection-card clickable" 
+                                   data-name="{{ subseccion.nombre|lower }}" 
+                                   data-section="{{ seccion.nombre|lower }}" 
+                                   data-description="{{ subseccion.descripcion|lower }}">
+                                    <div class="card-header">
+                                        <div class="subsection-logo">
+                                            {% if subseccion.logo %}
+                                                <img src="{{ subseccion.logo.url }}" alt="{{ subseccion.nombre }}">
+                                            {% else %}
+                                                <div class="logo-placeholder">
+                                                    <i class="fas fa-layer-group"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="click-indicator">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </div>
                                     </div>
+                                    <div class="card-body">
+                                        <h4 class="subsection-name">{{ subseccion.nombre }}</h4>
+                                        <p class="subsection-description">{{ subseccion.descripcion|default:"Sin descripción" }}</p>
+                                        <div class="subsection-stats">
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-tags me-1"></i>
+                                                {{ subseccion.total_subsubsecciones }} subsubsección{{ subseccion.total_subsubsecciones|pluralize:"es" }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-subsections">
+                            <p class="text-muted text-center py-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Esta sección no tiene subsecciones aún
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-layer-group"></i>
+                <h4>No hay secciones creadas</h4>
+                <p>Primero crea algunas secciones y subsecciones antes de gestionar subsubsecciones</p>
+                <a href="{% url 'panel_admin:seccion_create' %}" class="btn btn-admin">
+                    <i class="fas fa-folder me-2"></i>Crear Primera Sección
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+{% elif step == 2 %}
+    <!-- PASO 2: Ver y gestionar subsubsecciones de la subsección seleccionada -->
+    
+    <!-- Información de la subsección seleccionada -->
+    <div class="selected-subsection-card">
+        <div class="card-header">
+            <div class="subsection-info">
+                <div class="subsection-logo-large">
+                    {% if subseccion_seleccionada.logo %}
+                        <img src="{{ subseccion_seleccionada.logo.url }}" alt="{{ subseccion_seleccionada.nombre }}">
+                    {% else %}
+                        <div class="logo-placeholder">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="subsection-details">
+                    <div class="breadcrumb-info">
+                        <span class="section-badge">{{ subseccion_seleccionada.seccion.nombre }}</span>
+                        <i class="fas fa-chevron-right mx-2"></i>
+                        <strong>{{ subseccion_seleccionada.nombre }}</strong>
+                    </div>
+                    <h2>Subsubsecciones de {{ subseccion_seleccionada.nombre }}</h2>
+                    <p class="description">{{ subseccion_seleccionada.descripcion|default:"Sin descripción" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro de búsqueda para subsubsecciones -->
+    <div class="filters-card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" 
+                               id="liveSearchSubsubsecciones"
+                               class="form-control text-white live-search" 
+                               placeholder="Buscar subsubsección en tiempo real..."
+                               autocomplete="off">
+                        <div id="searchResultsSubsubsecciones" class="search-results-count"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de subsubsecciones -->
+    <div class="subsubsecciones-container">
+        {% if subsubsecciones %}
+            <div class="subsubsecciones-grid">
+                {% for subsubseccion in subsubsecciones %}
+                    <div class="subsubseccion-card" 
+                         data-name="{{ subsubseccion.nombre|lower }}" 
+                         data-description="{{ subsubseccion.descripcion|lower }}">
+                        <div class="card-header">
+                            <div class="subsubseccion-logo">
+                                {% if subsubseccion.logo %}
+                                    <img src="{{ subsubseccion.logo.url }}" alt="{{ subsubseccion.nombre }}">
                                 {% else %}
                                     <div class="logo-placeholder">
                                         <i class="fas fa-tags"></i>
                                     </div>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <strong>{{ subsubseccion.nombre }}</strong>
-                            </td>
-                            <td>
-                                <span class="badge bg-info">{{ subsubseccion.subseccion.nombre }}</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-primary">{{ subsubseccion.subseccion.seccion.nombre }}</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-success">{{ subsubseccion.total_prendas }}</span>
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group">
-                                    <a href="{% url 'panel_admin:subsubseccion_edit' subsubseccion.pk %}" 
-                                       class="btn btn-sm btn-outline-warning"
-                                       title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{% url 'panel_admin:subsubseccion_delete' subsubseccion.pk %}" 
-                                       class="btn btn-sm btn-outline-danger"
-                                       title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                            </div>
+                            <div class="subsubseccion-actions">
+                                <a href="{% url 'panel_admin:subsubseccion_edit' subsubseccion.pk %}" 
+                                   class="btn btn-sm btn-outline-warning"
+                                   title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'panel_admin:subsubseccion_delete' subsubseccion.pk %}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="subsubseccion-name">{{ subsubseccion.nombre }}</h4>
+                            <p class="subsubseccion-description">{{ subsubseccion.descripcion|default:"Sin descripción" }}</p>
+                            <div class="subsubseccion-stats">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-tshirt me-1"></i>
+                                    {{ subsubseccion.total_prendas }} prenda{{ subsubseccion.total_prendas|pluralize:"s" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
 
-        <!-- Paginación -->
-        {% if subsubsecciones.has_other_pages %}
-            <div class="d-flex justify-content-center">
-                <nav>
-                    <ul class="pagination">
-                        {% if subsubsecciones.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}{% if selected_subseccion %}&subseccion={{ selected_subseccion }}{% endif %}">
-                                    <i class="fas fa-angle-double-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ subsubsecciones.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}{% if selected_subseccion %}&subseccion={{ selected_subseccion }}{% endif %}">
-                                    <i class="fas fa-angle-left"></i>
-                                </a>
-                            </li>
-                        {% endif %}
+            <!-- Botón para añadir nueva subsubsección (solo aparece aquí) -->
+            <div class="add-subsubseccion-container">
+                <a href="{% url 'panel_admin:subsubseccion_create' %}?subseccion_id={{ subseccion_seleccionada.id }}" 
+                   class="btn btn-admin btn-add-subsubseccion">
+                    <i class="fas fa-plus me-2"></i>
+                    Añadir Subsubsección a {{ subseccion_seleccionada.nombre }}
+                </a>
+            </div>
 
-                        <li class="page-item active">
-                            <span class="page-link">
-                                {{ subsubsecciones.number }} de {{ subsubsecciones.paginator.num_pages }}
-                            </span>
-                        </li>
-
-                        {% if subsubsecciones.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ subsubsecciones.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}{% if selected_subseccion %}&subseccion={{ selected_subseccion }}{% endif %}">
-                                    <i class="fas fa-angle-right"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ subsubsecciones.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}{% if selected_subseccion %}&subseccion={{ selected_subseccion }}{% endif %}">
-                                    <i class="fas fa-angle-double-right"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-tags"></i>
+                <h4>No hay subsubsecciones</h4>
+                <p>Esta subsección no tiene subsubsecciones aún. ¡Crea la primera!</p>
+                <a href="{% url 'panel_admin:subsubseccion_create' %}?subseccion_id={{ subseccion_seleccionada.id }}" class="btn btn-admin">
+                    <i class="fas fa-plus me-2"></i>Crear Primera Subsubsección
+                </a>
             </div>
         {% endif %}
-    {% else %}
-        <div class="empty-state">
-            <i class="fas fa-tags"></i>
-            <h4>No hay subsubsecciones</h4>
-            <p>Comienza creando tu primera subsubsección para organizar las prendas</p>
-            <a href="{% url 'panel_admin:subsubseccion_create' %}" class="btn btn-admin">
-                <i class="fas fa-plus me-2"></i>Crear Primera Subsubsección
-            </a>
-        </div>
-    {% endif %}
-</div>
+    </div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const step = {{ step }};
+    
+    if (step === 1) {
+        // PASO 1: Búsqueda en subsecciones
+        const searchInput = document.getElementById('liveSearchSubsecciones');
+        const searchResults = document.getElementById('searchResultsSubsecciones');
+        const sectionGroups = document.querySelectorAll('.section-group');
+        const subsectionCards = document.querySelectorAll('.subsection-card');
+        
+        let totalSubsecciones = subsectionCards.length;
+        let totalSecciones = sectionGroups.length;
+        
+        function updateResultsCount(visibleSubsecciones, visibleSecciones) {
+            if (searchInput.value.trim() === '') {
+                searchResults.textContent = `${totalSubsecciones} subsecciones en ${totalSecciones} secciones`;
+            } else {
+                searchResults.textContent = `${visibleSubsecciones} subsecciones en ${visibleSecciones} secciones`;
+            }
+        }
+        
+        function liveFilterSubsecciones() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let visibleSubsecciones = 0;
+            let visibleSecciones = 0;
+            
+            sectionGroups.forEach(sectionGroup => {
+                const sectionName = sectionGroup.getAttribute('data-section-name');
+                const subsectionsInSection = sectionGroup.querySelectorAll('.subsection-card');
+                let hasVisibleSubsections = false;
+                
+                const sectionMatches = sectionName.includes(searchTerm);
+                
+                subsectionsInSection.forEach(card => {
+                    const nombre = card.getAttribute('data-name');
+                    const section = card.getAttribute('data-section');
+                    const description = card.getAttribute('data-description') || '';
+                    
+                    const matchesSearch = nombre.includes(searchTerm) || 
+                                        section.includes(searchTerm) || 
+                                        description.includes(searchTerm) ||
+                                        sectionMatches;
+                    
+                    if (matchesSearch || searchTerm === '') {
+                        card.style.display = '';
+                        hasVisibleSubsections = true;
+                        visibleSubsecciones++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                if (hasVisibleSubsections || searchTerm === '') {
+                    sectionGroup.style.display = '';
+                    visibleSecciones++;
+                } else {
+                    sectionGroup.style.display = 'none';
+                }
+            });
+            
+            updateResultsCount(visibleSubsecciones, visibleSecciones);
+        }
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchInput.debounceTimer);
+            searchInput.debounceTimer = setTimeout(liveFilterSubsecciones, 200);
+        });
+        
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.classList.add('search-focused');
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.classList.remove('search-focused');
+        });
+        
+        updateResultsCount(totalSubsecciones, totalSecciones);
+        
+    } else if (step === 2) {
+        // PASO 2: Búsqueda en subsubsecciones
+        const searchInput = document.getElementById('liveSearchSubsubsecciones');
+        const searchResults = document.getElementById('searchResultsSubsubsecciones');
+        const subsubseccionCards = document.querySelectorAll('.subsubseccion-card');
+        
+        let totalSubsubsecciones = subsubseccionCards.length;
+        
+        function updateResultsCount(visibleCount) {
+            if (searchInput.value.trim() === '') {
+                searchResults.textContent = `${totalSubsubsecciones} subsubsecciones`;
+            } else {
+                searchResults.textContent = `${visibleCount} de ${totalSubsubsecciones}`;
+            }
+        }
+        
+        function liveFilterSubsubsecciones() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+            
+            subsubseccionCards.forEach(card => {
+                const nombre = card.getAttribute('data-name');
+                const description = card.getAttribute('data-description') || '';
+                
+                const matchesSearch = nombre.includes(searchTerm) || description.includes(searchTerm);
+                
+                if (matchesSearch || searchTerm === '') {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            updateResultsCount(visibleCount);
+            
+            // Mostrar mensaje si no hay resultados
+            showNoResultsMessage(visibleCount === 0 && searchTerm !== '');
+        }
+        
+        function showNoResultsMessage(show) {
+            let noResultsMsg = document.querySelector('.no-results-message');
+            
+            if (show && !noResultsMsg) {
+                const container = document.querySelector('.subsubsecciones-grid');
+                if (container) {
+                    noResultsMsg = document.createElement('div');
+                    noResultsMsg.className = 'no-results-message col-12 text-center py-4';
+                    noResultsMsg.innerHTML = `
+                        <i class="fas fa-search text-muted mb-2" style="font-size: 2rem;"></i>
+                        <p class="text-muted mb-0">No se encontraron subsubsecciones que coincidan con la búsqueda</p>
+                    `;
+                    container.appendChild(noResultsMsg);
+                }
+            } else if (!show && noResultsMsg) {
+                noResultsMsg.remove();
+            }
+        }
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchInput.debounceTimer);
+            searchInput.debounceTimer = setTimeout(liveFilterSubsubsecciones, 200);
+        });
+        
+        searchInput.addEventListener('focus', function() {
+            this.parentElement.classList.add('search-focused');
+        });
+        
+        searchInput.addEventListener('blur', function() {
+            this.parentElement.classList.remove('search-focused');
+        });
+        
+        updateResultsCount(totalSubsubsecciones);
+    }
+});
+</script>
 {% endblock %}

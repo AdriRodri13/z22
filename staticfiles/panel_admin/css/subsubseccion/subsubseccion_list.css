@@ -1,212 +1,808 @@
-{% extends 'panel_admin/dashboard.html' %}
+/* ================================
+   SUBSUBSECCION LIST STYLES - FLUJO DE DOS PASOS
+   ================================ */
 
-{% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 admin-sidebar p-3">
-            <h5 class="text-center mb-4">
-                <i class="fas fa-cog me-2"></i>Panel Admin
-            </h5>
-            
-            <nav class="nav flex-column">
-                <a href="{% url 'panel_admin:dashboard' %}" class="admin-nav-link">
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                </a>
-                <a href="{% url 'panel_admin:temporada_list' %}" class="admin-nav-link">
-                    <i class="fas fa-calendar me-2"></i>Temporadas
-                </a>
-                <a href="{% url 'panel_admin:liga_list' %}" class="admin-nav-link">
-                    <i class="fas fa-trophy me-2"></i>Ligas
-                </a>
-                <a href="{% url 'panel_admin:equipo_list' %}" class="admin-nav-link active">
-                    <i class="fas fa-shield-alt me-2"></i>Equipos
-                </a>
-                <a href="{% url 'panel_admin:equipacion_list' %}" class="admin-nav-link">
-                    <i class="fas fa-tshirt me-2"></i>Equipaciones
-                </a>
-                <hr class="my-3">
-                <a href="{% url 'home:index' %}" class="admin-nav-link">
-                    <i class="fas fa-home me-2"></i>Ver Web
-                </a>
-                <a href="{% url 'panel_admin:logout' %}" class="admin-nav-link text-danger">
-                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-                </a>
-            </nav>
-        </div>
+/* ================================
+   LIVE SEARCH STYLES
+   ================================ */
+.filters-card {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+}
 
-        <!-- Contenido principal -->
-        <div class="col-md-9 col-lg-10">
-            <div class="p-4">
-                <!-- Header -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>
-                        <i class="fas fa-shield-alt me-2"></i>Gestión de Equipos
-                    </h2>
-                    <a href="{% url 'panel_admin:equipo_create' %}" class="btn btn-admin">
-                        <i class="fas fa-plus me-2"></i>Nuevo Equipo
-                    </a>
-                </div>
+.filters-card .card-body {
+    padding: 1.5rem;
+}
 
-                <!-- Mensajes -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                            <i class="fas fa-check-circle me-2"></i>{{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 
-                <!-- Filtros -->
-                <div class="card admin-card mb-4">
-                    <div class="card-body">
-                        <form method="get" class="row g-3">
-                            <div class="col-md-3">
-                                <input type="text" 
-                                       class="form-control" 
-                                       name="search" 
-                                       value="{{ search }}" 
-                                       placeholder="Buscar equipo...">
-                            </div>
-                            <div class="col-md-3">
-                                <select name="temporada" class="form-select">
-                                    <option value="">Todas las temporadas</option>
-                                    {% for temporada in temporadas %}
-                                        <option value="{{ temporada.id }}" 
-                                                {% if selected_temporada == temporada.id|stringformat:"s" %}selected{% endif %}>
-                                            {{ temporada.nombre }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <select name="liga" class="form-select">
-                                    <option value="">Todas las ligas</option>
-                                    {% for liga in ligas %}
-                                        <option value="{{ liga.id }}" 
-                                                {% if selected_liga == liga.id|stringformat:"s" %}selected{% endif %}>
-                                            {{ liga.nombre }} ({{ liga.temporada.nombre }})
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-admin me-2">
-                                    <i class="fas fa-search me-2"></i>Buscar
-                                </button>
-                                <a href="{% url 'panel_admin:equipo_list' %}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-2"></i>Limpiar
-                                </a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    z-index: 2;
+    transition: var(--transition-normal);
+}
 
-                <!-- Tabla de equipos -->
-                <div class="card admin-card">
-                    <div class="card-body">
-                        {% if equipos %}
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Logo</th>
-                                            <th>Nombre</th>
-                                            <th>Liga</th>
-                                            <th>Temporada</th>
-                                            <th>Equipaciones</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for equipo in equipos %}
-                                            <tr>
-                                                <td>
-                                                    {% if equipo.logo %}
-                                                        <img src="{{ equipo.logo.url }}" 
-                                                             alt="{{ equipo.nombre }}" 
-                                                             class="img-thumbnail" 
-                                                             style="width: 40px; height: 40px; object-fit: cover;">
-                                                    {% else %}
-                                                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
-                                                             style="width: 40px; height: 40px;">
-                                                            <i class="fas fa-shield-alt"></i>
-                                                        </div>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <strong>{{ equipo.nombre }}</strong>
-                                                </td>
-                                                <td>{{ equipo.liga.nombre }}</td>
-                                                <td>
-                                                    <span class="badge bg-primary">{{ equipo.liga.temporada.nombre }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-success">{{ equipo.total_equipaciones }}</span>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group">
-                                                        <a href="{% url 'panel_admin:equipo_edit' equipo.pk %}" 
-                                                           class="btn btn-sm btn-outline-warning">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <a href="{% url 'panel_admin:equipo_delete' equipo.pk %}" 
-                                                           class="btn btn-sm btn-outline-danger">
-                                                            <i class="fas fa-trash"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+.search-focused .search-icon {
+    color: var(--color-accent);
+    transform: scale(1.1);
+}
 
-                            <!-- Paginación -->
-                            {% if equipos.has_other_pages %}
-                                <nav class="mt-4">
-                                    <ul class="pagination justify-content-center">
-                                        {% if equipos.has_previous %}
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if selected_temporada %}&temporada={{ selected_temporada }}{% endif %}{% if selected_liga %}&liga={{ selected_liga }}{% endif %}">Primera</a>
-                                            </li>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page={{ equipos.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_temporada %}&temporada={{ selected_temporada }}{% endif %}{% if selected_liga %}&liga={{ selected_liga }}{% endif %}">Anterior</a>
-                                            </li>
-                                        {% endif %}
+.live-search {
+    padding-left: 3rem !important;
+    padding-right: 8rem !important;
+    font-size: 1rem;
+    transition: var(--transition-normal);
+    background-color: var(--color-primary);
+    border: 2px solid var(--color-hover-primary);
+    color: var(--color-accent);
+    border-radius: var(--border-radius-sm);
+}
 
-                                        <li class="page-item active">
-                                            <span class="page-link">
-                                                Página {{ equipos.number }} de {{ equipos.paginator.num_pages }}
-                                            </span>
-                                        </li>
+.live-search:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+    background-color: var(--color-primary);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
 
-                                        {% if equipos.has_next %}
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page={{ equipos.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_temporada %}&temporada={{ selected_temporada }}{% endif %}{% if selected_liga %}&liga={{ selected_liga }}{% endif %}">Siguiente</a>
-                                            </li>
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page={{ equipos.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if selected_temporada %}&temporada={{ selected_temporada }}{% endif %}{% if selected_liga %}&liga={{ selected_liga }}{% endif %}">Última</a>
-                                            </li>
-                                        {% endif %}
-                                    </ul>
-                                </nav>
-                            {% endif %}
-                        {% else %}
-                            <div class="text-center py-5">
-                                <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
-                                <h4>No hay equipos</h4>
-                                <p class="text-muted">Comienza creando tu primer equipo</p>
-                                <a href="{% url 'panel_admin:equipo_create' %}" class="btn btn-admin">
-                                    <i class="fas fa-plus me-2"></i>Crear Equipo
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+.live-search::placeholder {
+    color: var(--color-text-muted);
+}
+
+.search-results-count {
+    position: absolute;
+    right: 1rem;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    background: var(--color-hover-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-secondary);
+    transition: var(--transition-normal);
+}
+
+.search-focused .search-results-count {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* ================================
+   STEP INFO CARD
+   ================================ */
+.step-info-card {
+    background: linear-gradient(135deg, var(--color-info), #0ea5e9);
+    border: none;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    color: white;
+}
+
+.step-info-card .card-body {
+    padding: 2rem;
+}
+
+.step-info-card h4 {
+    color: white;
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 0.75rem;
+}
+
+.step-info-card .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 1.1rem;
+}
+
+/* ================================
+   PASO 1: SELECCIÓN DE SUBSECCIONES
+   ================================ */
+
+/* Sections Container */
+.sections-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.section-group {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transition: var(--transition-normal);
+}
+
+.section-group:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+}
+
+/* Section Header */
+.section-header {
+    background: var(--color-hover-primary);
+    padding: 2rem;
+    border-bottom: 1px solid var(--color-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.section-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--color-primary);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-accent);
+    transition: var(--transition-normal);
+}
+
+.section-icon:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.section-icon i {
+    font-size: 2rem;
+    color: var(--color-accent);
+}
+
+.section-details h3.section-title {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.75rem;
+    margin: 0 0 0.5rem 0;
+    text-transform: capitalize;
+}
+
+.section-details .section-description {
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    margin: 0;
+    max-width: 400px;
+    opacity: 0.9;
+}
+
+.section-stats .badge {
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-bold);
+    font-size: 0.9rem;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, var(--color-info), #0ea5e9) !important;
+    color: white;
+}
+
+/* Subsections Grid (Paso 1) */
+.subsections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+    background: var(--color-primary);
+}
+
+.subsection-card.clickable {
+    background: var(--color-secondary);
+    border: 1px solid var(--color-hover-primary);
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-normal);
+    overflow: hidden;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    cursor: pointer;
+}
+
+.subsection-card.clickable:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-accent);
+    text-decoration: none;
+    color: inherit;
+}
+
+.subsection-card .card-header {
+    background: var(--color-hover-primary);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subsection-logo {
+    width: 60px;
+    height: 60px;
+}
+
+.subsection-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--border-radius-sm);
+    border: 2px solid var(--color-accent);
+    background: white;
+    padding: 0.5rem;
+}
+
+.subsection-logo .logo-placeholder {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+    font-size: 1.5rem;
+    border: 2px solid var(--color-accent);
+    transition: var(--transition-normal);
+}
+
+.click-indicator {
+    background: var(--color-accent);
+    color: var(--color-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: var(--transition-normal);
+}
+
+.subsection-card.clickable:hover .click-indicator {
+    background: var(--color-warning);
+    transform: translateX(5px);
+}
+
+.subsection-card .card-body {
+    padding: 1.5rem;
+}
+
+.subsection-name {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.25rem;
+    margin: 0 0 0.75rem 0;
+}
+
+.subsection-description {
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+.subsection-stats .badge {
+    background: linear-gradient(135deg, var(--color-success), #10b981) !important;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.85rem;
+}
+
+.empty-subsections {
+    background: var(--color-hover-primary);
+    margin: 1rem;
+    border-radius: var(--border-radius-md);
+}
+
+/* ================================
+   PASO 2: SUBSECCIÓN SELECCIONADA
+   ================================ */
+
+/* Selected Subsection Card */
+.selected-subsection-card {
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.selected-subsection-card .card-header {
+    background: var(--color-hover-primary);
+    padding: 2.5rem;
+    border-bottom: 1px solid var(--color-secondary);
+}
+
+.subsection-info {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.subsection-logo-large {
+    width: 100px;
+    height: 100px;
+}
+
+.subsection-logo-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--border-radius-md);
+    border: 3px solid var(--color-accent);
+    background: white;
+    padding: 0.75rem;
+}
+
+.subsection-logo-large .logo-placeholder {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+    font-size: 2.5rem;
+    border: 3px solid var(--color-accent);
+}
+
+.subsection-details h2 {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    font-size: 2rem;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.breadcrumb-info {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-badge {
+    background: var(--color-info);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-weight: var(--font-weight-medium);
+}
+
+.subsection-details .description {
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ================================
+   PASO 2: SUBSUBSECCIONES GRID
+   ================================ */
+.subsubsecciones-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.subsubsecciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.subsubseccion-card {
+    background: var(--color-secondary);
+    border: 1px solid var(--color-hover-primary);
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-normal);
+    overflow: hidden;
+    position: relative;
+}
+
+.subsubseccion-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-accent);
+}
+
+.subsubseccion-card .card-header {
+    background: var(--color-hover-primary);
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--color-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subsubseccion-logo {
+    width: 50px;
+    height: 50px;
+}
+
+.subsubseccion-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--border-radius-sm);
+    border: 2px solid var(--color-accent);
+    background: white;
+    padding: 0.25rem;
+}
+
+.subsubseccion-logo .logo-placeholder {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: var(--border-radius-sm);
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+    font-size: 1.2rem;
+    border: 2px solid var(--color-accent);
+}
+
+.subsubseccion-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.subsubseccion-actions .btn {
+    padding: 0.5rem;
+    border-radius: var(--border-radius-sm);
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-normal);
+}
+
+.btn-outline-warning {
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.btn-outline-warning:hover {
+    background-color: var(--color-warning);
+    color: var(--color-primary);
+    border-color: var(--color-warning);
+    transform: scale(1.1);
+}
+
+.btn-outline-danger {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
+    transform: scale(1.1);
+}
+
+.subsubseccion-card .card-body {
+    padding: 1.25rem;
+}
+
+.subsubseccion-name {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.subsubseccion-description {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+}
+
+.subsubseccion-stats .badge {
+    background: linear-gradient(135deg, var(--color-success), #10b981) !important;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.8rem;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, var(--color-success), #10b981) !important;
+    color: white;
+}
+
+/* ================================
+   ADD SUBSUBSECCION BUTTON
+   ================================ */
+.add-subsubseccion-container {
+    background: var(--color-hover-primary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-add-subsubseccion {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    min-width: 280px;
+}
+
+.btn-add-subsubseccion::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.6s;
+}
+
+.btn-add-subsubseccion:hover::before {
+    left: 100%;
+}
+
+.btn-add-subsubseccion:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-add-subsubseccion i {
+    transition: var(--transition-normal);
+}
+
+.btn-add-subsubseccion:hover i {
+    transform: rotate(90deg);
+}
+
+/* ================================
+   EMPTY STATE
+   ================================ */
+.empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--color-text-muted);
+    background: var(--gradient-secondary);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-state i {
+    font-size: 5rem;
+    margin-bottom: 2rem;
+    color: var(--color-warning);
+}
+
+.empty-state h4 {
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+    font-weight: var(--font-weight-bold);
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    margin-bottom: 2rem;
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+}
+
+/* ================================
+   NO RESULTS MESSAGES
+   ================================ */
+.no-results-message {
+    background: var(--color-hover-primary);
+    border-radius: var(--border-radius-md);
+    margin: 1rem 0;
+}
+
+.no-results-message .text-muted {
+    color: var(--color-text-muted) !important;
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+@media (max-width: 1200px) {
+    .subsections-grid,
+    .subsubsecciones-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    
+    .section-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .section-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .section-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .section-details h3.section-title {
+        font-size: 1.5rem;
+    }
+    
+    .subsections-grid,
+    .subsubsecciones-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .subsection-card .card-header {
+        padding: 1.25rem;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .click-indicator {
+        transform: rotate(90deg);
+    }
+    
+    .subsection-card.clickable:hover .click-indicator {
+        transform: rotate(90deg) translateY(-5px);
+    }
+    
+    .selected-subsection-card .card-header {
+        padding: 2rem 1.5rem;
+    }
+    
+    .subsection-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .subsection-logo-large {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .subsection-logo-large .logo-placeholder {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    
+    .subsection-details h2 {
+        font-size: 1.5rem;
+    }
+    
+    .breadcrumb-info {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .add-subsubseccion-container {
+        padding: 1.5rem;
+    }
+    
+    .btn-add-subsubseccion {
+        width: 100%;
+        font-size: 1rem;
+        padding: 0.875rem 1.5rem;
+        min-width: auto;
+    }
+    
+    /* Live search responsive */
+    .live-search {
+        padding-left: 2.5rem !important;
+        padding-right: 6rem !important;
+        font-size: 0.9rem;
+    }
+    
+    .search-icon {
+        left: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .search-results-count {
+        right: 0.75rem;
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
+    }
+    
+    .filters-card .card-body {
+        padding: 1.25rem;
+    }
+    
+    .sections-container {
+        gap: 2rem;
+    }
+    
+    .step-info-card .card-body {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .subsection-logo,
+    .subsubseccion-logo {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .subsection-logo .logo-placeholder,
+    .subsubseccion-logo .logo-placeholder {
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
+        padding: 0.4rem;
+    }
+    
+    .subsection-actions .btn,
+    .subsubseccion-actions .btn {
+        width: 32px;
+        height: 32px;
+        padding: 0.4rem;
+    }
+    
+    .subsection-name {
+        font-size: 1.1rem;
+    }
+    
+    .subsubseccion-name {
+        font-size: 1rem;
+    }
+    
+    .subsection-description,
+    .subsubseccion-description {
+        font-size: 0.85rem;
+    }
+}

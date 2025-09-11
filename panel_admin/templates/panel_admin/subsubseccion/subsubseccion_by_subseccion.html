@@ -11,18 +11,34 @@
 {% block content_title %}{{ title }}{% endblock %}
 
 {% block header_actions %}
-<div class="d-flex gap-2 align-items-center">
-    <a href="{% url 'panel_admin:subsubseccion_create' %}" class="btn btn-admin">
-        <i class="fas fa-plus"></i>Nueva Subsubsección
-    </a>
-</div>
+<!-- Botón removido - solo aparece en vista específica de subsección -->
 {% endblock %}
 
 {% block panel_content %}
+
+<!-- Filtro de búsqueda en tiempo real -->
+<div class="filters-card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="liveSearchSubsecciones"
+                           class="form-control text-white live-search" 
+                           placeholder="Buscar subsección o sección en tiempo real..."
+                           autocomplete="off">
+                    <div id="searchResultsSubsecciones" class="search-results-count"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% if secciones %}
     <div class="secciones-cards-container">
         {% for seccion in secciones %}
-            <div class="seccion-card">
+            <div class="seccion-card" data-section-name="{{ seccion.nombre|lower }}">
                 <div class="seccion-header">
                     {% if seccion.icono %}
                         <div class="seccion-icono">
@@ -40,7 +56,10 @@
                 <div class="subsecciones-grid">
                     {% for subseccion in seccion.subsecciones.all %}
                         <a href="{% url 'panel_admin:subsubseccion_list_in_subseccion' subseccion.id %}" 
-                           class="subseccion-card">
+                           class="subseccion-card"
+                           data-name="{{ subseccion.nombre|lower }}" 
+                           data-section="{{ seccion.nombre|lower }}" 
+                           data-description="{{ subseccion.descripcion|lower|default:'' }}">
                             {% if subseccion.logo %}
                                 <div class="subseccion-logo-container">
                                     <img src="{{ subseccion.logo.url }}" alt="{{ subseccion.nombre }}">
@@ -81,4 +100,83 @@
         </div>
     </div>
 {% endif %}
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('liveSearchSubsecciones');
+    const searchResults = document.getElementById('searchResultsSubsecciones');
+    const sectionCards = document.querySelectorAll('.seccion-card');
+    const subseccionCards = document.querySelectorAll('.subseccion-card');
+    
+    let totalSubsecciones = subseccionCards.length;
+    let totalSecciones = sectionCards.length;
+    
+    function updateResultsCount(visibleSubsecciones, visibleSecciones) {
+        if (searchInput.value.trim() === '') {
+            searchResults.textContent = `${totalSubsecciones} subsecciones en ${totalSecciones} secciones`;
+        } else {
+            searchResults.textContent = `${visibleSubsecciones} subsecciones en ${visibleSecciones} secciones`;
+        }
+    }
+    
+    function liveFilterSubsecciones() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleSubsecciones = 0;
+        let visibleSecciones = 0;
+        
+        sectionCards.forEach(sectionCard => {
+            const sectionName = sectionCard.getAttribute('data-section-name');
+            const subseccionesInSection = sectionCard.querySelectorAll('.subseccion-card');
+            let hasVisibleSubsecciones = false;
+            
+            const sectionMatches = sectionName.includes(searchTerm);
+            
+            subseccionesInSection.forEach(card => {
+                const nombre = card.getAttribute('data-name');
+                const section = card.getAttribute('data-section');
+                const description = card.getAttribute('data-description') || '';
+                
+                const matchesSearch = nombre.includes(searchTerm) || 
+                                    section.includes(searchTerm) || 
+                                    description.includes(searchTerm) ||
+                                    sectionMatches;
+                
+                if (matchesSearch || searchTerm === '') {
+                    card.style.display = '';
+                    hasVisibleSubsecciones = true;
+                    visibleSubsecciones++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            if (hasVisibleSubsecciones || searchTerm === '') {
+                sectionCard.style.display = '';
+                visibleSecciones++;
+            } else {
+                sectionCard.style.display = 'none';
+            }
+        });
+        
+        updateResultsCount(visibleSubsecciones, visibleSecciones);
+    }
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchInput.debounceTimer);
+        searchInput.debounceTimer = setTimeout(liveFilterSubsecciones, 200);
+    });
+    
+    searchInput.addEventListener('focus', function() {
+        this.parentElement.classList.add('search-focused');
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        this.parentElement.classList.remove('search-focused');
+    });
+    
+    updateResultsCount(totalSubsecciones, totalSecciones);
+});
+</script>
 {% endblock %}

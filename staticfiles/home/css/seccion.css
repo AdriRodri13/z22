@@ -101,12 +101,9 @@
   text-align: center;
   margin-bottom: var(--space-lg);
   position: relative;
-  
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  
+
+  color: var(--text-primary); /* Esto pone el texto en blanco */
+
   animation: fadeInScale 0.8s var(--transition-bounce);
 }
 
@@ -372,7 +369,7 @@
   content: '';
   position: absolute;
   inset: -2px;
-  background: var(--accent-gradient);
+  background: var(--text-primary);
   border-radius: var(--radius-lg);
   opacity: 0;
   transition: opacity var(--transition-smooth);
@@ -478,7 +475,6 @@
 }
 
 .subseccion-card:hover .card-title {
-  color: var(--text-secondary);
   transform: translateX(4px);
 }
 

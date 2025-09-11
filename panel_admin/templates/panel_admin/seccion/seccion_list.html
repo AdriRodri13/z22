@@ -11,34 +11,26 @@
 {% block content_title %}Gestión de Secciones{% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'panel_admin:seccion_create' %}" class="btn btn-admin">
-    <i class="fas fa-plus me-2"></i>Nueva Sección
-</a>
+<!-- Botón de nueva sección movido abajo -->
 {% endblock %}
 
 {% block panel_content %}
-<!-- Filtros de búsqueda -->
+<!-- Filtro de búsqueda en vivo -->
 <div class="filters-card">
     <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-8">
-                <input type="text" 
-                       class="form-control" 
-                       name="search" 
-                       value="{{ search }}" 
-                       placeholder="Buscar sección...">
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-admin flex-fill">
-                        <i class="fas fa-search me-2"></i>Buscar
-                    </button>
-                    <a href="{% url 'panel_admin:seccion_list' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i>
-                    </a>
+        <div class="row">
+            <div class="col-12">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="liveSearch"
+                           class="form-control text-white live-search" 
+                           placeholder="Buscar sección en tiempo real..."
+                           autocomplete="off">
+                    <div id="searchResults" class="search-results-count"></div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -59,7 +51,7 @@
                 </thead>
                 <tbody>
                     {% for seccion in secciones %}
-                        <tr>
+                        <tr class="seccion-row" data-name="{{ seccion.nombre|lower }}" data-description="{{ seccion.descripcion|lower }}">
                             <td>
                                 {% if seccion.icono %}
                                     <div class="icon-container">
@@ -101,6 +93,13 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+
+        <!-- Botón Nueva Sección debajo de la tabla -->
+        <div class="new-section-container">
+            <a href="{% url 'panel_admin:seccion_create' %}" class="btn btn-admin btn-add-section">
+                <i class="fas fa-plus me-2"></i>Añadir Nueva Sección
+            </a>
         </div>
 
         <!-- Paginación -->
@@ -154,4 +153,91 @@
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('liveSearch');
+    const searchResults = document.getElementById('searchResults');
+    const seccionRows = document.querySelectorAll('.seccion-row');
+    const tableContainer = document.querySelector('.table-container');
+    
+    let totalSecciones = seccionRows.length;
+    
+    // Función para actualizar contador de resultados
+    function updateResultsCount(visibleCount) {
+        if (searchInput.value.trim() === '') {
+            searchResults.textContent = `${totalSecciones} secciones`;
+        } else {
+            searchResults.textContent = `${visibleCount} de ${totalSecciones}`;
+        }
+    }
+    
+    // Función para el filtrado en vivo
+    function liveFilter() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        seccionRows.forEach(row => {
+            const nombre = row.getAttribute('data-name');
+            const descripcion = row.getAttribute('data-description');
+            
+            const matchesSearch = nombre.includes(searchTerm) || descripcion.includes(searchTerm);
+            
+            if (matchesSearch) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        updateResultsCount(visibleCount);
+        
+        // Mostrar mensaje si no hay resultados
+        showNoResultsMessage(visibleCount === 0 && searchTerm !== '');
+    }
+    
+    // Función para mostrar mensaje de "sin resultados"
+    function showNoResultsMessage(show) {
+        let noResultsRow = document.querySelector('.no-results-row');
+        
+        if (show && !noResultsRow) {
+            // Crear fila de "sin resultados"
+            const tbody = document.querySelector('tbody');
+            noResultsRow = document.createElement('tr');
+            noResultsRow.className = 'no-results-row';
+            noResultsRow.innerHTML = `
+                <td colspan="6" class="text-center py-4">
+                    <i class="fas fa-search text-muted mb-2" style="font-size: 2rem;"></i>
+                    <p class="text-muted mb-0">No se encontraron secciones que coincidan con la búsqueda</p>
+                </td>
+            `;
+            tbody.appendChild(noResultsRow);
+        } else if (!show && noResultsRow) {
+            noResultsRow.remove();
+        }
+    }
+    
+    // Event listener para el input de búsqueda
+    searchInput.addEventListener('input', function() {
+        // Debounce para optimizar el rendimiento
+        clearTimeout(searchInput.debounceTimer);
+        searchInput.debounceTimer = setTimeout(liveFilter, 150);
+    });
+    
+    // Inicializar contador
+    updateResultsCount(totalSecciones);
+    
+    // Añadir efecto de focus al input
+    searchInput.addEventListener('focus', function() {
+        this.parentElement.classList.add('search-focused');
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        this.parentElement.classList.remove('search-focused');
+    });
+});
+</script>
 {% endblock %}

@@ -187,10 +187,10 @@ class PrendaMultipleUploadForm(forms.Form):
         super().__init__(*args, **kwargs)
         
         if subsubseccion_id:
-            # Si tenemos una subsubseccion específica, la preseleccionamos
+            # Si tenemos una subsubseccion específica, la preseleccionamos con campo oculto
             self.fields['subsubseccion'].queryset = Subsubseccion.objects.filter(id=subsubseccion_id)
             self.fields['subsubseccion'].initial = subsubseccion_id
-            self.fields['subsubseccion'].widget.attrs['disabled'] = True
+            self.fields['subsubseccion'].widget = forms.HiddenInput()
         else:
             self.fields['subsubseccion'].queryset = Subsubseccion.objects.select_related(
                 'subseccion', 'subseccion__seccion'

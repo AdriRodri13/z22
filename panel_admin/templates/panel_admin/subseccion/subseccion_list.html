@@ -11,154 +11,261 @@
 {% block content_title %}Gestión de Subsecciones{% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'panel_admin:subseccion_create' %}" class="btn btn-admin">
-    <i class="fas fa-plus me-2"></i>Nueva Subsección
-</a>
+<!-- Botón movido a cada sección -->
 {% endblock %}
 
 {% block panel_content %}
-<!-- Filtros de búsqueda -->
+<!-- Filtro de búsqueda en tiempo real -->
 <div class="filters-card">
     <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-4">
-                <input type="text" 
-                       class="form-control" 
-                       name="search" 
-                       value="{{ search }}" 
-                       placeholder="Buscar subsección...">
-            </div>
-            <div class="col-md-4">
-                <select name="seccion" class="form-select">
-                    <option value="">Todas las secciones</option>
-                    {% for seccion in secciones %}
-                        <option value="{{ seccion.id }}" 
-                                {% if selected_seccion == seccion.id|stringformat:"s" %}selected{% endif %}>
-                            {{ seccion.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-admin flex-fill">
-                        <i class="fas fa-search me-2"></i>Buscar
-                    </button>
-                    <a href="{% url 'panel_admin:subseccion_list' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i>
-                    </a>
+        <div class="row">
+            <div class="col-12">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="liveSearch"
+                           class="form-control text-white live-search" 
+                           placeholder="Buscar subsección o sección en tiempo real..."
+                           autocomplete="off">
+                    <div id="searchResults" class="search-results-count"></div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<!-- Tabla de subsecciones -->
-<div class="table-container">
-    {% if subsecciones %}
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Logo</th>
-                        <th>Nombre</th>
-                        <th>Sección</th>
-                        <th>Subsubsecciones</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for subseccion in subsecciones %}
-                        <tr>
-                            <td>
-                                {% if subseccion.logo %}
-                                    <div class="logo-container">
-                                        <img src="{{ subseccion.logo.url }}" alt="{{ subseccion.nombre }}">
+<!-- Subsecciones agrupadas por sección -->
+<div class="sections-container">
+    {% if secciones_con_subsecciones %}
+        {% for seccion in secciones_con_subsecciones %}
+            <div class="section-group" data-section-name="{{ seccion.nombre|lower }}">
+                <!-- Encabezado de sección -->
+                <div class="section-header">
+                    <div class="section-info">
+                        <div class="section-icon">
+                            {% if seccion.icono %}
+                                <i class="{{ seccion.icono }}"></i>
+                            {% else %}
+                                <i class="fas fa-folder"></i>
+                            {% endif %}
+                        </div>
+                        <div class="section-details">
+                            <h3 class="section-title">{{ seccion.nombre }}</h3>
+                            <p class="section-description">{{ seccion.descripcion|default:"Sin descripción" }}</p>
+                        </div>
+                    </div>
+                    <div class="section-stats">
+                        <span class="badge bg-info">{{ seccion.total_subsecciones }} subsección{{ seccion.total_subsecciones|pluralize:"es" }}</span>
+                    </div>
+                </div>
+
+                <!-- Subsecciones de esta sección -->
+                {% if seccion.subsecciones.all %}
+                    <div class="subsections-grid">
+                        {% for subseccion in seccion.subsecciones.all %}
+                            <div class="subsection-card" 
+                                 data-name="{{ subseccion.nombre|lower }}" 
+                                 data-section="{{ seccion.nombre|lower }}" 
+                                 data-description="{{ subseccion.descripcion|lower }}">
+                                <div class="card-header">
+                                    <div class="subsection-logo">
+                                        {% if subseccion.logo %}
+                                            <img src="{{ subseccion.logo.url }}" alt="{{ subseccion.nombre }}">
+                                        {% else %}
+                                            <div class="logo-placeholder">
+                                                <i class="fas fa-layer-group"></i>
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                {% else %}
-                                    <div class="logo-placeholder">
-                                        <i class="fas fa-layer-group"></i>
+                                    <div class="subsection-actions">
+                                        <a href="{% url 'panel_admin:subseccion_edit' subseccion.pk %}" 
+                                           class="btn btn-sm btn-outline-warning"
+                                           title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'panel_admin:subseccion_delete' subseccion.pk %}" 
+                                           class="btn btn-sm btn-outline-danger"
+                                           title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
                                     </div>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <strong>{{ subseccion.nombre }}</strong>
-                            </td>
-                            <td>
-                                <span class="badge bg-primary">{{ subseccion.seccion.nombre }}</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-info">{{ subseccion.total_subsubsecciones }}</span>
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group">
-                                    <a href="{% url 'panel_admin:subseccion_edit' subseccion.pk %}" 
-                                       class="btn btn-sm btn-outline-warning"
-                                       title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{% url 'panel_admin:subseccion_delete' subseccion.pk %}" 
-                                       class="btn btn-sm btn-outline-danger"
-                                       title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
                                 </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                                <div class="card-body">
+                                    <h4 class="subsection-name">{{ subseccion.nombre }}</h4>
+                                    <p class="subsection-description">{{ subseccion.descripcion|default:"Sin descripción" }}</p>
+                                    <div class="subsection-stats">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-layer-group me-1"></i>
+                                            {{ subseccion.total_subsubsecciones }} subsubsección{{ subseccion.total_subsubsecciones|pluralize:"es" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
-        <!-- Paginación -->
-        {% if subsecciones.has_other_pages %}
-            <div class="d-flex justify-content-center">
-                <nav>
-                    <ul class="pagination">
-                        {% if subsecciones.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}">
-                                    <i class="fas fa-angle-double-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ subsecciones.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}">
-                                    <i class="fas fa-angle-left"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-
-                        <li class="page-item active">
-                            <span class="page-link">
-                                {{ subsecciones.number }} de {{ subsecciones.paginator.num_pages }}
-                            </span>
-                        </li>
-
-                        {% if subsecciones.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ subsecciones.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}">
-                                    <i class="fas fa-angle-right"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ subsecciones.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if selected_seccion %}&seccion={{ selected_seccion }}{% endif %}">
-                                    <i class="fas fa-angle-double-right"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
+                <!-- Botón para añadir nueva subsección a esta sección -->
+                <div class="add-subsection-container">
+                    <a href="{% url 'panel_admin:subseccion_create' %}?seccion_id={{ seccion.id }}" 
+                       class="btn btn-admin btn-add-subsection">
+                        <i class="fas fa-plus me-2"></i>
+                        Añadir Subsección a {{ seccion.nombre }}
+                    </a>
+                </div>
             </div>
-        {% endif %}
+        {% endfor %}
     {% else %}
         <div class="empty-state">
             <i class="fas fa-layer-group"></i>
-            <h4>No hay subsecciones</h4>
-            <p>Comienza creando tu primera subsección para organizar tu catálogo</p>
-            <a href="{% url 'panel_admin:subseccion_create' %}" class="btn btn-admin">
-                <i class="fas fa-plus me-2"></i>Crear Primera Subsección
+            <h4>No hay secciones creadas</h4>
+            <p>Primero crea algunas secciones y luego podrás añadir subsecciones</p>
+            <a href="{% url 'panel_admin:seccion_create' %}" class="btn btn-admin">
+                <i class="fas fa-folder me-2"></i>Crear Primera Sección
             </a>
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('liveSearch');
+    const searchResults = document.getElementById('searchResults');
+    const sectionGroups = document.querySelectorAll('.section-group');
+    const subsectionCards = document.querySelectorAll('.subsection-card');
+    
+    let totalSubsecciones = subsectionCards.length;
+    let totalSecciones = sectionGroups.length;
+    
+    // Función para actualizar contador de resultados
+    function updateResultsCount(visibleSubsecciones, visibleSecciones) {
+        if (searchInput.value.trim() === '') {
+            searchResults.textContent = `${totalSubsecciones} subsecciones en ${totalSecciones} secciones`;
+        } else {
+            searchResults.textContent = `${visibleSubsecciones} subsecciones en ${visibleSecciones} secciones`;
+        }
+    }
+    
+    // Función para el filtrado en vivo
+    function liveFilter() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleSubsecciones = 0;
+        let visibleSecciones = 0;
+        
+        sectionGroups.forEach(sectionGroup => {
+            const sectionName = sectionGroup.getAttribute('data-section-name');
+            const subsectionsInSection = sectionGroup.querySelectorAll('.subsection-card');
+            let hasVisibleSubsections = false;
+            
+            // Verificar si la sección coincide con la búsqueda
+            const sectionMatches = sectionName.includes(searchTerm);
+            
+            subsectionsInSection.forEach(card => {
+                const nombre = card.getAttribute('data-name');
+                const section = card.getAttribute('data-section');
+                const description = card.getAttribute('data-description') || '';
+                
+                const matchesSearch = nombre.includes(searchTerm) || 
+                                    section.includes(searchTerm) || 
+                                    description.includes(searchTerm) ||
+                                    sectionMatches;
+                
+                if (matchesSearch || searchTerm === '') {
+                    card.style.display = '';
+                    hasVisibleSubsections = true;
+                    visibleSubsecciones++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Mostrar/ocultar la sección completa
+            if (hasVisibleSubsections || searchTerm === '') {
+                sectionGroup.style.display = '';
+                visibleSecciones++;
+            } else {
+                sectionGroup.style.display = 'none';
+            }
+            
+            // Mostrar/ocultar mensaje de subsecciones vacías
+            const subsectionsGrid = sectionGroup.querySelector('.subsections-grid');
+            if (subsectionsGrid) {
+                const visibleCardsInSection = Array.from(subsectionsInSection).filter(card => 
+                    card.style.display !== 'none'
+                ).length;
+                
+                if (visibleCardsInSection === 0 && searchTerm !== '') {
+                    showNoSubsectionsMessage(sectionGroup, true);
+                } else {
+                    showNoSubsectionsMessage(sectionGroup, false);
+                }
+            }
+        });
+        
+        updateResultsCount(visibleSubsecciones, visibleSecciones);
+        
+        // Mostrar mensaje global si no hay resultados
+        showNoResultsMessage(visibleSecciones === 0 && searchTerm !== '');
+    }
+    
+    // Función para mostrar mensaje de "sin subsecciones" en una sección
+    function showNoSubsectionsMessage(sectionGroup, show) {
+        let noSubsectionsMsg = sectionGroup.querySelector('.no-subsections-message');
+        
+        if (show && !noSubsectionsMsg) {
+            const subsectionsGrid = sectionGroup.querySelector('.subsections-grid');
+            noSubsectionsMsg = document.createElement('div');
+            noSubsectionsMsg.className = 'no-subsections-message text-center py-4';
+            noSubsectionsMsg.innerHTML = `
+                <i class="fas fa-search text-muted mb-2" style="font-size: 1.5rem;"></i>
+                <p class="text-muted mb-0">No hay subsecciones que coincidan con la búsqueda en esta sección</p>
+            `;
+            if (subsectionsGrid) {
+                subsectionsGrid.appendChild(noSubsectionsMsg);
+            }
+        } else if (!show && noSubsectionsMsg) {
+            noSubsectionsMsg.remove();
+        }
+    }
+    
+    // Función para mostrar mensaje global de "sin resultados"
+    function showNoResultsMessage(show) {
+        let noResultsMsg = document.querySelector('.global-no-results');
+        
+        if (show && !noResultsMsg) {
+            const container = document.querySelector('.sections-container');
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.className = 'global-no-results text-center py-5';
+            noResultsMsg.innerHTML = `
+                <i class="fas fa-search text-muted mb-3" style="font-size: 3rem;"></i>
+                <h4 class="text-muted">No se encontraron resultados</h4>
+                <p class="text-muted mb-0">No hay secciones ni subsecciones que coincidan con tu búsqueda</p>
+            `;
+            container.appendChild(noResultsMsg);
+        } else if (!show && noResultsMsg) {
+            noResultsMsg.remove();
+        }
+    }
+    
+    // Event listener para el input de búsqueda
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchInput.debounceTimer);
+        searchInput.debounceTimer = setTimeout(liveFilter, 200);
+    });
+    
+    // Inicializar contador
+    updateResultsCount(totalSubsecciones, totalSecciones);
+    
+    // Efectos de focus
+    searchInput.addEventListener('focus', function() {
+        this.parentElement.classList.add('search-focused');
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        this.parentElement.classList.remove('search-focused');
+    });
+});
+</script>
 {% endblock %}
