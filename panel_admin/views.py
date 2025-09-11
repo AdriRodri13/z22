@@ -115,7 +115,7 @@ def seccion_list(request):
 @user_passes_test(is_staff_user)
 def seccion_create(request):
     if request.method == 'POST':
-        form = SeccionForm(request.POST)
+        form = SeccionForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, 'Sección creada exitosamente.')
@@ -137,7 +137,7 @@ def seccion_edit(request, pk):
     seccion = get_object_or_404(Seccion, pk=pk)
     
     if request.method == 'POST':
-        form = SeccionForm(request.POST, instance=seccion)
+        form = SeccionForm(request.POST, request.FILES, instance=seccion)
         if form.is_valid():
             form.save()
             messages.success(request, 'Sección actualizada exitosamente.')

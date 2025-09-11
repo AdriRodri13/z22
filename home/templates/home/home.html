@@ -24,13 +24,13 @@
             {% for seccion in secciones %}
             <div class="col-12 col-sm-6 col-lg-4">
                 <div class="seccion-card" data-seccion-id="{{ seccion.id }}">
-                    <!-- Icono de la sección -->
-                    <div class="seccion-icono-container">
-                        {% if seccion.icono %}
-                            <i class="{{ seccion.icono }} seccion-icono"></i>
+                    <!-- Logo de la sección -->
+                    <div class="seccion-logo-container">
+                        {% if seccion.logo %}
+                            <img src="{{ seccion.logo.url }}" alt="{{ seccion.nombre }}" class="seccion-logo">
                         {% else %}
-                            <div class="seccion-icono-placeholder">
-                                <i class="fas fa-tag"></i>
+                            <div class="seccion-logo-placeholder">
+                                <i class="fas fa-image"></i>
                             </div>
                         {% endif %}
                     </div>

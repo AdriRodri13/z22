@@ -5,7 +5,7 @@ from home.models import Seccion, Subseccion, Subsubseccion, Prenda
 class SeccionForm(forms.ModelForm):
     class Meta:
         model = Seccion
-        fields = ['nombre', 'descripcion', 'icono']
+        fields = ['nombre', 'descripcion', 'logo']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -16,15 +16,15 @@ class SeccionForm(forms.ModelForm):
                 'placeholder': 'Descripción opcional de la sección...',
                 'rows': 3
             }),
-            'icono': forms.TextInput(attrs={
+            'logo': forms.FileInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: fas fa-tshirt, fas fa-futbol, fas fa-shoe-prints'
+                'accept': 'image/*'
             })
         }
         labels = {
             'nombre': 'Nombre de la sección',
             'descripcion': 'Descripción',
-            'icono': 'Icono (clase CSS)'
+            'logo': 'Logo de la sección'
         }
 
 

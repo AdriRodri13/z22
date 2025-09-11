@@ -5,7 +5,12 @@ from .utils import seleccionar_storage
 class Seccion(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
-    icono = models.CharField(max_length=50, blank=True, null=True, help_text="Clase CSS del icono (ej: fas fa-tshirt)", default='')
+    logo = models.ImageField(
+        storage=seleccionar_storage(),
+        upload_to='logos/secciones/',
+        blank=True,
+        null=True
+    )
     creado_en = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
