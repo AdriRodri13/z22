@@ -464,12 +464,13 @@ def subsubseccion_list_in_subseccion(request, subseccion_id):
 def prenda_create(request):
     # Obtener subsubsección preseleccionada si viene desde navegación jerárquica
     subsubseccion_id = request.GET.get('subsubseccion')
+    subsubseccion_preseleccionada = None
     initial_data = {}
     
     if subsubseccion_id:
         try:
-            subsubseccion = Subsubseccion.objects.get(pk=subsubseccion_id)
-            initial_data['subsubseccion'] = subsubseccion
+            subsubseccion_preseleccionada = Subsubseccion.objects.get(pk=subsubseccion_id)
+            initial_data['subsubseccion'] = subsubseccion_preseleccionada
         except Subsubseccion.DoesNotExist:
             pass
     
@@ -488,7 +489,7 @@ def prenda_create(request):
         'title': 'Crear Prenda',
         'form': form,
         'action': 'crear',
-        'subsubseccion_preseleccionada': subsubseccion_id
+        'subsubseccion_preseleccionada': subsubseccion_preseleccionada
     }
     return render(request, 'panel_admin/prenda/prenda_form.html', context)
 
@@ -512,7 +513,8 @@ def prenda_edit(request, pk):
         'title': 'Editar Prenda',
         'form': form,
         'prenda': prenda,
-        'action': 'editar'
+        'action': 'editar',
+        'subsubseccion_preseleccionada': prenda.subsubseccion
     }
     return render(request, 'panel_admin/prenda/prenda_form.html', context)
 

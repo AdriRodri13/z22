@@ -23,9 +23,15 @@
 {% endblock %}
 
 {% block header_actions %}
-<a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="btn btn-outline-secondary">
-    <i class="fas fa-arrow-left me-2"></i>Volver
-</a>
+{% if subsubseccion_preseleccionada %}
+    <a href="{% url 'panel_admin:prenda_list_in_subsubseccion' subsubseccion_preseleccionada.id %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+{% else %}
+    <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+{% endif %}
 {% endblock %}
 
 {% block panel_content %}
@@ -118,9 +124,15 @@
 
 
                 <div class="d-grid gap-3 d-md-flex justify-content-md-end">
-                    <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-2"></i>Cancelar
-                    </a>
+                    {% if subsubseccion_preseleccionada %}
+                        <a href="{% url 'panel_admin:prenda_list_in_subsubseccion' subsubseccion_preseleccionada.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                    {% else %}
+                        <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                    {% endif %}
                     <button type="submit" class="btn btn-admin">
                         <i class="fas fa-save me-2"></i>
                         {% if action == 'crear' %}
