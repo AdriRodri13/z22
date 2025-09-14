@@ -4,10 +4,12 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing subsubseccion page...');
     initPrendaCards();
     initScrollAnimations();
     initModalFunctionality();
     initMobileOptimizations();
+    console.log('Subsubseccion page initialized');
 });
 
 /**
@@ -15,19 +17,28 @@ document.addEventListener('DOMContentLoaded', function() {
  * ==================================
  */
 function initPrendaCards() {
+    console.log('Initializing prenda cards...');
     const prendaCards = document.querySelectorAll('.prenda-card');
+    console.log('Found', prendaCards.length, 'prenda cards');
     
-    prendaCards.forEach(card => {
+    prendaCards.forEach((card, index) => {
         const prendaId = card.dataset.prendaId;
         const prendaImg = card.querySelector('.prenda-img');
         const btnContactar = card.querySelector('.btn-contactar');
         
+        console.log(`Card ${index}:`, { prendaId, prendaImg, btnContactar });
+        
         // Click en la card para ver imagen ampliada
         card.addEventListener('click', (e) => {
+            console.log('Card clicked', e.target);
+            
             // Si se hizo click en el botón, no abrir modal
             if (e.target.closest('.btn-contactar')) {
+                console.log('Contact button clicked, not opening modal');
                 return;
             }
+            
+            console.log('Opening modal for prenda:', prendaImg);
             openPrendaModal(prendaImg);
         });
         
@@ -89,22 +100,39 @@ function initModalFunctionality() {
 }
 
 function openPrendaModal(imgElement) {
+    console.log('openPrendaModal called with:', imgElement);
+    
     const modal = document.getElementById('prendaModal');
     const modalImg = document.getElementById('modalPrendaImg');
+    
+    console.log('Modal elements found:', { modal, modalImg });
     
     if (modal && modalImg && imgElement) {
         // Actualizar imagen del modal
         modalImg.src = imgElement.src;
         modalImg.alt = imgElement.alt;
         
-        // Mostrar modal
-        const bootstrapModal = new bootstrap.Modal(modal);
-        bootstrapModal.show();
+        console.log('Image src set to:', imgElement.src);
+        
+        // Mostrar modal - verificar si Bootstrap está disponible
+        if (typeof bootstrap !== 'undefined') {
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
+            console.log('Bootstrap modal shown');
+        } else {
+            // Fallback si Bootstrap no está disponible
+            modal.style.display = 'block';
+            modal.classList.add('show');
+            document.body.classList.add('modal-open');
+            console.log('Fallback modal shown');
+        }
         
         // Focus en el modal para accesibilidad
         modal.addEventListener('shown.bs.modal', () => {
             modal.focus();
-        });
+        }, { once: true });
+    } else {
+        console.error('Missing elements for modal:', { modal, modalImg, imgElement });
     }
 }
 
