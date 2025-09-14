@@ -1,25 +1,25 @@
 /**
- * EQUIPO.JS - JavaScript para página de equipaciones
- * ==================================================
+ * SUBSUBSECCION.JS - JavaScript para página de subsubsección
+ * ===========================================================
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    initEquipacionCards();
+    initPrendaCards();
     initScrollAnimations();
     initModalFunctionality();
     initMobileOptimizations();
 });
 
 /**
- * FUNCIONALIDAD DE CARDS DE EQUIPACIONES
- * ======================================
+ * FUNCIONALIDAD DE CARDS DE PRENDAS
+ * ==================================
  */
-function initEquipacionCards() {
-    const equipacionCards = document.querySelectorAll('.equipacion-card');
+function initPrendaCards() {
+    const prendaCards = document.querySelectorAll('.prenda-card');
     
-    equipacionCards.forEach(card => {
-        const equipacionId = card.dataset.equipacionId;
-        const equipacionImg = card.querySelector('.equipacion-img');
+    prendaCards.forEach(card => {
+        const prendaId = card.dataset.prendaId;
+        const prendaImg = card.querySelector('.prenda-img');
         const btnContactar = card.querySelector('.btn-contactar');
         
         // Click en la card para ver imagen ampliada
@@ -28,14 +28,14 @@ function initEquipacionCards() {
             if (e.target.closest('.btn-contactar')) {
                 return;
             }
-            openEquipacionModal(equipacionImg);
+            openPrendaModal(prendaImg);
         });
         
         // Click en botón contactar
         if (btnContactar) {
             btnContactar.addEventListener('click', (e) => {
                 e.stopPropagation();
-                contactarInstagram(equipacionImg);
+                contactarInstagram(prendaImg);
             });
         }
         
@@ -43,28 +43,28 @@ function initEquipacionCards() {
         card.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                openEquipacionModal(equipacionImg);
+                openPrendaModal(prendaImg);
             }
         });
         
         // Hacer la card focusable
         card.setAttribute('tabindex', '0');
         card.setAttribute('role', 'button');
-        card.setAttribute('aria-label', 'Ver equipación en detalle');
+        card.setAttribute('aria-label', 'Ver prenda en detalle');
         
         // Lazy loading de imagen
-        if (equipacionImg.dataset.src) {
-            initLazyLoading(equipacionImg);
+        if (prendaImg.dataset.src) {
+            initLazyLoading(prendaImg);
         }
     });
 }
 
 /**
- * MODAL DE EQUIPACIÓN
- * ===================
+ * MODAL DE PRENDA
+ * ===============
  */
 function initModalFunctionality() {
-    const modal = document.getElementById('equipacionModal');
+    const modal = document.getElementById('prendaModal');
     
     if (modal) {
         // Cerrar modal con Escape
@@ -88,9 +88,9 @@ function initModalFunctionality() {
     }
 }
 
-function openEquipacionModal(imgElement) {
-    const modal = document.getElementById('equipacionModal');
-    const modalImg = document.getElementById('modalEquipacionImg');
+function openPrendaModal(imgElement) {
+    const modal = document.getElementById('prendaModal');
+    const modalImg = document.getElementById('modalPrendaImg');
     
     if (modal && modalImg && imgElement) {
         // Actualizar imagen del modal
@@ -180,7 +180,7 @@ function initScrollAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-                const delay = entry.target.classList.contains('equipacion-card') ? index * 50 : 0;
+                const delay = entry.target.classList.contains('prenda-card') ? index * 50 : 0;
                 
                 setTimeout(() => {
                     entry.target.style.opacity = '1';
@@ -196,7 +196,7 @@ function initScrollAnimations() {
     });
     
     // Aplicar estado inicial y observar
-    document.querySelectorAll('.equipacion-card, .equipo-info-header').forEach(el => {
+    document.querySelectorAll('.prenda-card, .subsubseccion-info-header').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
@@ -225,7 +225,7 @@ function descargarImagen(imgElement) {
     if (imgElement) {
         const link = document.createElement('a');
         link.href = imgElement.src;
-        link.download = `equipacion-${Date.now()}.jpg`;
+        link.download = `prenda-${Date.now()}.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -270,7 +270,7 @@ function initMobileOptimizations() {
         document.body.style.webkitOverflowScrolling = 'touch';
         
         // Reducir animaciones en móvil para mejor performance
-        const cards = document.querySelectorAll('.equipacion-card');
+        const cards = document.querySelectorAll('.prenda-card');
         cards.forEach(card => {
             card.style.willChange = 'transform';
         });
@@ -279,7 +279,7 @@ function initMobileOptimizations() {
         document.addEventListener('touchstart', function() {}, {passive: true});
         
         // Optimizar imágenes para móvil
-        const images = document.querySelectorAll('.equipacion-img');
+        const images = document.querySelectorAll('.prenda-img');
         images.forEach(img => {
             img.addEventListener('load', function() {
                 this.style.willChange = 'auto';
@@ -293,7 +293,7 @@ function initMobileOptimizations() {
         }
         
         // Optimizar el modal para móvil
-        const modal = document.getElementById('equipacionModal');
+        const modal = document.getElementById('prendaModal');
         if (modal) {
             modal.addEventListener('show.bs.modal', () => {
                 // Ajustar altura del modal en móvil
@@ -323,18 +323,18 @@ function initMobileOptimizations() {
     
     // Optimización para dispositivos con hover limitado
     if (window.matchMedia('(hover: none)').matches) {
-        const cards = document.querySelectorAll('.equipacion-card');
+        const cards = document.querySelectorAll('.prenda-card');
         cards.forEach(card => {
             // En dispositivos sin hover, mostrar overlay al hacer tap
             card.addEventListener('touchstart', function(e) {
-                const overlay = this.querySelector('.equipacion-overlay');
+                const overlay = this.querySelector('.prenda-overlay');
                 if (overlay) {
                     overlay.style.transform = 'translateY(0)';
                 }
             }, {passive: true});
             
             card.addEventListener('touchend', function(e) {
-                const overlay = this.querySelector('.equipacion-overlay');
+                const overlay = this.querySelector('.prenda-overlay');
                 if (overlay) {
                     setTimeout(() => {
                         overlay.style.transform = 'translateY(100%)';
@@ -350,7 +350,7 @@ function initMobileOptimizations() {
  * ==================
  */
 window.addEventListener('error', function(e) {
-    console.error('Error en equipo.js:', e.error);
+    console.error('Error en subsubseccion.js:', e.error);
     showFeedback('Ha ocurrido un error inesperado', 'error');
 });
 
