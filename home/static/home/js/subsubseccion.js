@@ -20,26 +20,11 @@ function initPrendaCards() {
     prendaCards.forEach(card => {
         const prendaId = card.dataset.prendaId;
         const prendaImg = card.querySelector('.prenda-img');
-        const btnContactar = card.querySelector('.btn-contactar');
-        
+
         // Click en la card para ver imagen ampliada
         card.addEventListener('click', (e) => {
-            // Si se hizo click en el botón, no abrir modal
-            if (e.target.closest('.btn-contactar')) {
-                return;
-            }
             openPrendaModal(prendaImg);
         });
-        
-        // Click en botón contactar
-        if (btnContactar) {
-            btnContactar.addEventListener('click', (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                // Abrir modal primero, no ir directo a Instagram
-                openPrendaModal(prendaImg);
-            });
-        }
         
         // Accesibilidad - Enter y Space para abrir modal
         card.addEventListener('keydown', (e) => {
@@ -334,23 +319,9 @@ function initMobileOptimizations() {
     if (window.matchMedia('(hover: none)').matches) {
         const cards = document.querySelectorAll('.prenda-card');
         cards.forEach(card => {
-            // En dispositivos sin hover, mostrar overlay al hacer tap
-            card.addEventListener('touchstart', function(e) {
-                const overlay = this.querySelector('.prenda-overlay');
-                if (overlay) {
-                    overlay.style.transform = 'translateY(0)';
-                }
-            }, {passive: true});
-            
+            // En dispositivos móviles, abrir modal al hacer tap
             card.addEventListener('touchend', function(e) {
                 e.preventDefault();
-                const overlay = this.querySelector('.prenda-overlay');
-                if (overlay) {
-                    setTimeout(() => {
-                        overlay.style.transform = 'translateY(100%)';
-                    }, 2000);
-                }
-                // Si el usuario hizo tap rápido, abrir modal en lugar de contactar Instagram
                 const prendaImg = this.querySelector('.prenda-img');
                 if (prendaImg) {
                     openPrendaModal(prendaImg);
