@@ -18,7 +18,7 @@
   font-weight: 400;
 }
 
-/* Sección Cards - DISEÑO ELEGANTE Y GENÉRICO */
+/* Sección Cards - DISEÑO ELEGANTE Y GENÉRICO CON ALTURA FIJA */
 .seccion-card {
   background: white;
   border-radius: 1.25rem;
@@ -33,7 +33,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  height: 320px;
+  height: 380px; /* Altura fija aumentada para acomodar contenido */
   position: relative;
   overflow: hidden;
 }
@@ -82,6 +82,7 @@
   position: relative;
   border: 2px solid rgba(102, 126, 234, 0.2);
   overflow: hidden;
+  flex-shrink: 0; /* Evita que se reduzca */
 }
 
 .seccion-card:hover .seccion-logo-container {
@@ -114,15 +115,16 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
-/* Info de la sección - TIPOGRAFÍA ELEGANTE */
+/* Info de la sección - ALTURA FIJA Y CONTROLADA */
 .seccion-info {
   margin-bottom: 1rem;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
-  min-height: 80px;
+  height: 110px; /* Altura fija para la sección de info */
+  overflow: hidden;
 }
 
 .seccion-nombre {
@@ -132,6 +134,12 @@
   margin-bottom: 0.5rem;
   line-height: 1.2;
   letter-spacing: -0.01em;
+  height: 2.4rem; /* Altura fija para 2 líneas máximo */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .seccion-descripcion {
@@ -140,9 +148,13 @@
   margin-bottom: 0.75rem;
   line-height: 1.4;
   opacity: 0.8;
-  min-height: 2.1rem;
-  display: flex;
-  align-items: center;
+  height: 3.6rem; /* Altura fija para 3 líneas máximo */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
 }
 
 .seccion-subsecciones {
@@ -159,13 +171,15 @@
   border-radius: 1rem;
   align-self: center;
   border: 1px solid rgba(102, 126, 234, 0.15);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .seccion-subsecciones i {
   font-size: 0.7rem;
 }
 
-/* Preview de subsecciones - LOGOS MÁS GRANDES */
+/* Preview de subsecciones - ALTURA FIJA */
 .subsecciones-preview {
   display: flex;
   justify-content: center;
@@ -175,14 +189,16 @@
   padding: 0.75rem;
   background: rgba(102, 126, 234, 0.03);
   border-radius: 0.75rem;
-  height: 70px;
+  height: 70px; /* Altura fija */
   border: 1px solid rgba(102, 126, 234, 0.08);
+  flex-shrink: 0;
 }
 
 .subseccion-mini {
   width: 36px;
   height: 36px;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .seccion-card:hover .subseccion-mini {
@@ -222,6 +238,7 @@
   font-weight: 600;
   color: rgba(102, 126, 234, 0.8);
   border: 1px solid rgba(102, 126, 234, 0.2);
+  flex-shrink: 0;
 }
 
 .no-subsecciones {
@@ -235,6 +252,7 @@
   justify-content: center;
   font-size: 0.9rem;
   color: rgba(102, 126, 234, 0.4);
+  flex-shrink: 0;
 }
 
 /* Botón - DISEÑO MODERNO MEJORADO */
@@ -257,6 +275,8 @@
   box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  margin-top: auto; /* Empuja el botón hacia abajo */
 }
 
 .btn-explorar::before {
@@ -321,7 +341,7 @@
   font-size: 0.9rem;
 }
 
-/* Responsive - MOBILE FIRST */
+/* Responsive - MOBILE FIRST CON ALTURAS FIJAS */
 @media (max-width: 575.98px) {
   .secciones-section {
     padding: 1rem 0 !important;
@@ -336,7 +356,7 @@
   }
   
   .seccion-card {
-    height: 280px;
+    height: 320px; /* Altura fija mobile */
     padding: 1.25rem 1rem;
   }
   
@@ -351,14 +371,21 @@
     height: 70px;
   }
   
+  .seccion-info {
+    height: 95px; /* Altura fija para mobile */
+  }
+  
   .seccion-nombre {
     font-size: 1rem;
     margin-bottom: 0.4rem;
+    height: 2rem; /* Altura fija para mobile */
   }
   
   .seccion-descripcion {
     font-size: 0.8rem;
     margin-bottom: 0.6rem;
+    height: 3rem; /* Altura fija para mobile */
+    -webkit-line-clamp: 2;
   }
   
   .seccion-subsecciones {
@@ -370,6 +397,7 @@
     padding: 0.5rem;
     margin-bottom: 1rem;
     gap: 0.5rem;
+    height: 60px; /* Altura fija mobile */
   }
   
   .subseccion-mini {
@@ -398,7 +426,11 @@
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   .seccion-card {
-    height: 300px;
+    height: 350px; /* Altura fija tablet pequeña */
+  }
+  
+  .seccion-info {
+    height: 100px;
   }
   
   .seccion-logo-container {
@@ -410,12 +442,24 @@
     width: 75px;
     height: 75px;
   }
+  
+  .seccion-nombre {
+    height: 2.2rem;
+  }
+  
+  .seccion-descripcion {
+    height: 3.3rem;
+  }
 }
 
 @media (min-width: 768px) {
   .seccion-card {
-    height: 340px;
+    height: 400px; /* Altura fija desktop */
     padding: 1.75rem 1.5rem;
+  }
+  
+  .seccion-info {
+    height: 120px;
   }
   
   .seccion-logo-container {
@@ -431,15 +475,18 @@
   
   .seccion-nombre {
     font-size: 1.25rem;
+    height: 2.6rem;
   }
   
   .seccion-descripcion {
     font-size: 0.9rem;
+    height: 3.8rem;
   }
   
   .subsecciones-preview {
     padding: 0.85rem;
     margin-bottom: 1.5rem;
+    height: 75px;
   }
   
   .subseccion-mini {
@@ -477,7 +524,7 @@
 /* Landscape móvil */
 @media (max-width: 767.98px) and (orientation: landscape) {
   .seccion-card {
-    height: 250px;
+    height: 280px; /* Altura fija landscape */
     padding: 1rem 0.85rem;
   }
   
@@ -494,16 +541,24 @@
   
   .seccion-info {
     margin-bottom: 0.75rem;
+    height: 85px;
+  }
+  
+  .seccion-nombre {
+    height: 1.8rem;
   }
   
   .seccion-descripcion {
     font-size: 0.75rem;
     margin-bottom: 0.5rem;
+    height: 2.5rem;
+    -webkit-line-clamp: 2;
   }
   
   .subsecciones-preview {
     padding: 0.4rem;
     margin-bottom: 0.75rem;
+    height: 55px;
   }
   
   .btn-explorar {
@@ -648,7 +703,7 @@
   min-height: 60vh;
 }
 
-/* Subsección cards */
+/* Subsección cards - TAMBIÉN CON ALTURA FIJA */
 .subseccion-card {
   background: white;
   border-radius: 1rem;
@@ -659,7 +714,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: 220px;
+  height: 260px; /* Altura fija para subsección cards */
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -701,6 +756,7 @@
   justify-content: center;
   border: 2px solid rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .subseccion-card:hover .subseccion-logo-container {
@@ -727,6 +783,11 @@
 .subseccion-info {
   flex-grow: 1;
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 120px; /* Altura fija para la info */
+  overflow: hidden;
 }
 
 .subseccion-nombre {
@@ -735,6 +796,12 @@
   color: #2d3748;
   margin-bottom: 0.5rem;
   line-height: 1.3;
+  height: 2.6rem; /* Altura fija para nombre */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .subseccion-descripcion {
@@ -742,12 +809,20 @@
   color: #718096;
   line-height: 1.4;
   margin-bottom: 0.75rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .subseccion-stats {
   font-size: 0.85rem;
   color: #4a5568;
   font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .subseccion-stats i {
@@ -756,6 +831,7 @@
 
 .subseccion-action {
   margin-top: auto;
+  flex-shrink: 0;
 }
 
 .btn-explorar-mini {
@@ -769,6 +845,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .subseccion-card:hover .btn-explorar-mini {
@@ -813,8 +890,16 @@
   }
   
   .subseccion-card {
-    min-height: 200px;
+    height: 240px; /* Altura fija mobile para subsecciones */
     padding: 1.25rem;
+  }
+  
+  .subseccion-info {
+    height: 100px;
+  }
+  
+  .subseccion-nombre {
+    height: 2.2rem;
   }
   
   .subseccion-logo-container {
