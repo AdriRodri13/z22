@@ -35,7 +35,9 @@ function initPrendaCards() {
         if (btnContactar) {
             btnContactar.addEventListener('click', (e) => {
                 e.stopPropagation();
-                contactarInstagram(prendaImg);
+                e.preventDefault();
+                // Abrir modal primero, no ir directo a Instagram
+                openPrendaModal(prendaImg);
             });
         }
         
@@ -341,13 +343,19 @@ function initMobileOptimizations() {
             }, {passive: true});
             
             card.addEventListener('touchend', function(e) {
+                e.preventDefault();
                 const overlay = this.querySelector('.prenda-overlay');
                 if (overlay) {
                     setTimeout(() => {
                         overlay.style.transform = 'translateY(100%)';
                     }, 2000);
                 }
-            }, {passive: true});
+                // Si el usuario hizo tap rápido, abrir modal en lugar de contactar Instagram
+                const prendaImg = this.querySelector('.prenda-img');
+                if (prendaImg) {
+                    openPrendaModal(prendaImg);
+                }
+            }, {passive: false});
         });
     }
 }

@@ -485,10 +485,39 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   transition: transform var(--transition-smooth);
+  max-width: 100%;
+  height: auto;
+  opacity: 1 !important;
+  background: transparent !important;
 }
 
 .modal-body img:hover {
   transform: scale(1.02);
+}
+
+/* Fixes para dispositivos móviles */
+@media (max-width: 768px) {
+  .modal-content {
+    backdrop-filter: none !important;
+    background: rgba(31, 41, 55, 0.95) !important;
+  }
+  
+  .modal-body img {
+    backdrop-filter: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    background-color: transparent !important;
+    isolation: auto;
+  }
+  
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
 }
 
 /* Botón Instagram */
