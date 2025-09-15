@@ -107,10 +107,10 @@ function openPrendaModal(imgElement) {
  * ==========================
  */
 function contactarInstagram(imgElement = null) {
-    // URL de Instagram actualizada para zone22._
-    const instagramUrl = 'https://www.instagram.com/zone22._/';
-    
-    // Abrir Instagram en nueva pestaña
+    // URL directa al chat de Instagram para zone22._
+    const instagramUrl = 'https://www.instagram.com/direct/t/zone22._/';
+
+    // Abrir chat de Instagram en nueva pestaña
     window.open(instagramUrl, '_blank');
     
     // Cerrar modal si está abierto
