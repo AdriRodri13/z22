@@ -23,7 +23,7 @@
   background: white;
   border-radius: 1.25rem;
   padding: 1.5rem 1.25rem;
-  box-shadow: 
+  box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.12),
     0 1px 2px rgba(0, 0, 0, 0.24);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -33,7 +33,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: 200px;
+  height: 320px;
   position: relative;
   overflow: hidden;
 }
@@ -70,8 +70,8 @@
 
 /* Logo de la sección - MÁS GRANDE */
 .seccion-logo-container {
-  width: 90px;
-  height: 90px;
+  width: 110px;
+  height: 110px;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -91,8 +91,8 @@
 }
 
 .seccion-logo {
-  width: 70px;
-  height: 70px;
+  width: 85px;
+  height: 85px;
   object-fit: contain;
   transition: all 0.3s ease;
   border-radius: 8px;
@@ -332,18 +332,19 @@
   }
   
   .seccion-card {
-    min-height: 180px;
+    height: 280px;
     padding: 1.25rem 1rem;
   }
   
   .seccion-logo-container {
-    width: 75px;
-    height: 75px;
+    width: 90px;
+    height: 90px;
     margin-bottom: 0.75rem;
   }
   
   .seccion-logo {
-    font-size: 1.8rem;
+    width: 70px;
+    height: 70px;
   }
   
   .seccion-nombre {
@@ -393,33 +394,35 @@
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   .seccion-card {
-    min-height: 190px;
-  }
-  
-  .seccion-logo-container {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .seccion-logo {
-    font-size: 2rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .seccion-card {
-    min-height: 210px;
-    padding: 1.75rem 1.5rem;
+    height: 300px;
   }
   
   .seccion-logo-container {
     width: 95px;
     height: 95px;
+  }
+  
+  .seccion-logo {
+    width: 75px;
+    height: 75px;
+  }
+}
+
+@media (min-width: 768px) {
+  .seccion-card {
+    height: 340px;
+    padding: 1.75rem 1.5rem;
+  }
+  
+  .seccion-logo-container {
+    width: 115px;
+    height: 115px;
     margin-bottom: 1.25rem;
   }
   
   .seccion-logo {
-    font-size: 2.4rem;
+    width: 90px;
+    height: 90px;
   }
   
   .seccion-nombre {
@@ -470,18 +473,19 @@
 /* Landscape móvil */
 @media (max-width: 767.98px) and (orientation: landscape) {
   .seccion-card {
-    min-height: 160px;
+    height: 250px;
     padding: 1rem 0.85rem;
   }
   
   .seccion-logo-container {
-    width: 65px;
-    height: 65px;
+    width: 80px;
+    height: 80px;
     margin-bottom: 0.5rem;
   }
   
   .seccion-logo {
-    font-size: 1.6rem;
+    width: 60px;
+    height: 60px;
   }
   
   .seccion-info {
