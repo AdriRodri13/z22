@@ -249,15 +249,32 @@ function showNotification(message, type = 'info', timeout = 4000) {
 
     container.appendChild(notification);
 
-    // Auto-remove después del timeout especificado
-    setTimeout(() => {
-        if (notification.parentNode) {
-            const bsAlert = bootstrap.Alert.getInstance(notification);
-            if (bsAlert) {
-                bsAlert.close();
+    // Inicializar Bootstrap Alert
+    try {
+        new bootstrap.Alert(notification);
+    } catch (e) {
+        console.warn('Bootstrap Alert no pudo inicializarse:', e);
+    }
+
+    // Auto-remove después del timeout especificado con múltiples fallbacks
+    const removeNotification = () => {
+        if (notification && notification.parentNode) {
+            try {
+                const bsAlert = bootstrap.Alert.getInstance(notification);
+                if (bsAlert) {
+                    bsAlert.close();
+                } else {
+                    // Fallback: remover directamente
+                    notification.remove();
+                }
+            } catch (e) {
+                // Fallback final: remover directamente
+                notification.remove();
             }
         }
-    }, timeout);
+    };
+
+    setTimeout(removeNotification, timeout);
 }
 
 // Función para lazy loading de imágenes
