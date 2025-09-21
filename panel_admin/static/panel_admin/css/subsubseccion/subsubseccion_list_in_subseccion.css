@@ -240,7 +240,7 @@
     align-items: center;
     justify-content: center;
     color: var(--color-text-muted);
-    font-size: 1.8rem;
+    font-size: 3rem;
     border: 2px solid var(--color-secondary);
     transition: var(--transition-normal);
 }
