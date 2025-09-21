@@ -33,9 +33,9 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  height: 380px !important; /* Altura fija forzada */
-  min-height: 380px !important;
-  max-height: 380px !important;
+  height: 500px !important; /* Altura generosa para el botón */
+  min-height: 500px !important;
+  max-height: 500px !important;
   position: relative;
   overflow: hidden;
 }
@@ -261,26 +261,27 @@
 
 /* Botón - DISEÑO MODERNO MEJORADO */
 .btn-explorar {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  max-width: 170px;
-  letter-spacing: 0.01em;
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-  margin-top: auto; /* Empuja el botón hacia abajo */
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
+  border: none !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+  max-width: 170px !important;
+  letter-spacing: 0.01em !important;
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  margin-top: auto !important; /* Empuja el botón hacia abajo */
+  z-index: 10 !important; /* Asegurar que esté visible */
 }
 
 .btn-explorar::before {
@@ -360,9 +361,9 @@
   }
   
   .seccion-card {
-    height: 320px !important; /* Altura fija mobile forzada */
-    min-height: 320px !important;
-    max-height: 320px !important;
+    height: 420px !important; /* Altura aumentada mobile */
+    min-height: 420px !important;
+    max-height: 420px !important;
     padding: 1.25rem 1rem;
   }
   
@@ -434,9 +435,9 @@
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   .seccion-card {
-    height: 350px !important; /* Altura fija tablet pequeña forzada */
-    min-height: 350px !important;
-    max-height: 350px !important;
+    height: 450px !important; /* Altura aumentada tablet pequeña */
+    min-height: 450px !important;
+    max-height: 450px !important;
   }
   
   .seccion-info {
@@ -466,9 +467,9 @@
 
 @media (min-width: 768px) {
   .seccion-card {
-    height: 400px !important; /* Altura fija desktop forzada */
-    min-height: 400px !important;
-    max-height: 400px !important;
+    height: 500px !important; /* Altura aumentada desktop */
+    min-height: 500px !important;
+    max-height: 500px !important;
     padding: 1.75rem 1.5rem;
   }
   
@@ -540,9 +541,9 @@
 /* Landscape móvil */
 @media (max-width: 767.98px) and (orientation: landscape) {
   .seccion-card {
-    height: 280px !important; /* Altura fija landscape forzada */
-    min-height: 280px !important;
-    max-height: 280px !important;
+    height: 380px !important; /* Altura aumentada landscape */
+    min-height: 380px !important;
+    max-height: 380px !important;
     padding: 1rem 0.85rem;
   }
   
