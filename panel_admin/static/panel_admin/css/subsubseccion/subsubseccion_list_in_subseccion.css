@@ -20,7 +20,6 @@
     height: 80px;
     background: white;
     border-radius: var(--border-radius-md);
-    padding: 1rem;
     border: 2px solid var(--color-hover-primary);
     display: flex;
     align-items: center;
@@ -210,7 +209,6 @@
     height: 70px;
     background: white;
     border-radius: var(--border-radius-md);
-    padding: 1rem;
     margin: 0 auto 1.5rem;
     display: flex;
     align-items: center;
