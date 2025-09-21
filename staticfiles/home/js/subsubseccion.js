@@ -18,7 +18,7 @@ function agregarACesta() {
 
     // Validar datos
     if (!prendaData.id || !prendaData.nombre) {
-        showFeedback('Error: Datos de prenda incompletos', 'error');
+        showFeedback('Error: Datos de prenda incompletos', 'error', 4000);
         return;
     }
 
@@ -33,10 +33,12 @@ function agregarACesta() {
                 const wasAdded = window.addToCestaGlobal(prendaData);
 
                 if (wasAdded) {
-                    showFeedback('¡Agregado a la cesta!', 'success');
+                    showFeedback('¡Agregado a la cesta!', 'success', 2500);
+                    hideLoadingState(btn);
                     showSuccessState(btn);
                 } else {
-                    showFeedback('Prenda ya está en la cesta', 'info');
+                    showFeedback('Prenda ya está en la cesta', 'info', 3000);
+                    hideLoadingState(btn);
                 }
             } else {
                 // Fallback: usar sistema local
@@ -44,13 +46,15 @@ function agregarACesta() {
 
                 if (existingIndex !== -1) {
                     cestaItems[existingIndex].timestamp = new Date().toISOString();
-                    showFeedback('Prenda ya está en la cesta', 'info');
+                    showFeedback('Prenda ya está en la cesta', 'info', 3000);
+                    hideLoadingState(btn);
                 } else {
                     cestaItems.push({
                         ...prendaData,
                         timestamp: new Date().toISOString()
                     });
-                    showFeedback('¡Agregado a la cesta!', 'success');
+                    showFeedback('¡Agregado a la cesta!', 'success', 2500);
+                    hideLoadingState(btn);
                     showSuccessState(btn);
                 }
 
@@ -63,11 +67,9 @@ function agregarACesta() {
 
         } catch (error) {
             console.error('Error al agregar a la cesta:', error);
-            showFeedback('Error al agregar a la cesta', 'error');
+            showFeedback('Error al agregar a la cesta', 'error', 4000);
+            hideLoadingState(btn);
         }
-
-        // Siempre restaurar el botón, independientemente de errores
-        hideLoadingState(btn);
     }, 800);
 }
 
@@ -215,8 +217,10 @@ function contactarInstagram(imgElement = null) {
     }
     
     // Feedback visual
-    showFeedback('Redirigiendo a Instagram...', 'success');
+    showFeedback('Redirigiendo a Instagram...', 'success', 2000);
 }
+
+
 
 // Función global para el botón del modal
 window.contactarInstagram = contactarInstagram;
@@ -301,9 +305,9 @@ function initScrollAnimations() {
 function copiarEnlaceImagen(imgElement) {
     if (navigator.clipboard && imgElement) {
         navigator.clipboard.writeText(imgElement.src).then(() => {
-            showFeedback('Enlace copiado al portapapeles', 'success');
+            showFeedback('Enlace copiado al portapapeles', 'success', 2500);
         }).catch(() => {
-            showFeedback('Error al copiar enlace', 'error');
+            showFeedback('Error al copiar enlace', 'error', 3500);
         });
     }
 }
@@ -317,12 +321,12 @@ function descargarImagen(imgElement) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        showFeedback('Descarga iniciada', 'success');
+        showFeedback('Descarga iniciada', 'success', 2500);
     }
 }
 
 // Feedback visual simple
-function showFeedback(message, type = 'info') {
+function showFeedback(message, type = 'info', timeout = 3000) {
     const toast = document.createElement('div');
     toast.className = `alert alert-${type} position-fixed`;
     toast.style.cssText = `
@@ -337,15 +341,15 @@ function showFeedback(message, type = 'info') {
         backdrop-filter: blur(10px);
     `;
     toast.textContent = message;
-    
+
     document.body.appendChild(toast);
-    
+
     setTimeout(() => toast.style.opacity = '1', 10);
-    
+
     setTimeout(() => {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, timeout);
 }
 
 /**
@@ -431,7 +435,7 @@ function initMobileOptimizations() {
  */
 window.addEventListener('error', function(e) {
     console.error('Error en subsubseccion.js:', e.error);
-    showFeedback('Ha ocurrido un error inesperado', 'error');
+    showFeedback('Ha ocurrido un error inesperado', 'error', 5000);
 });
 
 // Prevenir errores de Bootstrap si no está cargado
@@ -550,13 +554,18 @@ function hideLoadingState(btn) {
 }
 
 function showSuccessState(btn) {
-    const originalText = btn.innerHTML;
+    // Usar el texto original guardado por showLoadingState, o el actual como fallback
+    const originalText = btn.dataset.originalText || btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-check me-2"></i>¡Agregado!';
     btn.classList.add('success');
+    btn.disabled = true;
 
     setTimeout(() => {
         btn.innerHTML = originalText;
         btn.classList.remove('success');
+        btn.disabled = false;
+        // Limpiar el dataset
+        delete btn.dataset.originalText;
     }, 2000);
 }
 
@@ -585,7 +594,7 @@ function saveCestaToStorage() {
         localStorage.setItem('cesta_prendas', JSON.stringify(cestaItems));
     } catch (error) {
         console.error('Error al guardar cesta en localStorage:', error);
-        showFeedback('Error al guardar en la cesta', 'error');
+        showFeedback('Error al guardar en la cesta', 'error', 4000);
     }
 }
 
@@ -633,7 +642,7 @@ function removeFromCesta(prendaId) {
         const removedItem = cestaItems.splice(index, 1)[0];
         saveCestaToStorage();
         updateCestaCounter();
-        showFeedback(`${removedItem.nombre} eliminado de la cesta`, 'info');
+        showFeedback(`${removedItem.nombre} eliminado de la cesta`, 'info', 3000);
         return true;
     }
     return false;
@@ -643,7 +652,7 @@ function clearCesta() {
     cestaItems = [];
     saveCestaToStorage();
     updateCestaCounter();
-    showFeedback('Cesta vaciada', 'info');
+    showFeedback('Cesta vaciada', 'info', 2500);
 }
 
 function getCestaTotal() {

@@ -171,6 +171,46 @@
         </div>
     </div>
 
+    <!-- Modal de consulta de disponibilidad -->
+    <div class="modal fade" id="consultaModal" tabindex="-1" aria-labelledby="consultaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border-0">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white" id="consultaModalLabel">
+                        <i class="fas fa-phone me-2"></i>Consultar Disponibilidad
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="consultaForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nombreCliente" class="form-label text-white">Nombre completo</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="nombreCliente" name="nombre" required placeholder="Tu nombre completo">
+                        </div>
+                        <div class="mb-3">
+                            <label for="instagramCliente" class="form-label text-white">Instagram</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark text-white border-secondary">@</span>
+                                <input type="text" class="form-control bg-dark text-white border-secondary" id="instagramCliente" name="instagram" required placeholder="tu_usuario_instagram">
+                            </div>
+                        </div>
+                        <div class="alert alert-info border-0" style="background: rgba(13, 110, 253, 0.1);">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small class="text-light">Te contactaremos por Instagram para confirmar la disponibilidad de los productos en tu cesta.</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-cesta" onclick="enviarConsulta()">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Consulta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

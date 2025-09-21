@@ -229,7 +229,7 @@ function initAccessibility() {
  */
 
 // Función para mostrar notificaciones simples
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', timeout = 4000) {
     // Crear contenedor si no existe
     let container = document.querySelector('.notification-container');
     if (!container) {
@@ -238,7 +238,7 @@ function showNotification(message, type = 'info') {
         container.style.zIndex = '9999';
         document.body.appendChild(container);
     }
-    
+
     // Crear notificación
     const notification = document.createElement('div');
     notification.className = `alert alert-${type} alert-dismissible fade show`;
@@ -246,18 +246,35 @@ function showNotification(message, type = 'info') {
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-    
+
     container.appendChild(notification);
-    
-    // Auto-remove después de 5 segundos
-    setTimeout(() => {
-        if (notification.parentNode) {
-            const bsAlert = bootstrap.Alert.getInstance(notification);
-            if (bsAlert) {
-                bsAlert.close();
+
+    // Inicializar Bootstrap Alert
+    try {
+        new bootstrap.Alert(notification);
+    } catch (e) {
+        console.warn('Bootstrap Alert no pudo inicializarse:', e);
+    }
+
+    // Auto-remove después del timeout especificado con múltiples fallbacks
+    const removeNotification = () => {
+        if (notification && notification.parentNode) {
+            try {
+                const bsAlert = bootstrap.Alert.getInstance(notification);
+                if (bsAlert) {
+                    bsAlert.close();
+                } else {
+                    // Fallback: remover directamente
+                    notification.remove();
+                }
+            } catch (e) {
+                // Fallback final: remover directamente
+                notification.remove();
             }
         }
-    }, 5000);
+    };
+
+    setTimeout(removeNotification, timeout);
 }
 
 // Función para lazy loading de imágenes
@@ -303,11 +320,11 @@ document.addEventListener('error', function(e) {
 
 // Detectar estado de conexión
 window.addEventListener('online', function() {
-    showNotification('Conexión restaurada', 'success');
+    showNotification('Conexión restaurada', 'success', 3000);
 });
 
 window.addEventListener('offline', function() {
-    showNotification('Sin conexión a internet', 'warning');
+    showNotification('Sin conexión a internet', 'warning', 4000);
 });
 
 // CSS adicional para estados específicos
@@ -511,71 +528,119 @@ function removeFromCestaGlobal(prendaId) {
         renderCestaModal();
 
         // Mostrar feedback
-        showNotification(`${removedItem.nombre} eliminado de la cesta`, 'info');
+        showNotification(`${removedItem.nombre} eliminado de la cesta`, 'info', 3000);
     }
 }
 
 function clearCestaGlobal() {
     if (cestaGlobal.length === 0) {
-        showNotification('La cesta ya está vacía', 'info');
+        showNotification('La cesta ya está vacía', 'info', 3000);
         return;
     }
 
-    // Confirmar acción
-    if (confirm('¿Estás seguro de que quieres vaciar la cesta?')) {
-        cestaGlobal = [];
-        localStorage.setItem('cesta_prendas', JSON.stringify(cestaGlobal));
+    // Vaciar cesta directamente
+    cestaGlobal = [];
+    localStorage.setItem('cesta_prendas', JSON.stringify(cestaGlobal));
 
-        // Actualizar UI
-        updateCestaGlobalCounter();
-        renderCestaModal();
+    // Actualizar UI
+    updateCestaGlobalCounter();
+    renderCestaModal();
 
-        // Mostrar feedback
-        showNotification('Cesta vaciada', 'success');
-    }
+    // Mostrar feedback
+    showNotification('Cesta vaciada', 'success', 3000);
 }
 
 function consultarDisponibilidad() {
     if (cestaGlobal.length === 0) {
-        showNotification('Tu cesta está vacía', 'warning');
+        showNotification('Tu cesta está vacía', 'warning', 3000);
         return;
     }
 
-    // Crear mensaje para Instagram con los items de la cesta
-    let mensaje = '¡Hola! Me gustaría consultar la disponibilidad de estas prendas:\\n\\n';
+    // Cerrar modal de cesta y abrir modal de consulta
+    const cestaModal = bootstrap.Modal.getInstance(document.getElementById('cestaModal'));
+    if (cestaModal) {
+        cestaModal.hide();
+    }
 
-    cestaGlobal.forEach((item, index) => {
-        mensaje += `${index + 1}. ${item.nombre} - ${item.precio}\\n`;
+    // Abrir modal de consulta después de un pequeño delay
+    setTimeout(() => {
+        const consultaModal = new bootstrap.Modal(document.getElementById('consultaModal'));
+        consultaModal.show();
+    }, 300);
+}
+
+function enviarConsulta() {
+    const form = document.getElementById('consultaForm');
+    const nombre = document.getElementById('nombreCliente').value.trim();
+    const instagram = document.getElementById('instagramCliente').value.trim();
+
+    // Validar campos
+    if (!nombre || !instagram) {
+        showNotification('Por favor completa todos los campos', 'warning', 4000);
+        return;
+    }
+
+    // Validar Instagram (sin @)
+    const instagramClean = instagram.replace('@', '');
+    if (instagramClean.length < 3) {
+        showNotification('El usuario de Instagram debe tener al menos 3 caracteres', 'warning', 4000);
+        return;
+    }
+
+    // Preparar datos
+    const consultaData = {
+        nombre: nombre,
+        instagram: instagramClean,
+        productos: cestaGlobal.map(item => ({
+            id: item.id,
+            nombre: item.nombre,
+            precio: item.precio
+        }))
+    };
+
+    // Deshabilitar botón y mostrar loading
+    const btnEnviar = document.querySelector('#consultaModal .btn-cesta');
+    const originalText = btnEnviar.innerHTML;
+    btnEnviar.disabled = true;
+    btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+
+    // Enviar petición
+    fetch('/consultar-disponibilidad/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(consultaData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Cerrar modal de consulta
+            const consultaModal = bootstrap.Modal.getInstance(document.getElementById('consultaModal'));
+            consultaModal.hide();
+
+            // Limpiar cesta
+            clearCestaGlobal();
+
+            // Limpiar formulario
+            form.reset();
+
+            // Mostrar mensaje de éxito
+            showNotification(data.message, 'success', 5000);
+        } else {
+            showNotification(data.error || 'Error al enviar la consulta', 'error', 5000);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error de conexión. Inténtalo de nuevo.', 'error', 5000);
+    })
+    .finally(() => {
+        // Restaurar botón
+        btnEnviar.disabled = false;
+        btnEnviar.innerHTML = originalText;
     });
-
-    mensaje += '\\n¿Están disponibles? ¡Gracias!';
-
-    // URL para abrir Instagram con mensaje predefinido (simplificado)
-    const instagramUrl = 'https://www.instagram.com/zone22._/';
-
-    // Abrir Instagram y cerrar modal
-    window.open(instagramUrl, '_blank');
-
-    // Cerrar modal
-    const modal = document.getElementById('cestaModal');
-    const bootstrapModal = bootstrap.Modal.getInstance(modal);
-    if (bootstrapModal) {
-        bootstrapModal.hide();
-    }
-
-    // Mostrar feedback con instrucciones
-    showNotification('Redirigiendo a Instagram. Copia el mensaje de la cesta para consultar disponibilidad', 'info');
-
-    // Copiar mensaje al portapapeles si es posible
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(mensaje.replace(/\\n/g, '\n')).then(() => {
-            setTimeout(() => {
-                showNotification('Mensaje copiado al portapapeles', 'success');
-            }, 1000);
-        }).catch(() => {
-            // Silenciar error de clipboard
-        });
-    }
 }
 
 // Hacer funciones globales
@@ -583,6 +648,7 @@ window.abrirModalCesta = abrirModalCesta;
 window.removeFromCestaGlobal = removeFromCestaGlobal;
 window.clearCesta = clearCestaGlobal;
 window.consultarDisponibilidad = consultarDisponibilidad;
+window.enviarConsulta = enviarConsulta;
 
 // Funciones para usar desde otras páginas
 window.getCestaGlobalItems = function() {

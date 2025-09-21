@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Disponibilidad - Z22</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            z-index: 10;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            padding: 25px 30px 35px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: float 20s linear infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header .subtitle {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+            font-weight: 400;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .cliente-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cliente-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .section-title {
+            color: #1e293b;
+            margin: 0 0 18px 0;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .section-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .cliente-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+        
+        .cliente-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+        }
+        
+        .cliente-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .cliente-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .instagram-link {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 6px 15px rgba(34, 197, 94, 0.3);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .instagram-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px 12px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-number {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .productos-section {
+            margin-bottom: 25px;
+        }
+        
+        .producto {
+            display: flex;
+            align-items: center;
+            padding: 18px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .producto::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(102, 126, 234, 0.02) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .producto:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: #e2e8f0;
+        }
+        
+        .producto:hover::before {
+            opacity: 1;
+        }
+        
+        .producto-imagen {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-right: 20px;
+            border: 2px solid #f1f5f9;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .producto-imagen-placeholder {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 11px;
+            text-align: center;
+            font-weight: 500;
+            border: 2px solid #f1f5f9;
+        }
+        
+        .producto-info {
+            flex: 1;
+        }
+        
+        .producto-nombre {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .producto-categoria {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 8px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            display: inline-block;
+            font-weight: 500;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .producto-precio {
+            font-weight: 800;
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .total-section {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(30, 41, 59, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .total-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: float 25s linear infinite reverse;
+            opacity: 0.2;
+        }
+        
+        .total-section h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            padding: 25px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .footer-brand {
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .footer p {
+            margin: 8px 0;
+        }
+        
+        .contact-highlight {
+            background: white;
+            color: #1e293b;
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 30px 25px;
+            }
+            
+            .header {
+                padding: 25px 20px 35px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .cliente-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .producto {
+                flex-direction: column;
+                text-align: center;
+                padding: 25px 20px;
+            }
+            
+            .producto-imagen, .producto-imagen-placeholder {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            .cliente-section, .total-section {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">🛍️</div>
+            <h1>Nueva Consulta de Disponibilidad</h1>
+            <p class="subtitle">Pedido recibido desde la web de Z22</p>
+        </div>
+
+        <div class="content">
+            <div class="cliente-section">
+                <h2 class="section-title">
+                    <div class="section-icon">👤</div>
+                    Información del Cliente
+                </h2>
+                
+                <div class="cliente-grid">
+                    <div class="cliente-item">
+                        <div class="cliente-label">Nombre del Cliente</div>
+                        <div class="cliente-value">{{ nombre_cliente }}</div>
+                    </div>
+                    <div class="cliente-item">
+                        <div class="cliente-label">Instagram</div>
+                        <div class="cliente-value">@{{ instagram_cliente }}</div>
+                    </div>
+                </div>
+                
+                <a href="https://instagram.com/{{ instagram_cliente }}" class="instagram-link" target="_blank">
+                    📱 Ver perfil de Instagram
+                </a>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ cantidad_productos }}</div>
+                    <div class="stat-label">{% if cantidad_productos == 1 %}Producto{% else %}Productos{% endif %}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ total }}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{% now "H:i" %}</div>
+                    <div class="stat-label">Hora</div>
+                </div>
+            </div>
+
+            <div class="productos-section">
+                <h2 class="section-title">
+                    <div class="section-icon">🛒</div>
+                    Productos Solicitados
+                </h2>
+
+                {% for producto in productos %}
+                <div class="producto">
+                    {% if producto.imagen_url %}
+                    <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="producto-imagen">
+                    {% else %}
+                    <div class="producto-imagen-placeholder">
+                        Sin<br>imagen
+                    </div>
+                    {% endif %}
+                    <div class="producto-info">
+                        <div class="producto-nombre">{{ producto.nombre }}</div>
+                        <div class="producto-categoria">{{ producto.seccion }} → {{ producto.subseccion }} → {{ producto.subsubseccion }}</div>
+                        <div class="producto-precio">{{ producto.precio }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="total-section">
+                <h2>💰 Total del Pedido: {{ total }}</h2>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-brand">Z22 - Catálogo de Moda</div>
+            <p>Email generado automáticamente el {% now "d/m/Y" %} a las {% now "H:i" %}</p>
+            <div class="contact-highlight">
+                <strong>Contactar cliente:</strong> @{{ instagram_cliente }} en Instagram
+            </div>
+        </div>
+    </div>
+</body>
+</html>
