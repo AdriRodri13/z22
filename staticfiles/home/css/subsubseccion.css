@@ -10,6 +10,12 @@
   --accent-secondary: #374151;
   --accent-tertiary: #4b5563;
   --accent-gradient: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+
+  /* Colores para cesta */
+  --cesta-primary: #667eea;
+  --cesta-secondary: #764ba2;
+  --cesta-gradient: linear-gradient(135deg, var(--cesta-primary) 0%, var(--cesta-secondary) 100%);
+  --cesta-hover: linear-gradient(135deg, #5a6fd8 0%, #6b4c93 100%);
   
   /* Colores de texto */
   --text-primary: #ffffff;
@@ -485,10 +491,39 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   transition: transform var(--transition-smooth);
+  max-width: 100%;
+  height: auto;
+  opacity: 1 !important;
+  background: transparent !important;
 }
 
 .modal-body img:hover {
   transform: scale(1.02);
+}
+
+/* Fixes para dispositivos móviles */
+@media (max-width: 768px) {
+  .modal-content {
+    backdrop-filter: none !important;
+    background: rgba(31, 41, 55, 0.95) !important;
+  }
+  
+  .modal-body img {
+    backdrop-filter: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    background-color: transparent !important;
+    isolation: auto;
+  }
+  
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
 }
 
 /* Botón Instagram */
@@ -672,4 +707,169 @@ body {
 .btn-instagram:focus {
   outline: 2px solid var(--text-secondary);
   outline-offset: 2px;
+}
+
+/* ================================
+   ESTILOS PARA CESTA
+   ================================ */
+
+/* Info modal de prenda */
+.prenda-info-modal {
+  background: var(--surface-glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  margin: var(--space-md) 0;
+}
+
+.precio-modal {
+  color: var(--cesta-primary);
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  background: var(--cesta-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Botón de cesta */
+.btn-cesta {
+  background: white;
+  color: #1a202c;
+  border: 2px solid var(--cesta-primary);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all var(--transition-smooth);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+  position: relative;
+  overflow: hidden;
+  min-width: 180px;
+}
+
+.btn-cesta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-slow);
+}
+
+.btn-cesta:hover::before {
+  left: 100%;
+}
+
+.btn-cesta:hover {
+  background: var(--cesta-gradient);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+}
+
+.btn-cesta:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Estado de carga del botón */
+.btn-cesta.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.btn-cesta.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Acciones del modal */
+.modal-actions {
+  gap: var(--space-md);
+}
+
+.modal-actions .btn {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* Estados de éxito */
+.btn-cesta.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-color: #10b981;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+}
+
+.btn-cesta.success:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+}
+
+/* Responsive para modal */
+@media (max-width: 576px) {
+  .modal-actions {
+    flex-direction: column !important;
+    gap: var(--space-sm);
+  }
+
+  .modal-actions .btn {
+    width: 100% !important;
+    min-width: unset;
+  }
+
+  .btn-cesta,
+  .btn-instagram {
+    padding: var(--space-md) var(--space-lg);
+    font-size: 0.9rem;
+  }
+
+  .modal-body {
+    padding: var(--space-lg) !important;
+  }
+
+  .prenda-info-modal {
+    margin: var(--space-sm) 0;
+    padding: var(--space-sm);
+  }
+
+  .precio-modal {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-dialog {
+    margin: 0.25rem;
+    max-width: calc(100% - 0.5rem);
+  }
+
+  .btn-cesta,
+  .btn-instagram {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.85rem;
+    letter-spacing: 0.25px;
+  }
 }

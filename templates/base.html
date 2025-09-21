@@ -44,6 +44,18 @@
                                 <i class="fas fa-home me-2 d-lg-none"></i>Inicio
                             </a>
                         </li>
+                        <!-- Cesta de compras -->
+                        <li class="nav-item">
+                            <a class="nav-link position-relative cesta-nav-link" href="#" onclick="abrirModalCesta()" title="Ver cesta">
+                                <i class="fas fa-shopping-cart me-2 d-lg-none"></i>
+                                <span class="d-lg-none">Cesta</span>
+                                <i class="fas fa-shopping-cart d-none d-lg-inline"></i>
+                                <span class="cesta-badge position-absolute translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                    0
+                                    <span class="visually-hidden">items en cesta</span>
+                                </span>
+                            </a>
+                        </li>
                         <!-- Botón de acceso admin -->
                         {% if user.is_authenticated and user.is_staff %}
                             <li class="nav-item dropdown">
@@ -119,12 +131,52 @@
         </div>
     </footer>
 
+    <!-- Modal de Cesta -->
+    <div class="modal fade" id="cestaModal" tabindex="-1" aria-labelledby="cestaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content bg-dark border-0">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white" id="cestaModalLabel">
+                        <i class="fas fa-shopping-cart me-2"></i>Mi Cesta
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Contenido de la cesta se carga dinámicamente -->
+                    <div id="cestaContent">
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart text-muted mb-3" style="font-size: 3rem;"></i>
+                            <h5 class="text-white">Tu cesta está vacía</h5>
+                            <p class="text-muted">Agrega algunas prendas para comenzar</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0" id="cestaFooter" style="display: none;">
+                    <div class="w-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-white mb-0">Total:</h6>
+                            <h5 class="text-white mb-0" id="cestaTotal">0€</h5>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-light flex-fill" onclick="clearCesta()">
+                                <i class="fas fa-trash me-2"></i>Vaciar Cesta
+                            </button>
+                            <button type="button" class="btn btn-cesta flex-fill" onclick="consultarDisponibilidad()">
+                                <i class="fas fa-phone me-2"></i>Consultar Disponibilidad
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- JS personalizado -->
     <script src="{% static 'js/base.js' %}"></script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -3,11 +3,83 @@
  * ===========================================================
  */
 
+// Declarar función agregarACesta globalmente ANTES del DOMContentLoaded
+function agregarACesta() {
+    const btn = document.getElementById('btnAgregarCesta');
+    if (!btn) return;
+
+    // Obtener datos de la prenda desde el botón
+    const prendaData = {
+        id: btn.dataset.prendaId,
+        nombre: btn.dataset.prendaNombre,
+        precio: btn.dataset.prendaPrecio,
+        imagen: btn.dataset.prendaImg
+    };
+
+    // Validar datos
+    if (!prendaData.id || !prendaData.nombre) {
+        showFeedback('Error: Datos de prenda incompletos', 'error');
+        return;
+    }
+
+    // Mostrar estado de carga
+    showLoadingState(btn);
+
+    // Simular pequeño delay para UX
+    setTimeout(() => {
+        try {
+            // Usar la función global si está disponible
+            if (typeof window.addToCestaGlobal === 'function') {
+                const wasAdded = window.addToCestaGlobal(prendaData);
+
+                if (wasAdded) {
+                    showFeedback('¡Agregado a la cesta!', 'success');
+                    showSuccessState(btn);
+                } else {
+                    showFeedback('Prenda ya está en la cesta', 'info');
+                }
+            } else {
+                // Fallback: usar sistema local
+                const existingIndex = cestaItems.findIndex(item => item.id === prendaData.id);
+
+                if (existingIndex !== -1) {
+                    cestaItems[existingIndex].timestamp = new Date().toISOString();
+                    showFeedback('Prenda ya está en la cesta', 'info');
+                } else {
+                    cestaItems.push({
+                        ...prendaData,
+                        timestamp: new Date().toISOString()
+                    });
+                    showFeedback('¡Agregado a la cesta!', 'success');
+                    showSuccessState(btn);
+                }
+
+                saveCestaToStorage();
+                updateCestaCounter();
+            }
+
+            // Anunciar a screen readers
+            announceToScreenReader(`${prendaData.nombre} agregado a la cesta`);
+
+        } catch (error) {
+            console.error('Error al agregar a la cesta:', error);
+            showFeedback('Error al agregar a la cesta', 'error');
+        }
+
+        // Siempre restaurar el botón, independientemente de errores
+        hideLoadingState(btn);
+    }, 800);
+}
+
+// Hacer disponible globalmente inmediatamente
+window.agregarACesta = agregarACesta;
+
 document.addEventListener('DOMContentLoaded', function() {
     initPrendaCards();
     initScrollAnimations();
     initModalFunctionality();
     initMobileOptimizations();
+    initCestaFunctionality();
 });
 
 /**
@@ -78,12 +150,34 @@ function initModalFunctionality() {
 function openPrendaModal(imgElement) {
     const modal = document.getElementById('prendaModal');
     const modalImg = document.getElementById('modalPrendaImg');
-    
+    const modalPrecio = document.getElementById('modalPrendaPrecio');
+    const btnAgregarCesta = document.getElementById('btnAgregarCesta');
+
     if (modal && modalImg && imgElement) {
+        // Obtener datos de la prenda desde el card
+        const prendaCard = imgElement.closest('.prenda-card');
+        const prendaId = prendaCard?.dataset.prendaId;
+        const precioElement = prendaCard?.querySelector('.precio-valor');
+
         // Actualizar imagen del modal
         modalImg.src = imgElement.src;
         modalImg.alt = imgElement.alt;
-        
+
+        // Actualizar solo el precio
+        if (modalPrecio && precioElement) {
+            modalPrecio.textContent = precioElement.textContent;
+        } else if (modalPrecio) {
+            modalPrecio.textContent = 'Precio no disponible';
+        }
+
+        // Actualizar botón de cesta con ID de prenda
+        if (btnAgregarCesta && prendaId) {
+            btnAgregarCesta.dataset.prendaId = prendaId;
+            btnAgregarCesta.dataset.prendaImg = imgElement.src;
+            btnAgregarCesta.dataset.prendaNombre = imgElement.alt || 'Prenda';
+            btnAgregarCesta.dataset.prendaPrecio = precioElement?.textContent || '0€';
+        }
+
         // Mostrar modal - verificar si Bootstrap está disponible
         if (typeof bootstrap !== 'undefined') {
             const bootstrapModal = new bootstrap.Modal(modal);
@@ -94,7 +188,7 @@ function openPrendaModal(imgElement) {
             modal.classList.add('show');
             document.body.classList.add('modal-open');
         }
-        
+
         // Focus en el modal para accesibilidad
         modal.addEventListener('shown.bs.modal', () => {
             modal.focus();
@@ -414,4 +508,155 @@ function announceToScreenReader(message) {
         document.body.removeChild(announcement);
     }, 1000);
 }
+
+/**
+ * FUNCIONALIDAD DE CESTA
+ * ======================
+ */
+
+// Variable global para manejar la cesta
+let cestaItems = [];
+
+function initCestaFunctionality() {
+    // Cargar cesta desde localStorage
+    loadCestaFromStorage();
+
+    // Actualizar contador visual si existe
+    updateCestaCounter();
+
+    // Escuchar eventos de storage para sincronizar entre pestañas
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'cesta_prendas') {
+            loadCestaFromStorage();
+            updateCestaCounter();
+        }
+    });
+}
+
+function showLoadingState(btn) {
+    const originalText = btn.innerHTML;
+    btn.dataset.originalText = originalText;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Agregando...';
+    btn.classList.add('loading');
+    btn.disabled = true;
+}
+
+function hideLoadingState(btn) {
+    if (btn.dataset.originalText) {
+        btn.innerHTML = btn.dataset.originalText;
+    }
+    btn.classList.remove('loading');
+    btn.disabled = false;
+}
+
+function showSuccessState(btn) {
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check me-2"></i>¡Agregado!';
+    btn.classList.add('success');
+
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('success');
+    }, 2000);
+}
+
+function loadCestaFromStorage() {
+    try {
+        const storedCesta = localStorage.getItem('cesta_prendas');
+        cestaItems = storedCesta ? JSON.parse(storedCesta) : [];
+
+        // Limpiar items muy antiguos (más de 7 días)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        cestaItems = cestaItems.filter(item => {
+            return new Date(item.timestamp) > sevenDaysAgo;
+        });
+
+        saveCestaToStorage();
+    } catch (error) {
+        console.error('Error al cargar cesta desde localStorage:', error);
+        cestaItems = [];
+    }
+}
+
+function saveCestaToStorage() {
+    try {
+        localStorage.setItem('cesta_prendas', JSON.stringify(cestaItems));
+    } catch (error) {
+        console.error('Error al guardar cesta en localStorage:', error);
+        showFeedback('Error al guardar en la cesta', 'error');
+    }
+}
+
+function updateCestaCounter() {
+    // Usar la función global si está disponible
+    if (typeof window.updateCestaGlobalCounter === 'function') {
+        window.updateCestaGlobalCounter();
+        return;
+    }
+
+    // Fallback: usar sistema local
+    const counters = document.querySelectorAll('.cesta-counter');
+    const count = cestaItems.length;
+
+    counters.forEach(counter => {
+        counter.textContent = count;
+        counter.style.display = count > 0 ? 'block' : 'none';
+
+        // Animar si hay cambios
+        if (count > 0) {
+            counter.classList.add('animate');
+            setTimeout(() => counter.classList.remove('animate'), 300);
+        }
+    });
+
+    // Actualizar badge si existe
+    const badges = document.querySelectorAll('.cesta-badge');
+    badges.forEach(badge => {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    });
+}
+
+function getCestaItems() {
+    return [...cestaItems]; // Retornar copia para evitar mutaciones
+}
+
+function getCestaCount() {
+    return cestaItems.length;
+}
+
+function removeFromCesta(prendaId) {
+    const index = cestaItems.findIndex(item => item.id === prendaId);
+    if (index !== -1) {
+        const removedItem = cestaItems.splice(index, 1)[0];
+        saveCestaToStorage();
+        updateCestaCounter();
+        showFeedback(`${removedItem.nombre} eliminado de la cesta`, 'info');
+        return true;
+    }
+    return false;
+}
+
+function clearCesta() {
+    cestaItems = [];
+    saveCestaToStorage();
+    updateCestaCounter();
+    showFeedback('Cesta vaciada', 'info');
+}
+
+function getCestaTotal() {
+    return cestaItems.reduce((total, item) => {
+        const precio = parseFloat(item.precio.replace('€', '').replace(',', '.')) || 0;
+        return total + precio;
+    }, 0);
+}
+
+// Hacer funciones globales para uso en otros archivos
+window.getCestaItems = getCestaItems;
+window.getCestaCount = getCestaCount;
+window.removeFromCesta = removeFromCesta;
+window.clearCesta = clearCesta;
+window.getCestaTotal = getCestaTotal;
 

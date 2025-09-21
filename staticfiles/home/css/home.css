@@ -18,12 +18,12 @@
   font-weight: 400;
 }
 
-/* Sección Cards - DISEÑO ELEGANTE Y GENÉRICO */
+/* Sección Cards - DISEÑO ELEGANTE Y GENÉRICO CON ALTURA FIJA */
 .seccion-card {
   background: white;
   border-radius: 1.25rem;
   padding: 1.5rem 1.25rem;
-  box-shadow: 
+  box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.12),
     0 1px 2px rgba(0, 0, 0, 0.24);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -33,7 +33,9 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: 200px;
+  height: 380px !important; /* Altura fija forzada */
+  min-height: 380px !important;
+  max-height: 380px !important;
   position: relative;
   overflow: hidden;
 }
@@ -70,8 +72,8 @@
 
 /* Logo de la sección - MÁS GRANDE */
 .seccion-logo-container {
-  width: 90px;
-  height: 90px;
+  width: 110px;
+  height: 110px;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -82,6 +84,7 @@
   position: relative;
   border: 2px solid rgba(102, 126, 234, 0.2);
   overflow: hidden;
+  flex-shrink: 0; /* Evita que se reduzca */
 }
 
 .seccion-card:hover .seccion-logo-container {
@@ -91,8 +94,8 @@
 }
 
 .seccion-logo {
-  width: 70px;
-  height: 70px;
+  width: 85px;
+  height: 85px;
   object-fit: contain;
   transition: all 0.3s ease;
   border-radius: 8px;
@@ -114,14 +117,18 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
-/* Info de la sección - TIPOGRAFÍA ELEGANTE */
+/* Info de la sección - ALTURA FIJA Y CONTROLADA */
 .seccion-info {
   margin-bottom: 1rem;
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
+  height: 110px !important; /* Altura fija forzada para la sección de info */
+  min-height: 110px !important;
+  max-height: 110px !important;
+  overflow: hidden;
 }
 
 .seccion-nombre {
@@ -131,6 +138,12 @@
   margin-bottom: 0.5rem;
   line-height: 1.2;
   letter-spacing: -0.01em;
+  height: 2.4rem; /* Altura fija para 2 líneas máximo */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .seccion-descripcion {
@@ -139,6 +152,13 @@
   margin-bottom: 0.75rem;
   line-height: 1.4;
   opacity: 0.8;
+  height: 3.6rem; /* Altura fija para 3 líneas máximo */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
 }
 
 .seccion-subsecciones {
@@ -155,13 +175,15 @@
   border-radius: 1rem;
   align-self: center;
   border: 1px solid rgba(102, 126, 234, 0.15);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .seccion-subsecciones i {
   font-size: 0.7rem;
 }
 
-/* Preview de subsecciones - LOGOS MÁS GRANDES */
+/* Preview de subsecciones - ALTURA FIJA */
 .subsecciones-preview {
   display: flex;
   justify-content: center;
@@ -171,14 +193,16 @@
   padding: 0.75rem;
   background: rgba(102, 126, 234, 0.03);
   border-radius: 0.75rem;
-  min-height: 55px;
+  height: 70px; /* Altura fija */
   border: 1px solid rgba(102, 126, 234, 0.08);
+  flex-shrink: 0;
 }
 
 .subseccion-mini {
   width: 36px;
   height: 36px;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .seccion-card:hover .subseccion-mini {
@@ -218,6 +242,7 @@
   font-weight: 600;
   color: rgba(102, 126, 234, 0.8);
   border: 1px solid rgba(102, 126, 234, 0.2);
+  flex-shrink: 0;
 }
 
 .no-subsecciones {
@@ -231,6 +256,7 @@
   justify-content: center;
   font-size: 0.9rem;
   color: rgba(102, 126, 234, 0.4);
+  flex-shrink: 0;
 }
 
 /* Botón - DISEÑO MODERNO MEJORADO */
@@ -253,6 +279,8 @@
   box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
+  margin-top: auto; /* Empuja el botón hacia abajo */
 }
 
 .btn-explorar::before {
@@ -317,7 +345,7 @@
   font-size: 0.9rem;
 }
 
-/* Responsive - MOBILE FIRST */
+/* Responsive - MOBILE FIRST CON ALTURAS FIJAS */
 @media (max-width: 575.98px) {
   .secciones-section {
     padding: 1rem 0 !important;
@@ -332,28 +360,40 @@
   }
   
   .seccion-card {
-    min-height: 180px;
+    height: 320px !important; /* Altura fija mobile forzada */
+    min-height: 320px !important;
+    max-height: 320px !important;
     padding: 1.25rem 1rem;
   }
   
   .seccion-logo-container {
-    width: 75px;
-    height: 75px;
+    width: 90px;
+    height: 90px;
     margin-bottom: 0.75rem;
   }
   
   .seccion-logo {
-    font-size: 1.8rem;
+    width: 70px;
+    height: 70px;
+  }
+  
+  .seccion-info {
+    height: 95px !important; /* Altura fija para mobile forzada */
+    min-height: 95px !important;
+    max-height: 95px !important;
   }
   
   .seccion-nombre {
     font-size: 1rem;
     margin-bottom: 0.4rem;
+    height: 2rem; /* Altura fija para mobile */
   }
   
   .seccion-descripcion {
     font-size: 0.8rem;
     margin-bottom: 0.6rem;
+    height: 3rem; /* Altura fija para mobile */
+    -webkit-line-clamp: 2;
   }
   
   .seccion-subsecciones {
@@ -365,6 +405,7 @@
     padding: 0.5rem;
     margin-bottom: 1rem;
     gap: 0.5rem;
+    height: 60px; /* Altura fija mobile */
   }
   
   .subseccion-mini {
@@ -393,46 +434,75 @@
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   .seccion-card {
-    min-height: 190px;
+    height: 350px !important; /* Altura fija tablet pequeña forzada */
+    min-height: 350px !important;
+    max-height: 350px !important;
   }
   
-  .seccion-logo-container {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .seccion-logo {
-    font-size: 2rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .seccion-card {
-    min-height: 210px;
-    padding: 1.75rem 1.5rem;
+  .seccion-info {
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
   }
   
   .seccion-logo-container {
     width: 95px;
     height: 95px;
+  }
+  
+  .seccion-logo {
+    width: 75px;
+    height: 75px;
+  }
+  
+  .seccion-nombre {
+    height: 2.2rem;
+  }
+  
+  .seccion-descripcion {
+    height: 3.3rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .seccion-card {
+    height: 400px !important; /* Altura fija desktop forzada */
+    min-height: 400px !important;
+    max-height: 400px !important;
+    padding: 1.75rem 1.5rem;
+  }
+  
+  .seccion-info {
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 120px !important;
+  }
+  
+  .seccion-logo-container {
+    width: 115px;
+    height: 115px;
     margin-bottom: 1.25rem;
   }
   
   .seccion-logo {
-    font-size: 2.4rem;
+    width: 90px;
+    height: 90px;
   }
   
   .seccion-nombre {
     font-size: 1.25rem;
+    height: 2.6rem;
   }
   
   .seccion-descripcion {
     font-size: 0.9rem;
+    height: 3.8rem;
   }
   
   .subsecciones-preview {
     padding: 0.85rem;
     margin-bottom: 1.5rem;
+    height: 75px;
   }
   
   .subseccion-mini {
@@ -470,32 +540,45 @@
 /* Landscape móvil */
 @media (max-width: 767.98px) and (orientation: landscape) {
   .seccion-card {
-    min-height: 160px;
+    height: 280px !important; /* Altura fija landscape forzada */
+    min-height: 280px !important;
+    max-height: 280px !important;
     padding: 1rem 0.85rem;
   }
   
   .seccion-logo-container {
-    width: 65px;
-    height: 65px;
+    width: 80px;
+    height: 80px;
     margin-bottom: 0.5rem;
   }
   
   .seccion-logo {
-    font-size: 1.6rem;
+    width: 60px;
+    height: 60px;
   }
   
   .seccion-info {
     margin-bottom: 0.75rem;
+    height: 85px !important;
+    min-height: 85px !important;
+    max-height: 85px !important;
+  }
+  
+  .seccion-nombre {
+    height: 1.8rem;
   }
   
   .seccion-descripcion {
     font-size: 0.75rem;
     margin-bottom: 0.5rem;
+    height: 2.5rem;
+    -webkit-line-clamp: 2;
   }
   
   .subsecciones-preview {
     padding: 0.4rem;
     margin-bottom: 0.75rem;
+    height: 55px;
   }
   
   .btn-explorar {
@@ -640,7 +723,7 @@
   min-height: 60vh;
 }
 
-/* Subsección cards */
+/* Subsección cards - TAMBIÉN CON ALTURA FIJA */
 .subseccion-card {
   background: white;
   border-radius: 1rem;
@@ -651,7 +734,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: 220px;
+  height: 260px; /* Altura fija para subsección cards */
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -693,6 +776,7 @@
   justify-content: center;
   border: 2px solid rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .subseccion-card:hover .subseccion-logo-container {
@@ -719,6 +803,11 @@
 .subseccion-info {
   flex-grow: 1;
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 120px; /* Altura fija para la info */
+  overflow: hidden;
 }
 
 .subseccion-nombre {
@@ -727,6 +816,12 @@
   color: #2d3748;
   margin-bottom: 0.5rem;
   line-height: 1.3;
+  height: 2.6rem; /* Altura fija para nombre */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .subseccion-descripcion {
@@ -734,12 +829,20 @@
   color: #718096;
   line-height: 1.4;
   margin-bottom: 0.75rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .subseccion-stats {
   font-size: 0.85rem;
   color: #4a5568;
   font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .subseccion-stats i {
@@ -748,6 +851,7 @@
 
 .subseccion-action {
   margin-top: auto;
+  flex-shrink: 0;
 }
 
 .btn-explorar-mini {
@@ -761,6 +865,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .subseccion-card:hover .btn-explorar-mini {
@@ -805,8 +910,16 @@
   }
   
   .subseccion-card {
-    min-height: 200px;
+    height: 240px; /* Altura fija mobile para subsecciones */
     padding: 1.25rem;
+  }
+  
+  .subseccion-info {
+    height: 100px;
+  }
+  
+  .subseccion-nombre {
+    height: 2.2rem;
   }
   
   .subseccion-logo-container {

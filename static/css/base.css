@@ -52,6 +52,12 @@
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-bold: 700;
+
+  /* Colores para cesta */
+  --cesta-primary: #667eea;
+  --cesta-secondary: #764ba2;
+  --cesta-gradient: linear-gradient(135deg, var(--cesta-primary) 0%, var(--cesta-secondary) 100%);
+  --cesta-hover: linear-gradient(135deg, #5a6fd8 0%, #6b4c93 100%);
   
   /* Tamaños de fuente responsive */
   --font-size-xs: clamp(0.75rem, 2vw, 0.875rem);
@@ -445,4 +451,295 @@ html {
 .dropdown-item:focus {
   background-color: var(--color-hover-primary) !important;
   color: var(--color-accent) !important;
+}
+
+/* ================================
+   ESTILOS PARA CESTA
+   ================================ */
+
+
+/* Icono de cesta en navbar */
+.cesta-nav-link {
+  position: relative !important;
+}
+
+.cesta-nav-link:hover {
+  background-color: var(--color-hover-primary) !important;
+}
+
+/* Badge de contador */
+.cesta-badge {
+  position: absolute !important;
+  top: -8px !important;
+  right: -10px !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  font-size: 0.75rem !important;
+  line-height: 20px !important;
+  padding: 0 !important;
+  text-align: center !important;
+  background: var(--cesta-gradient) !important;
+  border: 2px solid var(--color-primary) !important;
+  border-radius: 50% !important;
+  font-weight: 700 !important;
+  animation: none !important;
+  box-sizing: border-box !important;
+}
+
+.cesta-badge.animate {
+  animation: cestaAnimate 0.3s ease-out !important;
+}
+
+@keyframes cestaAnimate {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Modal de cesta */
+#cestaModal .modal-content {
+  background: var(--gradient-secondary) !important;
+  border: 1px solid var(--color-secondary) !important;
+  border-radius: var(--border-radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+#cestaModal .modal-header {
+  background: var(--cesta-gradient);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+}
+
+#cestaModal .modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+}
+
+/* Items de cesta */
+.cesta-item {
+  background: var(--color-secondary);
+  border: 1px solid var(--color-hover-primary);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.cesta-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--cesta-gradient);
+  transform: scaleY(0);
+  transition: transform var(--transition-normal);
+  transform-origin: top;
+}
+
+.cesta-item:hover::before {
+  transform: scaleY(1);
+}
+
+.cesta-item:hover {
+  border-color: var(--cesta-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.cesta-item-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--border-radius-sm);
+  border: 2px solid var(--color-hover-primary);
+  transition: var(--transition-normal);
+}
+
+.cesta-item:hover .cesta-item-img {
+  border-color: var(--cesta-primary);
+  transform: scale(1.05);
+}
+
+.cesta-item-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cesta-item-precio {
+  color: var(--cesta-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: 1.2rem;
+  background: var(--cesta-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.cesta-item-remove {
+  background: var(--color-danger);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.8rem;
+  transition: var(--transition-normal);
+}
+
+.cesta-item-remove:hover {
+  background: #c82333;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Botón de cesta global */
+.btn-cesta {
+  background: white !important;
+  color: #1a202c !important;
+  border: 2px solid var(--cesta-primary) !important;
+  font-weight: var(--font-weight-bold) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  transition: var(--transition-normal) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+.btn-cesta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-slow);
+}
+
+.btn-cesta:hover::before {
+  left: 100%;
+}
+
+.btn-cesta:hover {
+  background: var(--cesta-gradient) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+}
+
+.btn-cesta:active {
+  transform: translateY(0) !important;
+}
+
+/* Estados empty de cesta */
+.cesta-empty {
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.cesta-empty i {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.cesta-empty h5 {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+}
+
+.cesta-empty p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Footer del modal */
+#cestaFooter {
+  background: var(--color-secondary);
+  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg) !important;
+  border-top: 1px solid var(--color-hover-primary) !important;
+}
+
+#cestaTotal {
+  background: var(--cesta-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: var(--font-weight-bold);
+}
+
+/* Responsive para modal de cesta */
+@media (max-width: 768px) {
+  #cestaModal .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+
+  #cestaModal .modal-body {
+    padding: var(--spacing-md);
+    max-height: 50vh;
+  }
+
+  .cesta-item {
+    padding: var(--spacing-sm);
+  }
+
+  .cesta-item-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .cesta-item-precio {
+    font-size: 1rem;
+  }
+
+  #cestaFooter .d-flex {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  #cestaFooter .btn {
+    width: 100% !important;
+  }
+
+  /* Badge más pequeño en mobile */
+  .cesta-badge {
+    top: -6px !important;
+    right: -8px !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    line-height: 18px !important;
+    font-size: 0.7rem !important;
+  }
+}
+
+/* Scroll personalizado para modal */
+#cestaModal .modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+#cestaModal .modal-body::-webkit-scrollbar-track {
+  background: var(--color-hover-primary);
+  border-radius: 3px;
+}
+
+#cestaModal .modal-body::-webkit-scrollbar-thumb {
+  background: var(--cesta-gradient);
+  border-radius: 3px;
+}
+
+#cestaModal .modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--cesta-hover);
 }

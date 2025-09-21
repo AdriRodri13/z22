@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollEffects();
     initResponsiveHandling();
     initAccessibility();
+    initCestaGlobal();
     
 });
 
@@ -366,3 +367,251 @@ if (document.readyState === 'loading') {
 } else {
     initLazyLoading();
 }
+
+/**
+ * FUNCIONALIDAD GLOBAL DE CESTA
+ * =============================
+ */
+
+// Variable global para la cesta
+let cestaGlobal = [];
+
+function initCestaGlobal() {
+    // Cargar cesta desde localStorage
+    loadCestaGlobal();
+
+    // Actualizar contador al cargar
+    updateCestaGlobalCounter();
+
+    // Escuchar cambios en localStorage para sincronizar entre pestañas
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'cesta_prendas') {
+            loadCestaGlobal();
+            updateCestaGlobalCounter();
+
+            // Si el modal está abierto, actualizarlo
+            const modal = document.getElementById('cestaModal');
+            if (modal && modal.classList.contains('show')) {
+                renderCestaModal();
+            }
+        }
+    });
+}
+
+function loadCestaGlobal() {
+    try {
+        const storedCesta = localStorage.getItem('cesta_prendas');
+        cestaGlobal = storedCesta ? JSON.parse(storedCesta) : [];
+
+        // Limpiar items antiguos (más de 7 días)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        cestaGlobal = cestaGlobal.filter(item => {
+            return new Date(item.timestamp) > sevenDaysAgo;
+        });
+
+        // Guardar cesta limpia
+        localStorage.setItem('cesta_prendas', JSON.stringify(cestaGlobal));
+    } catch (error) {
+        console.error('Error al cargar cesta global:', error);
+        cestaGlobal = [];
+    }
+}
+
+function updateCestaGlobalCounter() {
+    const badge = document.querySelector('.cesta-badge');
+    const count = cestaGlobal.length;
+
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+
+        // Animar cuando hay cambios
+        if (count > 0) {
+            badge.classList.add('animate');
+            setTimeout(() => badge.classList.remove('animate'), 300);
+        }
+    }
+}
+
+function abrirModalCesta() {
+    const modal = document.getElementById('cestaModal');
+    if (modal) {
+        renderCestaModal();
+
+        // Mostrar modal usando Bootstrap
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    }
+}
+
+function renderCestaModal() {
+    const content = document.getElementById('cestaContent');
+    const footer = document.getElementById('cestaFooter');
+    const total = document.getElementById('cestaTotal');
+
+    if (!content) return;
+
+    if (cestaGlobal.length === 0) {
+        // Cesta vacía
+        content.innerHTML = `
+            <div class="cesta-empty">
+                <i class="fas fa-shopping-cart text-muted mb-3" style="font-size: 3rem;"></i>
+                <h5 class="text-white">Tu cesta está vacía</h5>
+                <p class="text-muted">Agrega algunas prendas para comenzar</p>
+            </div>
+        `;
+
+        if (footer) footer.style.display = 'none';
+    } else {
+        // Mostrar items de la cesta
+        let itemsHTML = '';
+        let totalPrecio = 0;
+
+        cestaGlobal.forEach((item, index) => {
+            const precio = parseFloat(item.precio.replace('€', '').replace(',', '.')) || 0;
+            totalPrecio += precio;
+
+            itemsHTML += `
+                <div class="cesta-item d-flex align-items-center">
+                    <img src="${item.imagen}" alt="${item.nombre}" class="cesta-item-img me-3">
+                    <div class="cesta-item-info flex-grow-1">
+                        <div class="cesta-item-precio">${item.precio}</div>
+                    </div>
+                    <button class="cesta-item-remove" onclick="removeFromCestaGlobal('${item.id}')" title="Eliminar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        });
+
+        content.innerHTML = itemsHTML;
+
+        // Actualizar total
+        if (total) {
+            total.textContent = `${totalPrecio.toFixed(2)}€`;
+        }
+
+        // Mostrar footer
+        if (footer) footer.style.display = 'block';
+    }
+}
+
+function removeFromCestaGlobal(prendaId) {
+    const index = cestaGlobal.findIndex(item => item.id === prendaId);
+    if (index !== -1) {
+        const removedItem = cestaGlobal.splice(index, 1)[0];
+
+        // Guardar en localStorage
+        localStorage.setItem('cesta_prendas', JSON.stringify(cestaGlobal));
+
+        // Actualizar UI
+        updateCestaGlobalCounter();
+        renderCestaModal();
+
+        // Mostrar feedback
+        showNotification(`${removedItem.nombre} eliminado de la cesta`, 'info');
+    }
+}
+
+function clearCestaGlobal() {
+    if (cestaGlobal.length === 0) {
+        showNotification('La cesta ya está vacía', 'info');
+        return;
+    }
+
+    // Confirmar acción
+    if (confirm('¿Estás seguro de que quieres vaciar la cesta?')) {
+        cestaGlobal = [];
+        localStorage.setItem('cesta_prendas', JSON.stringify(cestaGlobal));
+
+        // Actualizar UI
+        updateCestaGlobalCounter();
+        renderCestaModal();
+
+        // Mostrar feedback
+        showNotification('Cesta vaciada', 'success');
+    }
+}
+
+function consultarDisponibilidad() {
+    if (cestaGlobal.length === 0) {
+        showNotification('Tu cesta está vacía', 'warning');
+        return;
+    }
+
+    // Crear mensaje para Instagram con los items de la cesta
+    let mensaje = '¡Hola! Me gustaría consultar la disponibilidad de estas prendas:\\n\\n';
+
+    cestaGlobal.forEach((item, index) => {
+        mensaje += `${index + 1}. ${item.nombre} - ${item.precio}\\n`;
+    });
+
+    mensaje += '\\n¿Están disponibles? ¡Gracias!';
+
+    // URL para abrir Instagram con mensaje predefinido (simplificado)
+    const instagramUrl = 'https://www.instagram.com/zone22._/';
+
+    // Abrir Instagram y cerrar modal
+    window.open(instagramUrl, '_blank');
+
+    // Cerrar modal
+    const modal = document.getElementById('cestaModal');
+    const bootstrapModal = bootstrap.Modal.getInstance(modal);
+    if (bootstrapModal) {
+        bootstrapModal.hide();
+    }
+
+    // Mostrar feedback con instrucciones
+    showNotification('Redirigiendo a Instagram. Copia el mensaje de la cesta para consultar disponibilidad', 'info');
+
+    // Copiar mensaje al portapapeles si es posible
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(mensaje.replace(/\\n/g, '\n')).then(() => {
+            setTimeout(() => {
+                showNotification('Mensaje copiado al portapapeles', 'success');
+            }, 1000);
+        }).catch(() => {
+            // Silenciar error de clipboard
+        });
+    }
+}
+
+// Hacer funciones globales
+window.abrirModalCesta = abrirModalCesta;
+window.removeFromCestaGlobal = removeFromCestaGlobal;
+window.clearCesta = clearCestaGlobal;
+window.consultarDisponibilidad = consultarDisponibilidad;
+
+// Funciones para usar desde otras páginas
+window.getCestaGlobalItems = function() {
+    return [...cestaGlobal];
+};
+
+window.getCestaGlobalCount = function() {
+    return cestaGlobal.length;
+};
+
+window.addToCestaGlobal = function(prendaData) {
+    // Verificar si ya existe
+    const existingIndex = cestaGlobal.findIndex(item => item.id === prendaData.id);
+
+    if (existingIndex === -1) {
+        // Agregar nuevo item
+        cestaGlobal.push({
+            ...prendaData,
+            timestamp: new Date().toISOString()
+        });
+
+        // Guardar en localStorage
+        localStorage.setItem('cesta_prendas', JSON.stringify(cestaGlobal));
+
+        // Actualizar contador
+        updateCestaGlobalCounter();
+
+        return true; // Item agregado
+    }
+
+    return false; // Item ya existe
+};
