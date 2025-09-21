@@ -108,7 +108,7 @@ function openPrendaModal(imgElement) {
  */
 function contactarInstagram(imgElement = null) {
     // URL directa al DM de Instagram para zone22._
-    const instagramUrl = 'https://ig.me/m/zone22._';
+    const instagramUrl = 'https://www.instagram.com/direct/t/75955415894/';
 
     // Abrir DM de Instagram en nueva pestaña
     window.open(instagramUrl, '_blank');
