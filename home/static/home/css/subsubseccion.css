@@ -471,7 +471,7 @@ body {
 
 /* Modal */
 .modal-content {
-  background: var(--surface-glass) !important;
+  background: rgba(31, 41, 55, 0.95) !important;
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-primary) !important;
   border-radius: var(--radius-2xl) !important;
@@ -812,6 +812,9 @@ body {
 .modal-actions .btn {
   flex: 1;
   white-space: nowrap;
+  min-width: 180px;
+  padding: var(--space-md) var(--space-lg);
+  font-size: 0.9rem;
 }
 
 /* Estados de éxito */
@@ -826,6 +829,38 @@ body {
   background: linear-gradient(135deg, #059669, #047857);
   color: white;
   box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+}
+
+/* Desktop modal optimizado */
+@media (min-width: 768px) {
+  .modal-dialog {
+    max-width: 600px;
+  }
+
+  .modal-actions {
+    justify-content: center;
+    gap: var(--space-xl);
+  }
+
+  .modal-actions .btn {
+    flex: none;
+    min-width: 200px;
+    padding: var(--space-lg) var(--space-xl);
+    font-size: 1rem;
+  }
+
+  .modal-body {
+    padding: var(--space-2xl);
+  }
+
+  .prenda-info-modal {
+    margin: var(--space-xl) 0;
+    padding: var(--space-lg);
+  }
+
+  .precio-modal {
+    font-size: 1.4rem;
+  }
 }
 
 /* Responsive para modal */
