@@ -1,13 +1,18 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
+from django.contrib import messages
 import json
 from .models import *
+from .forms import RegistroForm
 
 def home(request):
     # Obtener todas las secciones con sus subsecciones
@@ -15,8 +20,16 @@ def home(request):
         'subsecciones__subsubsecciones'
     ).order_by('nombre')
 
+    # Lógica para mostrar el alert de registro a usuarios nuevos
+    mostrar_alert_registro = False
+    if not request.user.is_authenticated:
+        # Verificar si es la primera visita (no ha rechazado el registro)
+        if not request.session.get('registro_rechazado', False):
+            mostrar_alert_registro = True
+
     context = {
         'secciones': secciones,
+        'mostrar_alert_registro': mostrar_alert_registro,
     }
     return render(request, 'home/home.html', context)
 
@@ -160,3 +173,131 @@ def consultar_disponibilidad(request):
             'success': False,
             'error': 'Error interno del servidor'
         }, status=500)
+
+
+def registro_view(request):
+    if request.user.is_authenticated:
+        return redirect('home:home')
+
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, f'¡Bienvenido @{user.profile.instagram_account}! Tu cuenta ha sido creada exitosamente.')
+            return redirect('home:perfil_usuario')
+    else:
+        form = RegistroForm()
+
+    return render(request, 'home/registro.html', {'form': form})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def rechazar_registro(request):
+    # Marcar en la sesión que el usuario rechazó el registro
+    request.session['registro_rechazado'] = True
+    return JsonResponse({'success': True})
+
+
+@login_required
+def perfil_usuario(request):
+    return render(request, 'home/perfil_usuario.html')
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def agregar_carrito(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Usuario no autenticado'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        prenda_id = data.get('prenda_id')
+
+        if not prenda_id:
+            return JsonResponse({'success': False, 'error': 'ID de prenda requerido'}, status=400)
+
+        # Obtener la prenda
+        try:
+            prenda = Prenda.objects.get(id=prenda_id)
+        except Prenda.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Prenda no encontrada'}, status=404)
+
+        # Crear o actualizar item del carrito
+        carrito_item, created = CarritoItem.objects.get_or_create(
+            user=request.user,
+            prenda=prenda
+        )
+
+        # Si ya existía, actualizar última actividad
+        if not created:
+            carrito_item.save()  # Esto actualiza ultima_actividad automáticamente
+
+        return JsonResponse({
+            'success': True,
+            'created': created,
+            'message': 'Agregado al carrito' if created else 'Ya estaba en el carrito'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Error interno'}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def remover_carrito(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Usuario no autenticado'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        prenda_id = data.get('prenda_id')
+
+        if not prenda_id:
+            return JsonResponse({'success': False, 'error': 'ID de prenda requerido'}, status=400)
+
+        # Buscar y eliminar el item del carrito
+        try:
+            carrito_item = CarritoItem.objects.get(user=request.user, prenda_id=prenda_id)
+            carrito_item.delete()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Eliminado del carrito'
+            })
+        except CarritoItem.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Item no encontrado en el carrito'}, status=404)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Error interno'}, status=500)
+
+
+@login_required
+def obtener_carrito(request):
+    try:
+        carrito_items = CarritoItem.objects.filter(user=request.user).select_related('prenda')
+
+        items_data = []
+        for item in carrito_items:
+            items_data.append({
+                'id': item.prenda.id,
+                'nombre': item.prenda.nombre or f"Prenda de {item.prenda.subsubseccion.nombre}",
+                'precio': f"{item.prenda.precio}€" if item.prenda.precio else "Precio no disponible",
+                'imagen': item.prenda.imagen.url if item.prenda.imagen else '',
+                'agregado_en': item.agregado_en.isoformat(),
+                'ultima_actividad': item.ultima_actividad.isoformat()
+            })
+
+        return JsonResponse({
+            'success': True,
+            'items': items_data,
+            'count': len(items_data)
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Error al obtener carrito'}, status=500)

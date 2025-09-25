@@ -3,9 +3,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, F, Prefetch
+from django.db.models import Q, Count, F, Prefetch, Max
 from django.urls import reverse_lazy
-from home.models import Seccion, Subseccion, Subsubseccion, Prenda
+from home.models import Seccion, Subseccion, Subsubseccion, Prenda, UserProfile, CarritoItem, CodigoDescuento, ConfiguracionDescuentos
+from django.contrib.auth.models import User
 from .forms import SeccionForm, SubseccionForm, SubsubseccionForm, PrendaForm, PrendaMultipleUploadForm
 from django.contrib.auth.views import LogoutView
 from django.utils.decorators import method_decorator
@@ -660,3 +661,292 @@ def prenda_multiple_upload(request, subsubseccion_id):
         'action': 'subida_multiple'
     }
     return render(request, 'panel_admin/prenda/prenda_multiple_upload.html', context)
+
+
+# ====================
+# USUARIOS Y DESCUENTOS
+# ====================
+
+@user_passes_test(is_staff_user)
+def usuarios_descuentos_dashboard(request):
+    """Dashboard principal de usuarios y descuentos"""
+
+    # Estadísticas generales
+    total_usuarios = User.objects.filter(profile__isnull=False).count()
+    usuarios_con_carrito = User.objects.filter(carrito_items__isnull=False).distinct().count()
+    codigos_activos = CodigoDescuento.objects.filter(usado=False, fecha_expiracion__gt=timezone.now()).count()
+    codigos_usados = CodigoDescuento.objects.filter(usado=True).count()
+
+    # Configuración actual
+    config_activa = ConfiguracionDescuentos.objects.filter(activo=True).first()
+
+    # Usuarios con actividad reciente en carrito
+    from django.utils import timezone
+    from datetime import timedelta
+    hace_7_dias = timezone.now() - timedelta(days=7)
+
+    usuarios_recientes = User.objects.filter(
+        carrito_items__ultima_actividad__gte=hace_7_dias,
+        profile__isnull=False
+    ).annotate(
+        items_carrito=Count('carrito_items'),
+        ultima_actividad_carrito=Max('carrito_items__ultima_actividad')
+    ).order_by('-ultima_actividad_carrito')[:10]
+
+    # Códigos próximos a vencer
+    en_una_semana = timezone.now() + timedelta(days=7)
+    codigos_por_vencer = CodigoDescuento.objects.filter(
+        usado=False,
+        fecha_expiracion__lte=en_una_semana,
+        fecha_expiracion__gt=timezone.now()
+    ).select_related('user__profile')[:10]
+
+    context = {
+        'title': 'Usuarios y Descuentos - Dashboard',
+        'total_usuarios': total_usuarios,
+        'usuarios_con_carrito': usuarios_con_carrito,
+        'codigos_activos': codigos_activos,
+        'codigos_usados': codigos_usados,
+        'config_activa': config_activa,
+        'usuarios_recientes': usuarios_recientes,
+        'codigos_por_vencer': codigos_por_vencer,
+    }
+
+    return render(request, 'panel_admin/usuarios_descuentos/dashboard.html', context)
+
+
+@user_passes_test(is_staff_user)
+def usuarios_list(request):
+    """Lista de usuarios registrados"""
+
+    # Filtros de búsqueda
+    search = request.GET.get('search', '')
+
+    usuarios_queryset = User.objects.filter(profile__isnull=False).select_related('profile').annotate(
+        items_carrito=Count('carrito_items'),
+        codigos_descuento_count=Count('codigos_descuento'),
+        ultima_actividad_carrito=Max('carrito_items__ultima_actividad')
+    )
+
+    if search:
+        usuarios_queryset = usuarios_queryset.filter(
+            Q(email__icontains=search) |
+            Q(profile__instagram_account__icontains=search)
+        )
+
+    # Paginación
+    paginator = Paginator(usuarios_queryset.order_by('-date_joined'), 20)
+    page_number = request.GET.get('page')
+    usuarios = paginator.get_page(page_number)
+
+    context = {
+        'title': 'Gestión de Usuarios',
+        'usuarios': usuarios,
+        'search': search,
+        'total_usuarios': usuarios_queryset.count(),
+    }
+
+    return render(request, 'panel_admin/usuarios_descuentos/usuarios_list.html', context)
+
+
+@user_passes_test(is_staff_user)
+def usuario_detail(request, user_id):
+    """Detalle de un usuario específico"""
+
+    usuario = get_object_or_404(User, id=user_id, profile__isnull=False)
+
+    # Items del carrito
+    carrito_items = CarritoItem.objects.filter(user=usuario).select_related('prenda').order_by('-ultima_actividad')
+
+    # Códigos de descuento
+    codigos = CodigoDescuento.objects.filter(user=usuario).order_by('-fecha_creacion')
+
+    context = {
+        'title': f'Usuario: @{usuario.profile.instagram_account}',
+        'usuario': usuario,
+        'carrito_items': carrito_items,
+        'codigos': codigos,
+    }
+
+    return render(request, 'panel_admin/usuarios_descuentos/usuario_detail.html', context)
+
+
+@user_passes_test(is_staff_user)
+def codigos_descuento_list(request):
+    """Lista de códigos de descuento"""
+
+    # Filtros
+    search = request.GET.get('search', '')
+    estado = request.GET.get('estado', 'todos')  # todos, vigente, usado, expirado
+
+    codigos_queryset = CodigoDescuento.objects.select_related('user__profile')
+
+    if search:
+        codigos_queryset = codigos_queryset.filter(
+            Q(codigo__icontains=search) |
+            Q(user__email__icontains=search) |
+            Q(user__profile__instagram_account__icontains=search)
+        )
+
+    # Filtrar por estado
+    from django.utils import timezone
+    now = timezone.now()
+
+    if estado == 'vigente':
+        codigos_queryset = codigos_queryset.filter(
+            usado=False,
+            fecha_expiracion__gt=now
+        )
+    elif estado == 'usado':
+        codigos_queryset = codigos_queryset.filter(usado=True)
+    elif estado == 'expirado':
+        codigos_queryset = codigos_queryset.filter(
+            usado=False,
+            fecha_expiracion__lte=now
+        )
+
+    # Paginación
+    paginator = Paginator(codigos_queryset.order_by('-fecha_creacion'), 20)
+    page_number = request.GET.get('page')
+    codigos = paginator.get_page(page_number)
+
+    context = {
+        'title': 'Gestión de Códigos de Descuento',
+        'codigos': codigos,
+        'search': search,
+        'estado': estado,
+        'total_codigos': codigos_queryset.count(),
+    }
+
+    return render(request, 'panel_admin/usuarios_descuentos/codigos_list.html', context)
+
+
+@user_passes_test(is_staff_user)
+def crear_codigo_descuento(request):
+    """Crear código de descuento manualmente"""
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        porcentaje = request.POST.get('porcentaje')
+        dias_expiracion = request.POST.get('dias_expiracion', 30)
+
+        try:
+            usuario = User.objects.get(id=user_id, profile__isnull=False)
+
+            # Crear código
+            from django.utils import timezone
+            from datetime import timedelta
+
+            codigo = CodigoDescuento.objects.create(
+                user=usuario,
+                porcentaje=int(porcentaje),
+                fecha_expiracion=timezone.now() + timedelta(days=int(dias_expiracion))
+            )
+
+            messages.success(request, f'Código {codigo.codigo} creado para @{usuario.profile.instagram_account}')
+            return redirect('panel_admin:codigos_descuento_list')
+
+        except Exception as e:
+            messages.error(request, f'Error al crear código: {str(e)}')
+
+    # Lista de usuarios para el formulario
+    usuarios = User.objects.filter(profile__isnull=False).select_related('profile').order_by('profile__instagram_account')
+
+    context = {
+        'title': 'Crear Código de Descuento',
+        'usuarios': usuarios,
+    }
+
+    return render(request, 'panel_admin/usuarios_descuentos/crear_codigo.html', context)
+
+
+@user_passes_test(is_staff_user)
+def configuracion_descuentos(request):
+    """Configuración del sistema de descuentos"""
+
+    config_activa = ConfiguracionDescuentos.objects.filter(activo=True).first()
+
+    if request.method == 'POST':
+        dias_inactividad = request.POST.get('dias_inactividad')
+        porcentaje_descuento = request.POST.get('porcentaje_descuento')
+
+        try:
+            # Desactivar configuraciones anteriores
+            ConfiguracionDescuentos.objects.filter(activo=True).update(activo=False)
+
+            # Crear nueva configuración
+            nueva_config = ConfiguracionDescuentos.objects.create(
+                dias_inactividad=int(dias_inactividad),
+                porcentaje_descuento=int(porcentaje_descuento),
+                activo=True
+            )
+
+            messages.success(request, 'Configuración actualizada correctamente')
+            return redirect('panel_admin:configuracion_descuentos')
+
+        except Exception as e:
+            messages.error(request, f'Error al actualizar configuración: {str(e)}')
+
+    context = {
+        'title': 'Configuración de Descuentos',
+        'config_activa': config_activa,
+    }
+
+    return render(request, 'panel_admin/usuarios_descuentos/configuracion.html', context)
+
+
+@user_passes_test(is_staff_user)
+def enviar_codigos_manual(request):
+    """Enviar códigos de descuento manualmente"""
+
+    if request.method == 'POST':
+        # Ejecutar comando
+        from django.core.management import call_command
+        from io import StringIO
+
+        try:
+            dry_run = request.POST.get('dry_run') == 'on'
+            force = request.POST.get('force') == 'on'
+
+            # Capturar output del comando
+            out = StringIO()
+
+            call_command(
+                'enviar_codigos_descuento',
+                dry_run=dry_run,
+                force=force,
+                stdout=out
+            )
+
+            output = out.getvalue()
+
+            if dry_run:
+                messages.info(request, f'Vista previa completada. {output}')
+            else:
+                messages.success(request, f'Envío completado. {output}')
+
+        except Exception as e:
+            messages.error(request, f'Error al ejecutar envío: {str(e)}')
+
+    # Estadísticas para mostrar
+    from django.utils import timezone
+    from datetime import timedelta
+
+    config_activa = ConfiguracionDescuentos.objects.filter(activo=True).first()
+
+    if config_activa:
+        fecha_limite = timezone.now() - timedelta(days=config_activa.dias_inactividad)
+        usuarios_candidatos = User.objects.filter(
+            carrito_items__ultima_actividad__lt=fecha_limite,
+            profile__isnull=False
+        ).distinct().count()
+    else:
+        usuarios_candidatos = 0
+
+    context = {
+        'title': 'Envío Manual de Códigos',
+        'config_activa': config_activa,
+        'usuarios_candidatos': usuarios_candidatos,
+    }
+
+    return render(request, 'panel_admin/usuarios_descuentos/enviar_codigos.html', context)

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡{{ porcentaje_descuento }}% de descuento para ti!</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .discount-code {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .discount-code h2 {
+            color: #667eea;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        .code {
+            font-family: 'Courier New', monospace;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 15px 0;
+            border: 2px solid #667eea;
+            letter-spacing: 2px;
+        }
+
+        .discount-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .products-section {
+            margin: 30px 0;
+        }
+
+        .products-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .product-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .product-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .product-price {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .product-category {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .instructions {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+        .instructions ol {
+            margin: 15px 0 0 20px;
+            color: #555;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .instagram-button {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .expiration-warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #ffeaa7;
+            text-align: center;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .code {
+                font-size: 24px;
+                padding: 12px 20px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>¡{{ porcentaje_descuento }}% de Descuento!</h1>
+            <p>Exclusivo para ti, @{{ instagram_account }}</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                ¡Hola @{{ instagram_account }}! 👋
+            </div>
+
+            <p>Notamos que has estado viendo algunas prendas increíbles en nuestra tienda, pero hace {{ dias_inactivo }} días que no has tenido actividad en tu cesta.</p>
+
+            <p>¡No queremos que pierdas esas prendas que te gustaron! Por eso, te ofrecemos un <strong>{{ porcentaje_descuento }}% de descuento</strong> exclusivo.</p>
+
+            <!-- Código de Descuento -->
+            <div class="discount-code">
+                <h2>Tu Código de Descuento</h2>
+                <div class="code">{{ codigo_descuento }}</div>
+                <div class="discount-info">
+                    Válido hasta {{ fecha_expiracion|date:"d/m/Y" }}
+                </div>
+            </div>
+
+            <!-- Productos en el Carrito -->
+            {% if items_carrito %}
+            <div class="products-section">
+                <h2 class="products-title">
+                    🛍️ Productos que tienes en tu cesta ({{ cantidad_items }})
+                </h2>
+
+                <div class="products-grid">
+                    {% for item in items_carrito %}
+                    <div class="product-item">
+                        {% if item.imagen_url %}
+                            <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" class="product-img">
+                        {% endif %}
+                        <div class="product-name">{{ item.nombre }}</div>
+                        <div class="product-price">{{ item.precio }}</div>
+                        <div class="product-category">{{ item.seccion }} > {{ item.subseccion }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Instrucciones -->
+            <div class="instructions">
+                <h3>📱 Cómo usar tu descuento:</h3>
+                <ol>
+                    <li>Contacta con nosotros por <strong>Instagram Direct Message</strong></li>
+                    <li>Menciona tu código: <strong>{{ codigo_descuento }}</strong></li>
+                    <li>Dinos qué productos quieres de tu cesta</li>
+                    <li>¡Aplicaremos tu descuento del {{ porcentaje_descuento }}% automáticamente!</li>
+                </ol>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="https://ig.me/m/zone22._" class="instagram-button">
+                    📸 Contactar por Instagram
+                </a>
+            </div>
+
+            <div class="expiration-warning">
+                ⏰ <strong>¡Importante!</strong> Este código expira el {{ fecha_expiracion|date:"d/m/Y" }}. ¡No dejes pasar esta oportunidad!
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="social-links">
+                <a href="https://www.instagram.com/zone22._" target="_blank">📸 Instagram</a>
+            </div>
+            <p>Zone22 - Donde calidad y confianza se encuentran</p>
+            <p>Este email fue enviado porque tienes productos en tu cesta. Si no deseas recibir más emails como este, contáctanos por Instagram.</p>
+        </div>
+    </div>
+</body>
+</html>

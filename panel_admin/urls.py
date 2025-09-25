@@ -42,4 +42,13 @@ urlpatterns = [
     path('prendas/crear/', views.prenda_create, name='prenda_create'),
     path('prendas/<int:pk>/editar/', views.prenda_edit, name='prenda_edit'),
     path('prendas/<int:pk>/eliminar/', views.prenda_delete, name='prenda_delete'),
+
+    # Gestión de Usuarios y Descuentos
+    path('usuarios-descuentos/', views.usuarios_descuentos_dashboard, name='usuarios_descuentos_dashboard'),
+    path('usuarios/', views.usuarios_list, name='usuarios_list'),
+    path('usuarios/<int:user_id>/', views.usuario_detail, name='usuario_detail'),
+    path('codigos-descuento/', views.codigos_descuento_list, name='codigos_descuento_list'),
+    path('codigos-descuento/crear/', views.crear_codigo_descuento, name='crear_codigo_descuento'),
+    path('configuracion-descuentos/', views.configuracion_descuentos, name='configuracion_descuentos'),
+    path('enviar-codigos/', views.enviar_codigos_manual, name='enviar_codigos_manual'),
 ]

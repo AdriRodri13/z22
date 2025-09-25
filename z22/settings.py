@@ -8,12 +8,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-valor-por-defecto-solo-desarrollo')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+ALLOWED_HOSTS = ['*']
+#CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 
-CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
-CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
-CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
+#CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
+#CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
+#CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
+
+DEBUG = False
+CLOUDINARY_CLOUD_NAME="dtjiyzpnm"
+CLOUDINARY_API_KEY="452591885955796"
+CLOUDINARY_API_SECRET="A8mCPI8aQOdZ_6MZHeJ5mxBn54I"
 
 # === APLICACIONES ===
 APPS_PROPIAS = [
@@ -69,17 +75,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'z22.wsgi.application'
 
 # === BASE DE DATOS ===
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+#
+    
+
+# === BASE DE DATOS (Railway, hardcodeado) ===
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "railway",
+        "USER": "postgres",
+        "PASSWORD": "eCwpNwqZcMEjAIDCqOcQlJfSDHDlPcjG",
+        "HOST": "switchyard.proxy.rlwy.net",
+        "PORT": "56673",
     }
-else:
-    DATABASES = {
-        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-    }
+}
+
 
 # === VALIDACIÓN DE CONTRASEÑAS ===
 AUTH_PASSWORD_VALIDATORS = [

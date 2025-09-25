@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(auth logout)",
+      "Bash(logout)",
+      "Bash(login)",
+      "Bash(auth login)",
+      "Bash(claude auth logout)",
+      "Bash(claude logout)",
+      "Bash(claude login)",
+      "Bash(claude setup-token)",
+      "Bash(claude auth login)",
+      "Bash(tree:*)",
+      "Bash(python manage.py:*)",
+      "Bash(venv/Scripts/python.exe manage.py makemigrations:*)",
+      "Bash(venv/Scripts/python.exe manage.py migrate:*)",
+      "Bash(venv/Scripts/python.exe manage.py createsuperuser:*)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(mkdir:*)",
+      "Bash(move:*)",
+      "Bash(pip install:*)",
+      "Bash(timeout:*)",
+      "Bash(del:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(dir:*)",
+      "Bash(ren:*)",
+      "Bash(venvScripts:*)",
+      "Bash(venvScriptspython.exe manage.py makemigrations:*)",
+      "Bash(\"venv\\Scripts\\python.exe\" manage.py makemigrations home)",
+      "Bash(\"venv\\Scripts\\python.exe\" manage.py migrate home)",
+      "Bash(\"venv\\Scripts\\python.exe\" manage.py migrate)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

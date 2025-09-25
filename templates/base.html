@@ -21,7 +21,7 @@
     
     {% block extra_css %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100{% if user.is_authenticated %} user-authenticated{% endif %}">
     <!-- Header -->
     <header class="main-header sticky-top">
         <nav class="navbar navbar-expand-lg navbar-dark">
@@ -57,27 +57,62 @@
                             </a>
                         </li>
                         <!-- Botón de acceso admin -->
-                        {% if user.is_authenticated and user.is_staff %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle admin-access" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-cog me-2"></i>Admin
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="{% url 'panel_admin:dashboard' %}">
-                                        <i class="fas fa-tachometer-alt me-2"></i>Panel Admin
-                                    </a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form method="post" action="{% url 'panel_admin:logout' %}" style="display: inline;">
-                                            {% csrf_token %}
-                                            <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">
-                                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
-                                            </button>
-                                        </form>
+                        <!-- Usuario logueado -->
+                        {% if user.is_authenticated %}
+                            {% if user.profile %}
+                                <!-- Usuario registrado normal -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; border: none;">
+                                        <i class="fab fa-instagram me-2"></i>@{{ user.profile.instagram_account }}
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="{% url 'home:perfil_usuario' %}">
+                                            <i class="fas fa-user me-2"></i>Mi Perfil
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="post" action="{% url 'panel_admin:logout' %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">
+                                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- Admin para usuarios que también son staff -->
+                                {% if user.is_staff %}
+                                    <li class="nav-item">
+                                        <a class="nav-link admin-access" href="{% url 'panel_admin:dashboard' %}">
+                                            <i class="fas fa-cog me-2 d-lg-none"></i>Admin
+                                        </a>
                                     </li>
-                                </ul>
-                            </li>
+                                {% endif %}
+                            {% else %}
+                                <!-- Usuario staff sin perfil -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle admin-access" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-cog me-2"></i>Admin
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="{% url 'panel_admin:dashboard' %}">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Panel Admin
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="post" action="{% url 'panel_admin:logout' %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">
+                                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            {% endif %}
                         {% else %}
+                            <!-- Usuario no autenticado -->
                             <li class="nav-item">
                                 <a class="nav-link admin-access" href="{% url 'panel_admin:login' %}">
                                     <i class="fas fa-user-shield me-2 d-lg-none"></i>Acceso Admin

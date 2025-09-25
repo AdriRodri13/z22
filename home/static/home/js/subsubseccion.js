@@ -28,37 +28,51 @@ function agregarACesta() {
     // Simular pequeño delay para UX
     setTimeout(() => {
         try {
-            // Usar la función global si está disponible
-            if (typeof window.addToCestaGlobal === 'function') {
-                const wasAdded = window.addToCestaGlobal(prendaData);
+            // Primero intentar guardar en la base de datos si el usuario está logueado
+            if (document.body.classList.contains('user-authenticated')) {
+                fetch('/carrito/agregar/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        prenda_id: prendaData.id
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // También guardar en localStorage para sincronización
+                        guardarEnLocalStorage(prendaData);
 
-                if (wasAdded) {
+                        if (data.created) {
+                            showFeedback('¡Agregado a la cesta!', 'success', 2500);
+                            showSuccessState(btn);
+                        } else {
+                            showFeedback('Prenda ya está en la cesta', 'info', 3000);
+                        }
+                    } else {
+                        throw new Error(data.error || 'Error al agregar');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error con la base de datos, usando localStorage:', error);
+                    // Fallback a localStorage si falla la BD
+                    guardarEnLocalStorage(prendaData);
                     showFeedback('¡Agregado a la cesta!', 'success', 2500);
-                    hideLoadingState(btn);
                     showSuccessState(btn);
-                } else {
-                    showFeedback('Prenda ya está en la cesta', 'info', 3000);
+                })
+                .finally(() => {
                     hideLoadingState(btn);
-                }
+                    updateCestaCounter();
+                });
             } else {
-                // Fallback: usar sistema local
-                const existingIndex = cestaItems.findIndex(item => item.id === prendaData.id);
-
-                if (existingIndex !== -1) {
-                    cestaItems[existingIndex].timestamp = new Date().toISOString();
-                    showFeedback('Prenda ya está en la cesta', 'info', 3000);
-                    hideLoadingState(btn);
-                } else {
-                    cestaItems.push({
-                        ...prendaData,
-                        timestamp: new Date().toISOString()
-                    });
-                    showFeedback('¡Agregado a la cesta!', 'success', 2500);
-                    hideLoadingState(btn);
-                    showSuccessState(btn);
-                }
-
-                saveCestaToStorage();
+                // Usuario no logueado, solo localStorage
+                guardarEnLocalStorage(prendaData);
+                showFeedback('¡Agregado a la cesta!', 'success', 2500);
+                hideLoadingState(btn);
+                showSuccessState(btn);
                 updateCestaCounter();
             }
 
@@ -69,6 +83,27 @@ function agregarACesta() {
             console.error('Error al agregar a la cesta:', error);
             showFeedback('Error al agregar a la cesta', 'error', 4000);
             hideLoadingState(btn);
+        }
+
+        function guardarEnLocalStorage(prendaData) {
+            // Usar la función global si está disponible
+            if (typeof window.addToCestaGlobal === 'function') {
+                window.addToCestaGlobal(prendaData);
+            } else {
+                // Fallback: usar sistema local
+                const existingIndex = cestaItems.findIndex(item => item.id === prendaData.id);
+
+                if (existingIndex !== -1) {
+                    cestaItems[existingIndex].timestamp = new Date().toISOString();
+                } else {
+                    cestaItems.push({
+                        ...prendaData,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                saveCestaToStorage();
+            }
         }
     }, 800);
 }
@@ -520,6 +555,23 @@ function announceToScreenReader(message) {
 
 // Variable global para manejar la cesta
 let cestaItems = [];
+
+// Función para obtener el token CSRF
+function getCsrfToken() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 function initCestaFunctionality() {
     // Cargar cesta desde localStorage

@@ -96,5 +96,110 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{% static 'home/js/home.js' %}"></script>
+
+{% if mostrar_alert_registro %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        title: '¡Únete a nuestra familia!',
+        html: `
+            <div style="text-align: center;">
+                <img src="{% static 'img/logo.png' %}" alt="Logo" style="height: 80px; margin-bottom: 20px; filter: brightness(1.1);">
+                <p style="color: #cccccc; margin-bottom: 15px; line-height: 1.6;">
+                    Regístrate y forma parte de nuestra comunidad exclusiva.
+                </p>
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <h5 style="color: white; margin: 0; font-weight: bold;">✨ Ventajas Exclusivas ✨</h5>
+                    <p style="color: white; margin: 5px 0; font-size: 14px;">
+                        🎯 Descuentos periódicos exclusivos<br>
+                        🛍️ Acceso anticipado a nuevas colecciones<br>
+                        📱 Notificaciones de ofertas especiales
+                    </p>
+                </div>
+                <p style="color: #999999; font-size: 13px; margin-top: 10px;">
+                    Solo necesitas tu Instagram, email y contraseña
+                </p>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '¡Me apunto! 🚀',
+        cancelButtonText: 'Ahora no',
+        background: '#1a1a1a',
+        color: '#ffffff',
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#666666',
+        customClass: {
+            popup: 'registro-popup',
+            confirmButton: 'registro-btn-confirm',
+            cancelButton: 'registro-btn-cancel'
+        },
+        backdrop: `
+            rgba(0, 0, 0, 0.8)
+            left top
+            no-repeat
+        `,
+        showClass: {
+            popup: 'animate__animated animate__fadeInDown'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOutUp'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '{% url "home:registro" %}';
+        } else {
+            // Usuario rechazó el registro
+            fetch('{% url "home:rechazar_registro" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            });
+        }
+    });
+});
+</script>
+
+<style>
+.registro-popup {
+    border: 2px solid #333333 !important;
+    border-radius: 15px !important;
+}
+
+.registro-btn-confirm {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 12px 25px !important;
+    transition: all 0.3s ease !important;
+}
+
+.registro-btn-confirm:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+}
+
+.registro-btn-cancel {
+    background: #333333 !important;
+    border: 1px solid #666666 !important;
+    border-radius: 8px !important;
+    color: #cccccc !important;
+    padding: 12px 25px !important;
+    transition: all 0.3s ease !important;
+}
+
+.registro-btn-cancel:hover {
+    background: #444444 !important;
+    border-color: #888888 !important;
+    color: #ffffff !important;
+}
+</style>
+{% endif %}
 {% endblock %}

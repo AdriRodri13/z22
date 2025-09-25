@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mi Perfil - {{ user.profile.instagram_account }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'home/css/home.css' %}">
+<style>
+.perfil-container {
+    min-height: calc(100vh - 120px);
+    padding: 2rem 0;
+}
+
+.perfil-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+    border: 1px solid #444444;
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.perfil-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.perfil-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #444444;
+}
+
+.perfil-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 2.5rem;
+    color: white;
+    border: 4px solid #444444;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.perfil-nombre {
+    color: #ffffff;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.perfil-instagram {
+    color: #667eea;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.perfil-instagram i {
+    margin-right: 0.5rem;
+}
+
+.perfil-email {
+    color: #cccccc;
+    font-size: 1rem;
+}
+
+.perfil-info {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #cccccc;
+    font-weight: 500;
+}
+
+.info-value {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.beneficios-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.beneficios-title {
+    color: #667eea;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.beneficios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.beneficio-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.beneficio-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.beneficio-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.beneficio-title {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.beneficio-desc {
+    color: #cccccc;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.acciones-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.btn-accion {
+    background: linear-gradient(135deg, #333333 0%, #555555 100%);
+    border: 1px solid #666666;
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 1rem 1.5rem;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-accion:hover {
+    background: linear-gradient(135deg, #444444 0%, #666666 100%);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-accion.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+}
+
+.btn-accion.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6b4c93 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-accion.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border-color: #dc3545;
+}
+
+.btn-accion.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+}
+
+@media (max-width: 768px) {
+    .perfil-card {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .beneficios-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .acciones-section {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+
+    .perfil-nombre {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="perfil-container">
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-8">
+                <div class="perfil-card">
+                    <!-- Header del perfil -->
+                    <div class="perfil-header">
+                        <div class="perfil-avatar">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        <h1 class="perfil-nombre">¡Hola!</h1>
+                        <div class="perfil-instagram">
+                            <i class="fab fa-instagram"></i>@{{ user.profile.instagram_account }}
+                        </div>
+                        <div class="perfil-email">{{ user.email }}</div>
+                    </div>
+
+                    <!-- Información del usuario -->
+                    <div class="perfil-info">
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-calendar-plus me-2"></i>Miembro desde
+                            </span>
+                            <span class="info-value">{{ user.profile.created_at|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-envelope me-2"></i>Email
+                            </span>
+                            <span class="info-value">{{ user.email }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fab fa-instagram me-2"></i>Instagram
+                            </span>
+                            <span class="info-value">@{{ user.profile.instagram_account }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-crown me-2"></i>Estado
+                            </span>
+                            <span class="info-value">Miembro VIP 👑</span>
+                        </div>
+                    </div>
+
+                    <!-- Beneficios exclusivos -->
+                    <div class="beneficios-section">
+                        <h2 class="beneficios-title">✨ Tus Beneficios Exclusivos ✨</h2>
+                        <p class="text-light mb-0">Como miembro registrado, tienes acceso a ventajas únicas</p>
+
+                        <div class="beneficios-grid">
+                            <div class="beneficio-item">
+                                <span class="beneficio-icon">🎯</span>
+                                <div class="beneficio-title">Descuentos Exclusivos</div>
+                                <div class="beneficio-desc">Ofertas especiales solo para miembros registrados</div>
+                            </div>
+                            <div class="beneficio-item">
+                                <span class="beneficio-icon">🛍️</span>
+                                <div class="beneficio-title">Acceso Anticipado</div>
+                                <div class="beneficio-desc">Sé el primero en ver nuevas colecciones</div>
+                            </div>
+                            <div class="beneficio-item">
+                                <span class="beneficio-icon">📱</span>
+                                <div class="beneficio-title">Notificaciones VIP</div>
+                                <div class="beneficio-desc">Recibe avisos de ofertas flash por Instagram</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones disponibles -->
+                    <div class="acciones-section">
+                        <a href="{% url 'home:home' %}" class="btn-accion btn-primary">
+                            <i class="fas fa-shopping-bag"></i>
+                            Explorar Catálogo
+                        </a>
+                        <a href="https://www.instagram.com/zone22._?igsh=cXpvbmYxYm80Z3B3" target="_blank" class="btn-accion">
+                            <i class="fab fa-instagram"></i>
+                            Seguir en Instagram
+                        </a>
+                        <form method="post" action="{% url 'panel_admin:logout' %}" style="display: inline; grid-column: span 1;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-accion btn-danger w-100" onclick="return confirm('¿Estás seguro de que quieres cerrar sesión?')">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Cerrar Sesión
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Animación de entrada para los elementos
+document.addEventListener('DOMContentLoaded', function() {
+    const elements = document.querySelectorAll('.beneficio-item');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, index * 100);
+            }
+        });
+    });
+
+    elements.forEach((element) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'all 0.6s ease';
+        observer.observe(element);
+    });
+});
+</script>
+{% endblock %}
