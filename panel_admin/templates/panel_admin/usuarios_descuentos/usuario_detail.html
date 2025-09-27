@@ -1,0 +1,396 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/usuarios_descuentos/usuarios.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-user"></i>{% endblock %}
+{% block content_title %}Detalle de Usuario{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:usuarios_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i>Volver a Usuarios
+</a>
+<a href="{% url 'panel_admin:crear_codigo_usuario' usuario.id %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i>Crear Código
+</a>
+{% endblock %}
+
+{% block panel_content %}
+{% csrf_token %}
+
+<!-- Información del usuario -->
+<div class="user-detail-header">
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="user-info-card">
+                <div class="user-avatar-large">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h3 class="user-name">@{{ usuario.profile.instagram_account }}</h3>
+                    <p class="user-email">
+                        <i class="fas fa-envelope"></i>{{ usuario.email }}
+                    </p>
+                    <div class="user-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-calendar-plus"></i>
+                            Registrado: {{ usuario.profile.created_at|date:"d/m/Y H:i" }}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            {% if carrito_items %}
+                                Última actividad: {{ carrito_items.0.ultima_actividad|date:"d/m/Y H:i" }}
+                            {% else %}
+                                Sin actividad en carrito
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="user-stats-card">
+                <div class="stat-row">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ carrito_items.count }}</div>
+                        <div class="stat-label">Items en Carrito</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ codigos.count }}</div>
+                        <div class="stat-label">Códigos Generados</div>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ codigos_activos }}</div>
+                        <div class="stat-label">Códigos Activos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ codigos_usados }}</div>
+                        <div class="stat-label">Códigos Usados</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenido principal -->
+<div class="user-detail-content">
+    <div class="row g-4">
+        <!-- Items del carrito -->
+        <div class="col-lg-6">
+            <div class="section-card">
+                <div class="section-header">
+                    <h5>
+                        <i class="fas fa-shopping-cart"></i>Items en Carrito
+                        <span class="badge bg-primary">{{ carrito_items.count }}</span>
+                    </h5>
+                </div>
+                <div class="section-body">
+                    {% if carrito_items %}
+                        <div class="carrito-list">
+                            {% for item in carrito_items %}
+                                <div class="carrito-item">
+                                    <div class="item-image">
+                                        {% if item.prenda.imagen %}
+                                            <img src="{{ item.prenda.imagen.url }}" alt="{{ item.prenda.nombre|default:'Prenda' }}">
+                                        {% else %}
+                                            <div class="no-image">
+                                                <i class="fas fa-tshirt"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="item-details">
+                                        <h6 class="item-name">
+                                            {% if item.prenda.nombre %}
+                                                {{ item.prenda.nombre }}
+                                            {% else %}
+                                                Prenda de {{ item.prenda.subsubseccion.nombre }}
+                                            {% endif %}
+                                        </h6>
+                                        <p class="item-category">
+                                            {{ item.prenda.subsubseccion.subseccion.seccion.nombre }} →
+                                            {{ item.prenda.subsubseccion.subseccion.nombre }} →
+                                            {{ item.prenda.subsubseccion.nombre }}
+                                        </p>
+                                        {% if item.prenda.precio %}
+                                            <p class="item-price">
+                                                <i class="fas fa-euro-sign"></i>{{ item.prenda.precio }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="item-meta">
+                                        <small class="text-muted">
+                                            <i class="fas fa-plus"></i>{{ item.agregado_en|date:"d/m/Y" }}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i>{{ item.ultima_actividad|date:"d/m/Y H:i" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state-small">
+                            <i class="fas fa-shopping-cart"></i>
+                            <p>No hay items en el carrito</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Códigos de descuento -->
+        <div class="col-lg-6">
+            <div class="section-card">
+                <div class="section-header">
+                    <h5>
+                        <i class="fas fa-ticket-alt"></i>Códigos de Descuento
+                        <span class="badge bg-success">{{ codigos.count }}</span>
+                    </h5>
+                </div>
+                <div class="section-body">
+                    {% if codigos %}
+                        <div class="codigos-list">
+                            {% for codigo in codigos %}
+                                <div class="codigo-item {% if codigo.usado %}codigo-usado{% endif %}">
+                                    <div class="codigo-header">
+                                        <div class="codigo-badge">
+                                            {% if codigo.usado %}
+                                                <i class="fas fa-check-circle text-success"></i>
+                                            {% else %}
+                                                <i class="fas fa-ticket-alt text-primary"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="codigo-info">
+                                            <h6 class="codigo-text">{{ codigo.codigo }}</h6>
+                                            <p class="codigo-descuento">{{ codigo.porcentaje }}% de descuento</p>
+                                        </div>
+                                        <div class="codigo-status">
+                                            {% if codigo.usado %}
+                                                <span class="badge bg-success">Usado</span>
+                                            {% elif codigo.esta_vigente %}
+                                                <span class="badge bg-primary">Activo</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Expirado</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="codigo-meta">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-plus"></i>
+                                            Creado: {{ codigo.fecha_creacion|date:"d/m/Y H:i" }}
+                                        </small>
+                                        {% if codigo.fecha_expiracion %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-times"></i>
+                                                Expira: {{ codigo.fecha_expiracion|date:"d/m/Y H:i" }}
+                                            </small>
+                                        {% endif %}
+                                        {% if codigo.usado and codigo.fecha_uso %}
+                                            <small class="text-success">
+                                                <i class="fas fa-check"></i>
+                                                Usado: {{ codigo.fecha_uso|date:"d/m/Y H:i" }}
+                                            </small>
+                                        {% endif %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-envelope"></i>
+                                            Email {{ codigo.email_enviado|yesno:"enviado,no enviado" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state-small">
+                            <i class="fas fa-ticket-alt"></i>
+                            <p>No hay códigos generados</p>
+                            <a href="{% url 'panel_admin:crear_codigo_usuario' usuario.id %}" class="btn btn-primary btn-sm mt-2">
+                                <i class="fas fa-plus"></i>Crear Primer Código
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones del usuario -->
+<div class="user-actions-section">
+    <div class="actions-card">
+        <h5>
+            <i class="fas fa-tools"></i>Acciones
+        </h5>
+        <div class="actions-buttons">
+            <a href="{% url 'panel_admin:crear_codigo_usuario' usuario.id %}" class="btn btn-primary">
+                <i class="fas fa-ticket-alt"></i>Generar Código de Descuento
+            </a>
+            {% if carrito_items %}
+                <button type="button" class="btn btn-success" onclick="enviarCodigoUsuario({{ usuario.id }})">
+                    <i class="fas fa-paper-plane"></i>Enviar Código por Email
+                </button>
+            {% endif %}
+            <a href="mailto:{{ usuario.email }}" class="btn btn-outline-primary">
+                <i class="fas fa-envelope"></i>Contactar por Email
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Funcionalidad para copiar código al portapapeles
+    document.querySelectorAll('.codigo-text').forEach(function(element) {
+        element.style.cursor = 'pointer';
+        element.title = 'Click para copiar';
+
+        element.addEventListener('click', function() {
+            const codigo = this.textContent;
+            navigator.clipboard.writeText(codigo).then(function() {
+                // Mostrar feedback visual
+                const originalText = element.textContent;
+                element.textContent = '¡Copiado!';
+                element.classList.add('text-success');
+
+                setTimeout(function() {
+                    element.textContent = originalText;
+                    element.classList.remove('text-success');
+                }, 1000);
+            });
+        });
+    });
+});
+
+function enviarCodigoUsuario(userId) {
+    Swal.fire({
+        title: '📧 Enviar Código de Descuento',
+        text: '¿Deseas enviar un código de descuento por email?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '✅ Sí, enviar',
+        cancelButtonText: '❌ Cancelar',
+        reverseButtons: true,
+        background: '#1a1a2e',
+        color: '#e2e8f0',
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#f56565'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Intentar envío inicial
+            enviarCodigo(userId, false, false);
+        }
+    });
+}
+
+function enviarCodigo(userId, forceNew, sendExisting) {
+    // Mostrar loading
+    Swal.fire({
+        title: '📨 Enviando Email...',
+        text: 'Por favor espera mientras se envía el código de descuento',
+        icon: 'info',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        showConfirmButton: false,
+        background: '#1a1a2e',
+        color: '#e2e8f0',
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch(`{% url 'panel_admin:enviar_codigo_individual' %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            user_id: userId,
+            force_send: forceNew,
+            enviar_existente: sendExisting
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: '✅ ¡Código Enviado!',
+                text: data.message,
+                icon: 'success',
+                background: '#1a1a2e',
+                color: '#e2e8f0',
+                confirmButtonColor: '#667eea'
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            if (data.error === 'codigo_vigente') {
+                // Usuario ya tiene código vigente - mostrar opciones
+                Swal.fire({
+                    title: '⚠️ Código Vigente Encontrado',
+                    html: `
+                        <p>El usuario ya tiene un código vigente:</p>
+                        <div style="background: #2d3748; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <strong style="color: #667eea; font-size: 1.2em;">${data.codigo_actual}</strong><br>
+                            <span style="color: #a0aec0;">${data.porcentaje}% de descuento</span><br>
+                            <span style="color: #a0aec0;">Válido hasta: ${data.expiracion}</span>
+                        </div>
+                        <p>¿Qué deseas hacer?</p>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    confirmButtonText: '📧 Enviar el actual',
+                    denyButtonText: '🆕 Crear nuevo (desactiva anterior)',
+                    cancelButtonText: '❌ Cancelar',
+                    background: '#1a1a2e',
+                    color: '#e2e8f0',
+                    confirmButtonColor: '#38b2ac',
+                    denyButtonColor: '#667eea',
+                    cancelButtonColor: '#f56565',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Enviar código existente
+                        enviarCodigo(userId, false, true);
+                    } else if (result.isDenied) {
+                        // Crear nuevo código (desactivar anterior)
+                        enviarCodigo(userId, true, false);
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: '❌ Error',
+                    text: data.error,
+                    icon: 'error',
+                    background: '#1a1a2e',
+                    color: '#e2e8f0',
+                    confirmButtonColor: '#f56565'
+                });
+            }
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            title: '❌ Error de Conexión',
+            text: 'No se pudo conectar con el servidor',
+            icon: 'error',
+            background: '#1a1a2e',
+            color: '#e2e8f0',
+            confirmButtonColor: '#f56565'
+        });
+    });
+}
+</script>
+{% endblock %}

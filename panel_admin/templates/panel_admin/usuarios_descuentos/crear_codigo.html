@@ -1,0 +1,356 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/usuarios_descuentos/codigos.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-plus-circle"></i>{% endblock %}
+{% block content_title %}Crear Código de Descuento{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:codigos_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i>Volver a Códigos
+</a>
+{% endblock %}
+
+{% block panel_content %}
+
+<div class="crear-codigo-section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="form-card">
+                <div class="form-header">
+                    <h4>
+                        <i class="fas fa-ticket-alt"></i>Nuevo Código de Descuento
+                    </h4>
+                    <p>Crea un código de descuento personalizado para un usuario</p>
+                </div>
+
+                <form method="POST" class="codigo-form">
+                    {% csrf_token %}
+
+                    <!-- Selección de usuario -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-user"></i>Usuario</h5>
+                        <div class="mb-3">
+                            <label for="id_user" class="form-label">Seleccionar Usuario *</label>
+                            <select class="form-select user-select" name="user_id" id="id_user" required>
+                                <option value="">-- Selecciona un usuario --</option>
+                                {% for usuario in usuarios %}
+                                    <option value="{{ usuario.id }}"
+                                            {% if preselected_user_id == usuario.id %}selected{% endif %}
+                                            data-instagram="@{{ usuario.profile.instagram_account }}"
+                                            data-email="{{ usuario.email }}"
+                                            data-carrito="{{ usuario.carrito_count }}">
+                                        @{{ usuario.profile.instagram_account }} - {{ usuario.email }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- Vista previa del usuario seleccionado -->
+                            <div id="usuario-preview" class="usuario-preview mt-3" style="display: none;">
+                                <div class="usuario-preview-card">
+                                    <div class="usuario-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="usuario-info">
+                                        <h6 id="preview-instagram"></h6>
+                                        <p id="preview-email"></p>
+                                        <small id="preview-carrito"></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuración del código -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-cog"></i>Configuración del Código</h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_porcentaje" class="form-label">Porcentaje de Descuento *</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="porcentaje" id="id_porcentaje"
+                                           min="1" max="100" value="{{ form.porcentaje.value|default:config_activa.porcentaje_descuento }}" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div class="form-text">Descuento entre 1% y 100%</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_codigo" class="form-label">Código Personalizado</label>
+                                <input type="text" class="form-control" name="codigo" id="id_codigo"
+                                       value="{{ form.codigo.value }}" maxlength="20"
+                                       placeholder="Dejar vacío para generar automáticamente">
+                                <div class="form-text">8-20 caracteres, solo letras y números</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="id_fecha_expiracion" class="form-label">Fecha de Expiración</label>
+                                <input type="datetime-local" class="form-control" name="fecha_expiracion" id="id_fecha_expiracion"
+                                       value="{{ form.fecha_expiracion.value|date:'Y-m-d\TH:i' }}">
+                                <div class="form-text">Dejar vacío para que no expire</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check-wrapper">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="enviar_email" id="id_enviar_email"
+                                               {% if form.enviar_email.value %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_enviar_email">
+                                            <i class="fas fa-envelope"></i>Enviar por email automáticamente
+                                        </label>
+                                    </div>
+                                    <div class="form-text">El usuario recibirá el código por email al crearlo</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista previa del código -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-eye"></i>Vista Previa</h5>
+                        <div class="codigo-preview">
+                            <div class="preview-card">
+                                <div class="preview-header">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <span>Código de Descuento</span>
+                                </div>
+                                <div class="preview-body">
+                                    <div class="codigo-display">
+                                        <span id="preview-codigo">XXXX-XXXX</span>
+                                    </div>
+                                    <div class="descuento-display">
+                                        <span id="preview-porcentaje">10</span>% de descuento
+                                    </div>
+                                    <div class="preview-info">
+                                        <small>
+                                            Para: <span id="preview-usuario">Selecciona un usuario</span>
+                                        </small>
+                                        <br>
+                                        <small id="preview-expiracion" style="display: none;">
+                                            Expira: <span></span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Errores del formulario -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle"></i>Errores en el formulario:</h6>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field|capfirst }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- Botones de acción -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i>Crear Código
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="limpiarFormulario()">
+                            <i class="fas fa-eraser"></i>Limpiar
+                        </button>
+                        <a href="{% url 'panel_admin:codigos_list' %}" class="btn btn-outline-danger btn-lg">
+                            <i class="fas fa-times"></i>Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Panel de información lateral -->
+        <div class="col-lg-4">
+            <div class="info-panel">
+                <div class="info-card">
+                    <div class="info-header">
+                        <h5><i class="fas fa-info-circle"></i>Información</h5>
+                    </div>
+                    <div class="info-body">
+                        <div class="info-item">
+                            <i class="fas fa-cog text-primary"></i>
+                            <div>
+                                <strong>Configuración Actual</strong>
+                                {% if config_activa %}
+                                    <p>{{ config_activa.dias_inactividad }} días de inactividad</p>
+                                    <p>{{ config_activa.porcentaje_descuento }}% de descuento por defecto</p>
+                                {% else %}
+                                    <p class="text-warning">No hay configuración activa</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <i class="fas fa-users text-success"></i>
+                            <div>
+                                <strong>Usuarios Totales</strong>
+                                <p>{{ usuarios.count }} usuarios registrados</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <i class="fas fa-ticket-alt text-warning"></i>
+                            <div>
+                                <strong>Códigos Activos</strong>
+                                <p>{{ codigos_activos }} códigos vigentes</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <i class="fas fa-lightbulb text-info"></i>
+                            <div>
+                                <strong>Consejos</strong>
+                                <ul>
+                                    <li>Los códigos se generan automáticamente si no especificas uno</li>
+                                    <li>Sin fecha de expiración = código permanente</li>
+                                    <li>El email incluirá los items del carrito del usuario</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userSelect = document.getElementById('id_user');
+    const codigoInput = document.getElementById('id_codigo');
+    const porcentajeInput = document.getElementById('id_porcentaje');
+    const fechaExpiracionInput = document.getElementById('id_fecha_expiracion');
+
+    const userPreview = document.getElementById('usuario-preview');
+    const previewInstagram = document.getElementById('preview-instagram');
+    const previewEmail = document.getElementById('preview-email');
+    const previewCarrito = document.getElementById('preview-carrito');
+
+    const previewCodigo = document.getElementById('preview-codigo');
+    const previewPorcentaje = document.getElementById('preview-porcentaje');
+    const previewUsuario = document.getElementById('preview-usuario');
+    const previewExpiracion = document.getElementById('preview-expiracion');
+
+    // Actualizar vista previa cuando cambia el usuario
+    userSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+
+        if (this.value) {
+            const instagram = selectedOption.dataset.instagram;
+            const email = selectedOption.dataset.email;
+            const carrito = selectedOption.dataset.carrito;
+
+            previewInstagram.textContent = instagram;
+            previewEmail.textContent = email;
+            previewCarrito.textContent = `${carrito} items en carrito`;
+            previewUsuario.textContent = instagram;
+
+            userPreview.style.display = 'block';
+        } else {
+            userPreview.style.display = 'none';
+            previewUsuario.textContent = 'Selecciona un usuario';
+        }
+    });
+
+    // Actualizar vista previa del código
+    codigoInput.addEventListener('input', function() {
+        if (this.value) {
+            previewCodigo.textContent = this.value.toUpperCase();
+        } else {
+            previewCodigo.textContent = 'AUTO-GENERADO';
+        }
+    });
+
+    // Actualizar vista previa del porcentaje
+    porcentajeInput.addEventListener('input', function() {
+        previewPorcentaje.textContent = this.value || '10';
+    });
+
+    // Actualizar vista previa de la fecha de expiración
+    fechaExpiracionInput.addEventListener('input', function() {
+        if (this.value) {
+            const fecha = new Date(this.value);
+            previewExpiracion.querySelector('span').textContent = fecha.toLocaleDateString('es-ES');
+            previewExpiracion.style.display = 'block';
+        } else {
+            previewExpiracion.style.display = 'none';
+        }
+    });
+
+    // Inicializar vista previa si hay valores pre-seleccionados
+    if (userSelect.value) {
+        userSelect.dispatchEvent(new Event('change'));
+    }
+
+    if (porcentajeInput.value) {
+        porcentajeInput.dispatchEvent(new Event('input'));
+    }
+
+    if (fechaExpiracionInput.value) {
+        fechaExpiracionInput.dispatchEvent(new Event('input'));
+    }
+
+    // Validar código personalizado
+    codigoInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+
+    // Validar porcentaje
+    porcentajeInput.addEventListener('input', function() {
+        if (this.value > 100) this.value = 100;
+        if (this.value < 1) this.value = 1;
+    });
+
+    // Establecer fecha mínima para expiración (ahora + 1 hora)
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    fechaExpiracionInput.min = now.toISOString().slice(0, 16);
+});
+
+function limpiarFormulario() {
+    if (confirm('¿Limpiar todos los campos del formulario?')) {
+        document.querySelector('.codigo-form').reset();
+        document.getElementById('usuario-preview').style.display = 'none';
+        document.getElementById('preview-codigo').textContent = 'XXXX-XXXX';
+        document.getElementById('preview-porcentaje').textContent = '10';
+        document.getElementById('preview-usuario').textContent = 'Selecciona un usuario';
+        document.getElementById('preview-expiracion').style.display = 'none';
+    }
+}
+
+// Generar código aleatorio si se hace click en el preview
+document.getElementById('preview-codigo').addEventListener('click', function() {
+    if (this.textContent === 'XXXX-XXXX' || this.textContent === 'AUTO-GENERADO') {
+        const codigo = generateRandomCode();
+        document.getElementById('id_codigo').value = codigo;
+        this.textContent = codigo;
+    }
+});
+
+function generateRandomCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+</script>
+{% endblock %}

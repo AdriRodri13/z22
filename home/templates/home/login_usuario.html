@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - Zone22{% endblock %}
+
+{% block extra_css %}
+<style>
+.login-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    margin: -2rem -15px 0;
+    padding: 2rem 15px;
+}
+
+.login-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+    border: 1px solid #333333;
+    border-radius: 20px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.login-header h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.login-header p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.login-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.form-floating {
+    margin-bottom: 1.5rem;
+}
+
+.form-floating .form-control {
+    background: #000000;
+    border: 1px solid #333333;
+    color: #ffffff;
+    font-size: 1rem;
+    padding: 1rem 0.75rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.form-floating .form-control:focus {
+    background: #1a1a1a;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    color: #ffffff;
+}
+
+.form-floating .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.form-floating label {
+    color: #cccccc;
+    font-weight: 500;
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    width: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(67, 233, 123, 0.3);
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(67, 233, 123, 0.4);
+    background: linear-gradient(135deg, #3dd970 0%, #32f0d1 100%);
+    color: white;
+}
+
+.login-divider {
+    margin: 2rem 0;
+    text-align: center;
+    position: relative;
+}
+
+.login-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.login-divider span {
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    color: #cccccc;
+    padding: 0 1rem;
+    font-size: 0.9rem;
+    position: relative;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.register-link a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    background: #333333;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #4d4d4d;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.register-link a:hover {
+    background: #4d4d4d;
+    border-color: #667eea;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.admin-note {
+    margin-top: 2rem;
+    text-align: center;
+    padding: 1rem;
+    background: #000000;
+    border-radius: 8px;
+    border-left: 4px solid #333333;
+    border: 1px solid #333333;
+}
+
+.admin-note small {
+    color: #999999;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.admin-note a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.admin-note a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+/* Animaciones */
+.login-card {
+    animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .login-container {
+        padding: 1rem;
+        margin: -1rem -15px 0;
+    }
+
+    .login-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .login-header h1 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1><i class="fas fa-user-circle me-2"></i>Hola!</h1>
+            <p>Inicia sesión en tu cuenta</p>
+            <div class="login-subtitle">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Accede a tu carrito y descuentos</span>
+            </div>
+        </div>
+
+        <!-- Mostrar mensajes -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-floating">
+                <input type="email" class="form-control" id="email" name="email" placeholder="tu@email.com" required>
+                <label for="email"><i class="fas fa-envelope me-2"></i>Email</label>
+            </div>
+
+            <div class="form-floating">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
+                <label for="password"><i class="fas fa-lock me-2"></i>Contraseña</label>
+            </div>
+
+            <button type="submit" class="btn btn-login">
+                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+            </button>
+        </form>
+
+        <div class="login-divider">
+            <span>¿No tienes cuenta?</span>
+        </div>
+
+        <div class="register-link">
+            <a href="{% url 'home:registro' %}">
+                <i class="fas fa-user-plus me-2"></i>Crear nueva cuenta
+            </a>
+        </div>
+
+        <div class="admin-note">
+            <small>
+                <i class="fas fa-info-circle me-1"></i>
+                <strong>¿Eres administrador?</strong><br>
+                <a href="{% url 'panel_admin:login' %}">Accede desde el panel de administración</a>
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}

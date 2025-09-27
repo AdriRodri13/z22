@@ -22,7 +22,7 @@
         
         <div class="row g-3">
             {% for seccion in secciones %}
-            <div class="col-12 col-sm-6 col-lg-4">
+            <div class="col-6 col-sm-6 col-lg-4">
                 <div class="seccion-card" data-seccion-id="{{ seccion.id }}">
                     <!-- Logo de la sección -->
                     <div class="seccion-logo-container">
@@ -42,10 +42,6 @@
                             {% if seccion.descripcion %}
                                 {{ seccion.descripcion|truncatewords:10 }}
                             {% endif %}
-                        </p>
-                        <p class="seccion-subsecciones">
-                            <i class="fas fa-layer-group"></i>
-                            {{ seccion.subsecciones.count }} subsección{{ seccion.subsecciones.count|pluralize:"es" }}
                         </p>
                     </div>
                     

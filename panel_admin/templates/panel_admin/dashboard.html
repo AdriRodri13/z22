@@ -11,6 +11,7 @@
 {% block content_title %}Dashboard{% endblock %}
 
 {% block panel_content %}
+<div class="dashboard-content">
 
 <!-- Acciones rápidas -->
 <div class="quick-actions">
@@ -40,6 +41,43 @@
             <a href="{% url 'panel_admin:prenda_create' %}" class="quick-action-card">
                 <i class="fas fa-plus-circle quick-action-icon"></i>
                 <h5 class="quick-action-title">Nueva Prenda</h5>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Nueva sección de Usuarios y Descuentos -->
+<div class="usuarios-descuentos-section">
+    <h4>
+        <i class="fas fa-users"></i>Usuarios y Descuentos
+    </h4>
+    <div class="row g-4">
+        <div class="col-md-6 col-xl-3">
+            <a href="{% url 'panel_admin:usuarios_descuentos_dashboard' %}" class="quick-action-card featured">
+                <i class="fas fa-tachometer-alt quick-action-icon"></i>
+                <h5 class="quick-action-title">Dashboard Usuarios</h5>
+                <p class="quick-action-subtitle">Ver estadísticas y gestionar descuentos</p>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{% url 'panel_admin:usuarios_list' %}" class="quick-action-card">
+                <i class="fas fa-users quick-action-icon"></i>
+                <h5 class="quick-action-title">Lista de Usuarios</h5>
+                <p class="quick-action-subtitle">Gestionar usuarios registrados</p>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{% url 'panel_admin:codigos_descuento_list' %}" class="quick-action-card">
+                <i class="fas fa-ticket-alt quick-action-icon"></i>
+                <h5 class="quick-action-title">Códigos Descuento</h5>
+                <p class="quick-action-subtitle">Ver y gestionar códigos</p>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a href="{% url 'panel_admin:enviar_codigos_manual' %}" class="quick-action-card">
+                <i class="fas fa-paper-plane quick-action-icon"></i>
+                <h5 class="quick-action-title">Enviar Códigos</h5>
+                <p class="quick-action-subtitle">Envío manual o automático</p>
             </a>
         </div>
     </div>
@@ -159,11 +197,22 @@
         </div>
     </div>
 </div>
+
+</div> <!-- Cierre de dashboard-content -->
 {% endblock %}
 
 {% block panel_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Carga suave del dashboard - evitar parpadeo
+    const dashboardContent = document.querySelector('.dashboard-content');
+    if (dashboardContent) {
+        // Pequeño delay para asegurar que todos los estilos se han cargado
+        setTimeout(() => {
+            dashboardContent.classList.add('loaded');
+        }, 100);
+    }
+
     // Hacer las stat-cards clicables
     document.querySelector('.stat-secciones').addEventListener('click', function() {
         window.location.href = '{% url "panel_admin:seccion_list" %}';

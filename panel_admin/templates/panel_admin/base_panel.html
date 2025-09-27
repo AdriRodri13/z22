@@ -37,15 +37,24 @@
                         <a href="{% url 'panel_admin:prenda_list_by_subseccion' %}" class="admin-nav-link {% if 'prenda' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="fas fa-tshirt"></i>Prendas
                         </a>
-                        
+
+                        <hr class="nav-divider">
+
+                        <a href="{% url 'panel_admin:usuarios_descuentos_dashboard' %}" class="admin-nav-link {% if 'usuarios' in request.resolver_match.url_name or 'codigos' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="fas fa-users"></i>Usuarios y Descuentos
+                        </a>
+
                         <hr class="nav-divider">
                         
                         <a href="{% url 'home:home' %}" class="admin-nav-link">
                             <i class="fas fa-home"></i>Ver Web
                         </a>
-                        <a href="{% url 'panel_admin:logout' %}" class="admin-nav-link text-danger">
-                            <i class="fas fa-sign-out-alt"></i>Cerrar Sesión
-                        </a>
+                        <form method="post" action="{% url 'panel_admin:logout' %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="admin-nav-link text-danger w-100 border-0 bg-transparent text-start" style="padding: 0.75rem 1rem;">
+                                <i class="fas fa-sign-out-alt"></i>Cerrar Sesión
+                            </button>
+                        </form>
                     </nav>
                 </div>
             </div>
@@ -95,6 +104,9 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 // Toggle sidebar en móvil
 function toggleSidebar() {

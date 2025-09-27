@@ -1,0 +1,422 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/usuarios_descuentos/configuracion.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-cog"></i>{% endblock %}
+{% block content_title %}Configuración del Sistema{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:usuarios_descuentos_dashboard' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i>Volver al Dashboard
+</a>
+{% endblock %}
+
+{% block panel_content %}
+
+<div class="configuracion-section">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="config-form-card">
+                <div class="form-header">
+                    <h4>
+                        <i class="fas fa-cog"></i>Configuración de Descuentos
+                    </h4>
+                    <p>
+                        Configura el comportamiento automático del sistema de descuentos por inactividad
+                    </p>
+                </div>
+
+                <form method="POST" class="config-form">
+                    {% csrf_token %}
+
+                    <!-- Estado del sistema -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h5><i class="fas fa-power-off"></i>Estado del Sistema</h5>
+                        </div>
+
+                        <div class="form-check form-switch form-switch-lg">
+                            <input class="form-check-input" type="checkbox" name="activo" id="id_activo"
+                                   {% if config_activa.activo %}checked{% endif %}>
+                            <label class="form-check-label" for="id_activo">
+                                <strong>Sistema de descuentos activo</strong>
+                                <br><small class="text-muted">
+                                    Cuando está activo, el sistema enviará códigos automáticamente según la configuración
+                                </small>
+                            </label>
+                        </div>
+
+                        <div class="status-indicator mt-3">
+                            <div id="status-active" class="status-badge bg-success" style="display: none;">
+                                <i class="fas fa-check-circle"></i>Sistema Activo
+                            </div>
+                            <div id="status-inactive" class="status-badge bg-danger">
+                                <i class="fas fa-times-circle"></i>Sistema Inactivo
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuración de inactividad -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h5><i class="fas fa-clock"></i>Detección de Inactividad</h5>
+                            <p>
+                                Define cuándo se considera que un usuario está inactivo
+                            </p>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_dias_inactividad" class="form-label">
+                                    Días de inactividad *
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <input type="number" class="form-control" name="dias_inactividad"
+                                           id="id_dias_inactividad" min="1" max="30"
+                                           value="{{ config_activa.dias_inactividad|default:'3' }}" required>
+                                    <span class="input-group-text">días</span>
+                                </div>
+                                <div class="form-text">
+                                    Tiempo sin actividad en el carrito antes de enviar código (1-30 días)
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Vista previa</label>
+                                <div class="preview-box">
+                                    <div class="preview-content">
+                                        <i class="fas fa-clock text-primary"></i>
+                                        <div>
+                                            <strong>Detección automática</strong>
+                                            <p class="mb-0">
+                                                Los usuarios recibirán códigos después de
+                                                <span id="preview-dias" class="text-primary font-weight-bold">3</span>
+                                                días sin actividad
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuración del descuento -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h5><i class="fas fa-percentage"></i>Descuento por Defecto</h5>
+                            <p>
+                                Porcentaje de descuento que se aplicará automáticamente
+                            </p>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_porcentaje_descuento" class="form-label">
+                                    Porcentaje de descuento *
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <input type="number" class="form-control" name="porcentaje_descuento"
+                                           id="id_porcentaje_descuento" min="1" max="100"
+                                           value="{{ config_activa.porcentaje_descuento|default:'10' }}" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <div class="form-text">
+                                    Descuento aplicado en códigos automáticos (1-100%)
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Vista previa del código</label>
+                                <div class="codigo-preview-mini">
+                                    <div class="codigo-card">
+                                        <div class="codigo-header">
+                                            <i class="fas fa-ticket-alt"></i>
+                                            <span>Código de Descuento</span>
+                                        </div>
+                                        <div class="codigo-body">
+                                            <div class="descuento-value">
+                                                <span id="preview-porcentaje">10</span>%
+                                            </div>
+                                            <small>de descuento</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h5><i class="fas fa-info-circle"></i>Información del Sistema</h5>
+                            <p>
+                                El sistema funcionará automáticamente cuando esté activado
+                            </p>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-item">
+                                <i class="fas fa-clock text-primary"></i>
+                                <div>
+                                    <strong>Funcionamiento automático</strong>
+                                    <p>El sistema verificará diariamente usuarios inactivos y enviará códigos de descuento por email automáticamente.</p>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <i class="fas fa-envelope text-success"></i>
+                                <div>
+                                    <strong>Envío de emails</strong>
+                                    <p>Los emails incluirán el código de descuento y los productos del carrito del usuario.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Errores del formulario -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle"></i>Errores en la configuración:</h6>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field|capfirst }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- Botones de acción -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i>Guardar Configuración
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="resetearConfiguracion()">
+                            <i class="fas fa-undo"></i>Restablecer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Panel de información -->
+        <div class="col-lg-4">
+            <div class="info-panel">
+                <!-- Estado actual -->
+                {% if config_activa %}
+                    <div class="info-card current-config">
+                        <div class="info-header">
+                            <h5><i class="fas fa-info-circle"></i>Configuración Actual</h5>
+                            <span class="config-status {% if config_activa.activo %}active{% else %}inactive{% endif %}">
+                                {% if config_activa.activo %}
+                                    <i class="fas fa-check-circle"></i>Activo
+                                {% else %}
+                                    <i class="fas fa-times-circle"></i>Inactivo
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-body">
+                            <div class="config-item">
+                                <span class="config-label">Días de inactividad:</span>
+                                <span class="config-value">{{ config_activa.dias_inactividad }} días</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">Porcentaje descuento:</span>
+                                <span class="config-value">{{ config_activa.porcentaje_descuento }}%</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">Última actualización:</span>
+                                <span class="config-value">{{ config_activa.actualizado_en|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Estado del sistema automático -->
+                <div class="info-card system-status-card">
+                    <div class="info-header">
+                        <h5><i class="fas fa-robot"></i>Sistema Automático</h5>
+                        <span class="config-status {% if scheduler_estado.activo %}active{% else %}inactive{% endif %}">
+                            {% if scheduler_estado.activo %}
+                                <i class="fas fa-play-circle"></i>Ejecutándose
+                            {% else %}
+                                <i class="fas fa-pause-circle"></i>Detenido
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-body">
+                        {% if scheduler_estado.activo %}
+                            <div class="config-item">
+                                <span class="config-label">Estado:</span>
+                                <span class="config-value">✅ Activo</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">Trabajos programados:</span>
+                                <span class="config-value">{{ scheduler_estado.trabajos }}</span>
+                            </div>
+                            {% if scheduler_estado.proximo_envio %}
+                            <div class="config-item">
+                                <span class="config-label">Próximo envío:</span>
+                                <span class="config-value">{{ scheduler_estado.proximo_envio|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="config-item">
+                                <span class="config-label">Horario:</span>
+                                <span class="config-value">Diariamente 10:00 AM</span>
+                            </div>
+                        {% else %}
+                            <div class="config-item">
+                                <span class="config-label">Estado:</span>
+                                <span class="config-value" style="color: #ff6b6b;">⏸️ Detenido</span>
+                            </div>
+                            <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-top: 10px;">
+                                Activa el sistema en la configuración para que envíe códigos automáticamente.
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Acciones rápidas -->
+                <div class="info-card quick-actions-card">
+                    <div class="info-header">
+                        <h5><i class="fas fa-bolt"></i>Acciones Rápidas</h5>
+                    </div>
+                    <div class="info-body">
+                        <div class="d-grid gap-3">
+                            <a href="{% url 'panel_admin:usuarios_list' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-users"></i>Gestionar Usuarios
+                            </a>
+                            <a href="{% url 'panel_admin:codigos_list' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-ticket-alt"></i>Ver Códigos
+                            </a>
+                            <a href="{% url 'panel_admin:crear_codigo' %}" class="btn btn-outline-success">
+                                <i class="fas fa-plus-circle"></i>Crear Código
+                            </a>
+                            <a href="{% url 'panel_admin:usuarios_enviar_codigos' %}" class="btn btn-outline-warning">
+                                <i class="fas fa-paper-plane"></i>Enviar Códigos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ayuda -->
+                <div class="info-card help-card">
+                    <div class="info-header">
+                        <h5><i class="fas fa-question-circle"></i>Ayuda</h5>
+                    </div>
+                    <div class="info-body">
+                        <div class="help-item">
+                            <h6>¿Cómo funciona?</h6>
+                            <p>El sistema detecta automáticamente usuarios inactivos y les envía códigos de descuento para incentivar la compra.</p>
+                        </div>
+
+                        <div class="help-item">
+                            <h6>Comando manual</h6>
+                            <code>python manage.py enviar_codigos_descuento</code>
+                            <p>Ejecuta el envío manual de códigos</p>
+                        </div>
+
+                        <div class="help-item">
+                            <h6>Automatización</h6>
+                            <p>Configura un cron job para ejecutar el comando automáticamente cada día.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block panel_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const activoSwitch = document.getElementById('id_activo');
+    const diasInput = document.getElementById('id_dias_inactividad');
+    const porcentajeInput = document.getElementById('id_porcentaje_descuento');
+
+    const statusActive = document.getElementById('status-active');
+    const statusInactive = document.getElementById('status-inactive');
+    const previewDias = document.getElementById('preview-dias');
+    const previewPorcentaje = document.getElementById('preview-porcentaje');
+
+    // Actualizar indicador de estado
+    function updateStatusIndicator() {
+        if (activoSwitch.checked) {
+            statusActive.style.display = 'block';
+            statusInactive.style.display = 'none';
+        } else {
+            statusActive.style.display = 'none';
+            statusInactive.style.display = 'block';
+        }
+    }
+
+    // Actualizar preview de días
+    function updateDiasPreview() {
+        previewDias.textContent = diasInput.value || '3';
+    }
+
+    // Actualizar preview de porcentaje
+    function updatePorcentajePreview() {
+        previewPorcentaje.textContent = porcentajeInput.value || '10';
+    }
+
+    // Event listeners
+    activoSwitch.addEventListener('change', updateStatusIndicator);
+    diasInput.addEventListener('input', updateDiasPreview);
+    porcentajeInput.addEventListener('input', updatePorcentajePreview);
+
+    // Validaciones
+    diasInput.addEventListener('input', function() {
+        if (this.value > 30) this.value = 30;
+        if (this.value < 1) this.value = 1;
+    });
+
+    porcentajeInput.addEventListener('input', function() {
+        if (this.value > 100) this.value = 100;
+        if (this.value < 1) this.value = 1;
+    });
+
+    // Inicializar
+    updateStatusIndicator();
+    updateDiasPreview();
+    updatePorcentajePreview();
+});
+
+function resetearConfiguracion() {
+    if (confirm('¿Restablecer la configuración a los valores por defecto?')) {
+        document.getElementById('id_activo').checked = true;
+        document.getElementById('id_dias_inactividad').value = 3;
+        document.getElementById('id_porcentaje_descuento').value = 10;
+
+        // Actualizar previews
+        document.getElementById('preview-dias').textContent = '3';
+        document.getElementById('preview-porcentaje').textContent = '10';
+        document.getElementById('status-active').style.display = 'block';
+        document.getElementById('status-inactive').style.display = 'none';
+    }
+}
+
+// Animación de guardado
+document.querySelector('.config-form').addEventListener('submit', function() {
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Guardando...';
+
+    // Restaurar después de un tiempo (por si hay errores)
+    setTimeout(function() {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }, 3000);
+});
+</script>
+{% endblock %}

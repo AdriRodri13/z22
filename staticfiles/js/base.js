@@ -24,12 +24,18 @@ function initNavbar() {
     const navbarToggler = document.querySelector('.navbar-toggler');
     const navbarCollapse = document.querySelector('.navbar-collapse');
     const navLinks = document.querySelectorAll('.nav-link');
-    
-    // Auto-cerrar menú móvil al hacer clic en enlaces
+
+    // Auto-cerrar menú móvil al hacer clic en enlaces (EXCEPTO dropdowns)
     if (navLinks.length > 0) {
         navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                // Solo cerrar en móvil
+            link.addEventListener('click', (e) => {
+                // No cerrar si es un dropdown toggle
+                if (link.classList.contains('dropdown-toggle')) {
+                    e.stopPropagation();
+                    return;
+                }
+
+                // Solo cerrar en móvil para enlaces normales
                 if (window.innerWidth < 992 && navbarCollapse.classList.contains('show')) {
                     const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
                     if (bsCollapse) {
@@ -39,7 +45,48 @@ function initNavbar() {
             });
         });
     }
-    
+
+    // Manejar específicamente los dropdowns en móvil
+    const dropdownToggles = document.querySelectorAll('.navbar .dropdown-toggle');
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            if (window.innerWidth < 992) {
+                // Solo evitar que se cierre el navbar collapse, pero permitir que Bootstrap maneje el dropdown
+                e.stopPropagation();
+
+                // Permitir que Bootstrap maneje el dropdown normalmente
+                // No preventDefault() para que Bootstrap funcione
+
+                // Pequeño delay para que Bootstrap procese primero
+                setTimeout(() => {
+                    const dropdownMenu = toggle.nextElementSibling;
+                    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+                        // Si Bootstrap no lo abrió, hacerlo manualmente
+                        if (!dropdownMenu.classList.contains('show')) {
+                            // Usar Bootstrap dropdown si está disponible
+                            try {
+                                const dropdown = new bootstrap.Dropdown(toggle);
+                                dropdown.show();
+                            } catch (error) {
+                                // Fallback manual si Bootstrap falla
+                                dropdownMenu.classList.add('show');
+                            }
+                        }
+                    }
+                }, 10);
+            }
+        });
+    });
+
+    // Evitar que clicks en el dropdown menu cierren el navbar
+    document.querySelectorAll('.navbar .dropdown-menu').forEach(menu => {
+        menu.addEventListener('click', (e) => {
+            if (window.innerWidth < 992) {
+                e.stopPropagation();
+            }
+        });
+    });
+
     // Mejorar botón hamburguesa
     if (navbarToggler) {
         navbarToggler.addEventListener('click', function() {
@@ -482,36 +529,170 @@ function renderCestaModal() {
 
         if (footer) footer.style.display = 'none';
     } else {
-        // Mostrar items de la cesta
-        let itemsHTML = '';
-        let totalPrecio = 0;
+        // Verificar si el usuario está autenticado y obtener descuentos
+        const isAuthenticated = document.body.classList.contains('user-authenticated');
 
-        cestaGlobal.forEach((item, index) => {
-            const precio = parseFloat(item.precio.replace('€', '').replace(',', '.')) || 0;
-            totalPrecio += precio;
+        if (isAuthenticated) {
+            // Cargar descuentos del usuario y renderizar con descuentos
+            obtenerDescuentosUsuario().then(descuentos => {
+                renderCestaConDescuentos(descuentos);
+            }).catch(() => {
+                // Si falla, mostrar sin descuentos
+                renderCestaSinDescuentos();
+            });
+        } else {
+            // Usuario no autenticado, mostrar sin descuentos
+            renderCestaSinDescuentos();
+        }
+    }
+}
 
-            itemsHTML += `
-                <div class="cesta-item d-flex align-items-center">
-                    <img src="${item.imagen}" alt="${item.nombre}" class="cesta-item-img me-3">
-                    <div class="cesta-item-info flex-grow-1">
-                        <div class="cesta-item-precio">${item.precio}</div>
+function renderCestaSinDescuentos() {
+    const content = document.getElementById('cestaContent');
+    const footer = document.getElementById('cestaFooter');
+    const total = document.getElementById('cestaTotal');
+
+    // Mostrar items de la cesta sin descuentos
+    let itemsHTML = '';
+    let totalPrecio = 0;
+
+    cestaGlobal.forEach((item, index) => {
+        const precio = parseFloat(item.precio.replace('€', '').replace(',', '.')) || 0;
+        totalPrecio += precio;
+
+        itemsHTML += `
+            <div class="cesta-item d-flex align-items-center p-3 border-bottom border-secondary">
+                <img src="${item.imagen}" alt="${item.nombre}" class="cesta-item-img me-3" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                <div class="cesta-item-info flex-grow-1">
+                    <div class="text-white fw-medium mb-1">${item.nombre}</div>
+                    <div class="text-primary fw-bold">${item.precio}</div>
+                </div>
+                <button class="btn btn-outline-danger btn-sm" onclick="removeFromCestaGlobal('${item.id}')" title="Eliminar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+    });
+
+    content.innerHTML = itemsHTML;
+
+    // Actualizar total
+    if (total) {
+        total.textContent = `${totalPrecio.toFixed(2)}€`;
+    }
+
+    // Mostrar footer
+    if (footer) footer.style.display = 'block';
+}
+
+function renderCestaConDescuentos(descuentos) {
+    const content = document.getElementById('cestaContent');
+    const footer = document.getElementById('cestaFooter');
+    const total = document.getElementById('cestaTotal');
+
+    // Obtener el mejor descuento disponible
+    const mejorDescuento = descuentos.length > 0 ? descuentos.reduce((prev, current) =>
+        (prev.porcentaje > current.porcentaje) ? prev : current
+    ) : null;
+
+    let itemsHTML = '';
+    let totalPrecio = 0;
+    let totalConDescuento = 0;
+
+    // Mostrar descuento disponible si existe
+    if (mejorDescuento) {
+        itemsHTML += `
+            <div class="alert alert-success border-0 mb-3" style="background: rgba(40, 167, 69, 0.15);">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-tag text-success me-2"></i>
+                    <div class="flex-grow-1">
+                        <strong class="text-success">¡Tienes un ${mejorDescuento.porcentaje}% de descuento!</strong>
+                        <div class="small text-light">Código: <code class="bg-dark text-success px-2 py-1 rounded">${mejorDescuento.codigo}</code></div>
                     </div>
-                    <button class="cesta-item-remove" onclick="removeFromCestaGlobal('${item.id}')" title="Eliminar">
-                        <i class="fas fa-times"></i>
-                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    cestaGlobal.forEach((item, index) => {
+        const precio = parseFloat(item.precio.replace('€', '').replace(',', '.')) || 0;
+        totalPrecio += precio;
+
+        let precioConDescuento = precio;
+        let descuentoHTML = '';
+
+        if (mejorDescuento) {
+            precioConDescuento = precio * (1 - mejorDescuento.porcentaje / 100);
+            totalConDescuento += precioConDescuento;
+
+            descuentoHTML = `
+                <div class="d-flex align-items-center gap-2">
+                    <div class="text-light text-decoration-line-through small" style="opacity: 0.7;">${item.precio}</div>
+                    <div class="badge fs-6 fw-bold px-3 py-2" style="font-size: 0.9rem !important; background: linear-gradient(135deg, #ffffff, #f8f9fa) !important; color: #28a745 !important; box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3); border-radius: 12px; border: 2px solid #28a745;">${precioConDescuento.toFixed(2)}€</div>
                 </div>
             `;
-        });
-
-        content.innerHTML = itemsHTML;
-
-        // Actualizar total
-        if (total) {
-            total.textContent = `${totalPrecio.toFixed(2)}€`;
+        } else {
+            totalConDescuento += precio;
+            descuentoHTML = `<div class="text-primary fw-bold">${item.precio}</div>`;
         }
 
-        // Mostrar footer
-        if (footer) footer.style.display = 'block';
+        itemsHTML += `
+            <div class="cesta-item d-flex align-items-center p-3 border-bottom border-secondary">
+                <img src="${item.imagen}" alt="${item.nombre}" class="cesta-item-img me-3" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                <div class="cesta-item-info flex-grow-1">
+                    <div class="text-white fw-medium mb-1">${item.nombre}</div>
+                    ${descuentoHTML}
+                </div>
+                <button class="btn btn-outline-danger btn-sm" onclick="removeFromCestaGlobal('${item.id}')" title="Eliminar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+    });
+
+    content.innerHTML = itemsHTML;
+
+    // Actualizar total con descuento - VERSION SIMPLE
+    if (total) {
+        if (mejorDescuento && totalPrecio !== totalConDescuento) {
+            const ahorro = totalPrecio - totalConDescuento;
+            total.style.cssText = '';
+            total.innerHTML = `
+                <div style="text-align: right;">
+                    <div style="color: #ffffff; text-decoration: line-through; font-size: 0.9em; margin-bottom: 5px; opacity: 0.7;">${totalPrecio.toFixed(2)}€</div>
+                    <div style="background: white; color: #28a745; font-weight: bold; padding: 8px 16px; border-radius: 8px; border: 2px solid #28a745; font-size: 1.1em; margin-bottom: 5px;">${totalConDescuento.toFixed(2)}€</div>
+                    <div style="color: #00d4aa; font-weight: bold; font-size: 0.9em;">¡Ahorras ${ahorro.toFixed(2)}€!</div>
+                </div>
+            `;
+        } else {
+            total.style.cssText = 'color: white; font-size: 1.25rem; font-weight: bold;';
+            total.textContent = `${totalPrecio.toFixed(2)}€`;
+        }
+    }
+
+    // Mostrar footer
+    if (footer) footer.style.display = 'block';
+}
+
+async function obtenerDescuentosUsuario() {
+    try {
+        const response = await fetch('/carrito/descuentos/', {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            return data.descuentos;
+        } else {
+            throw new Error(data.error || 'Error al obtener descuentos');
+        }
+    } catch (error) {
+        console.error('Error obteniendo descuentos:', error);
+        throw error;
     }
 }
 
@@ -556,6 +737,15 @@ function consultarDisponibilidad() {
         return;
     }
 
+    // Verificar si el usuario está autenticado
+    const userDropdown = document.getElementById('userDropdown');
+    if (userDropdown) {
+        // Usuario autenticado - enviar automáticamente
+        enviarConsultaAutomatica();
+        return;
+    }
+
+    // Usuario no autenticado - mostrar modal
     // Cerrar modal de cesta y abrir modal de consulta
     const cestaModal = bootstrap.Modal.getInstance(document.getElementById('cestaModal'));
     if (cestaModal) {
@@ -567,6 +757,69 @@ function consultarDisponibilidad() {
         const consultaModal = new bootstrap.Modal(document.getElementById('consultaModal'));
         consultaModal.show();
     }, 300);
+}
+
+function enviarConsultaAutomatica() {
+    // Prevenir ejecuciones múltiples
+    if (window.enviandoConsulta) {
+        console.log('Ya se está enviando una consulta, ignorando nueva solicitud');
+        return;
+    }
+    window.enviandoConsulta = true;
+
+    // Cerrar modal de cesta
+    const cestaModal = bootstrap.Modal.getInstance(document.getElementById('cestaModal'));
+    if (cestaModal) {
+        cestaModal.hide();
+    }
+
+    // Mostrar notificación de procesamiento
+    showNotification('Enviando consulta de disponibilidad...', 'info', 2000);
+
+    // Preparar datos - el backend obtendrá automáticamente el nombre e Instagram del usuario autenticado
+    const consultaData = {
+        productos: cestaGlobal.map(item => ({
+            id: item.id,
+            nombre: item.nombre,
+            precio: item.precio
+        })),
+        usuario_autenticado: true
+    };
+
+    // Enviar consulta
+    fetch('/consultar-disponibilidad/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+        },
+        body: JSON.stringify(consultaData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showNotification('✅ Consulta enviada correctamente. Te contactaremos pronto por Instagram.', 'success', 5000);
+            // Limpiar cesta después del envío exitoso
+            cestaGlobal = [];
+            updateCestaBadge();
+            localStorage.removeItem('cestaGlobal');
+        } else {
+            showNotification(`❌ Error: ${data.error}`, 'danger', 5000);
+        }
+    })
+    .catch(error => {
+        console.error('Error en enviarConsultaAutomatica:', error);
+        showNotification('❌ Error de conexión. Inténtalo de nuevo.', 'danger', 5000);
+    })
+    .finally(() => {
+        // Siempre limpiar el flag al final
+        window.enviandoConsulta = false;
+    });
 }
 
 function enviarConsulta() {

@@ -494,11 +494,43 @@
                     <div class="stat-number">{{ total }}</div>
                     <div class="stat-label">Total</div>
                 </div>
+                {% if codigo_descuento %}
+                <div class="stat-card">
+                    <div class="stat-number">{{ porcentaje_descuento }}%</div>
+                    <div class="stat-label">Descuento</div>
+                </div>
+                {% else %}
                 <div class="stat-card">
                     <div class="stat-number">{% now "H:i" %}</div>
                     <div class="stat-label">Hora</div>
                 </div>
+                {% endif %}
             </div>
+
+            {% if codigo_descuento %}
+            <div class="cliente-section" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border-left: 6px solid #22c55e;">
+                <h2 class="section-title" style="color: #15803d;">
+                    <div class="section-icon" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);">🎟️</div>
+                    ¡Cliente con Descuento Activo!
+                </h2>
+
+                <div class="cliente-grid">
+                    <div class="cliente-item" style="background: white; border: 2px solid #22c55e;">
+                        <div class="cliente-label" style="color: #16a34a;">Código de Descuento</div>
+                        <div class="cliente-value" style="color: #15803d; font-family: 'Courier New', monospace; font-size: 18px; font-weight: 800;">{{ codigo_descuento.codigo }}</div>
+                    </div>
+                    <div class="cliente-item" style="background: white; border: 2px solid #22c55e;">
+                        <div class="cliente-label" style="color: #16a34a;">Porcentaje</div>
+                        <div class="cliente-value" style="color: #15803d; font-size: 20px; font-weight: 800;">{{ porcentaje_descuento }}% OFF</div>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 15px; border-radius: 10px; text-align: center; margin-top: 15px; border: 2px solid #22c55e;">
+                    <div style="color: #16a34a; font-size: 14px; font-weight: 600; margin-bottom: 8px;">AHORRO TOTAL</div>
+                    <div style="color: #15803d; font-size: 24px; font-weight: 800;">{{ ahorro_total }}</div>
+                </div>
+            </div>
+            {% endif %}
 
             <div class="productos-section">
                 <h2 class="section-title">
@@ -518,14 +550,29 @@
                     <div class="producto-info">
                         <div class="producto-nombre">{{ producto.nombre }}</div>
                         <div class="producto-categoria">{{ producto.seccion }} → {{ producto.subseccion }} → {{ producto.subsubseccion }}</div>
+                        {% if producto.precio_con_descuento %}
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <div style="text-decoration: line-through; color: #94a3b8; font-size: 16px; font-weight: 600;">{{ producto.precio }}</div>
+                            <div style="color: #15803d; font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #dcfce7, #bbf7d0); padding: 5px 12px; border-radius: 8px; border: 1px solid #22c55e;">{{ producto.precio_con_descuento }}</div>
+                        </div>
+                        {% else %}
                         <div class="producto-precio">{{ producto.precio }}</div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
             </div>
 
             <div class="total-section">
+                {% if total_con_descuento %}
+                <div style="margin-bottom: 15px;">
+                    <div style="text-decoration: line-through; color: rgba(255,255,255,0.6); font-size: 18px; margin-bottom: 8px;">Total original: {{ total }}</div>
+                    <h2 style="color: #22c55e; font-size: 28px; margin: 0;">💰 Total con descuento: {{ total_con_descuento }}</h2>
+                    <div style="background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 8px 15px; border-radius: 8px; margin-top: 10px; font-weight: 600;">¡Ahorro de {{ ahorro_total }}!</div>
+                </div>
+                {% else %}
                 <h2>💰 Total del Pedido: {{ total }}</h2>
+                {% endif %}
             </div>
         </div>
 

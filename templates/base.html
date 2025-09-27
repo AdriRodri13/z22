@@ -80,20 +80,11 @@
                                         </li>
                                     </ul>
                                 </li>
-
-                                <!-- Admin para usuarios que también son staff -->
-                                {% if user.is_staff %}
-                                    <li class="nav-item">
-                                        <a class="nav-link admin-access" href="{% url 'panel_admin:dashboard' %}">
-                                            <i class="fas fa-cog me-2 d-lg-none"></i>Admin
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            {% else %}
-                                <!-- Usuario staff sin perfil -->
+                            {% elif user.is_staff %}
+                                <!-- Administrador -->
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle admin-access" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-cog me-2"></i>Admin
+                                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); border-radius: 8px; border: none;">
+                                        <i class="fas fa-user-shield me-2"></i>{{ user.username }}
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li><a class="dropdown-item" href="{% url 'panel_admin:dashboard' %}">
@@ -112,10 +103,10 @@
                                 </li>
                             {% endif %}
                         {% else %}
-                            <!-- Usuario no autenticado -->
+                            <!-- Usuario no autenticado - Botón de acceso para usuarios clientes -->
                             <li class="nav-item">
-                                <a class="nav-link admin-access" href="{% url 'panel_admin:login' %}">
-                                    <i class="fas fa-user-shield me-2 d-lg-none"></i>Acceso Admin
+                                <a class="nav-link" href="{% url 'home:login_usuario' %}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; border: none; color: white;">
+                                    <i class="fas fa-user me-2 d-lg-none"></i>Iniciar Sesión
                                 </a>
                             </li>
                         {% endif %}
@@ -143,6 +134,25 @@
                     </p>
                 </div>
                 
+                <!-- Área central - Acceso Admin -->
+                <div class="col-md-4 text-center">
+                    {% if user.is_authenticated and user.is_staff %}
+                        <h5 class="footer-title mb-3">Panel de Administración</h5>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <a href="{% url 'panel_admin:dashboard' %}" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </div>
+                    {% elif not user.is_authenticated %}
+                        <h5 class="footer-title mb-3">Administradores</h5>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <a href="{% url 'panel_admin:login' %}" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user-shield me-1"></i>Acceso Admin
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
                 <!-- Redes sociales -->
                 <div class="col-md-4 text-center text-md-end">
                     <h5 class="footer-title mb-3">Síguenos</h5>
@@ -166,38 +176,37 @@
         </div>
     </footer>
 
-    <!-- Modal de Cesta -->
-    <div class="modal fade" id="cestaModal" tabindex="-1" aria-labelledby="cestaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content bg-dark border-0">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title text-white" id="cestaModalLabel">
-                        <i class="fas fa-shopping-cart me-2"></i>Mi Cesta
+    <!-- Modal de Cesta - REHECHO DESDE CERO -->
+    <div class="modal fade" id="cestaModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background: #1a1a1a; border: none; color: white;">
+                <div class="modal-header" style="border: none; background: #1a1a1a;">
+                    <h5 style="color: white; margin: 0;">
+                        <i class="fas fa-shopping-cart" style="margin-right: 10px;"></i>Mi Cesta
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <!-- Contenido de la cesta se carga dinámicamente -->
+                <div class="modal-body" style="background: #1a1a1a; color: white;">
                     <div id="cestaContent">
-                        <div class="text-center py-5">
-                            <i class="fas fa-shopping-cart text-muted mb-3" style="font-size: 3rem;"></i>
-                            <h5 class="text-white">Tu cesta está vacía</h5>
-                            <p class="text-muted">Agrega algunas prendas para comenzar</p>
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-shopping-cart" style="font-size: 3rem; color: #666; margin-bottom: 20px;"></i>
+                            <h5 style="color: white; margin-bottom: 10px;">Tu cesta está vacía</h5>
+                            <p style="color: #999;">Agrega algunas prendas para comenzar</p>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0" id="cestaFooter" style="display: none;">
-                    <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="text-white mb-0">Total:</h6>
-                            <h5 class="text-white mb-0" id="cestaTotal">0€</h5>
+                <div class="modal-footer" id="cestaFooter" style="display: none; border: none; background: #1a1a1a;">
+                    <div style="width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h6 style="color: white; margin: 0;">Total:</h6>
+                            <div id="cestaTotal" style="color: white; font-size: 1.25rem; font-weight: bold;">0€</div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-light flex-fill" onclick="clearCesta()">
-                                <i class="fas fa-trash me-2"></i>Vaciar Cesta
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" onclick="clearCesta()" style="flex: 1; background: transparent; color: white; border: 1px solid white; padding: 10px; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-trash" style="margin-right: 8px;"></i>Vaciar Cesta
                             </button>
-                            <button type="button" class="btn btn-cesta flex-fill" onclick="consultarDisponibilidad()">
-                                <i class="fas fa-phone me-2"></i>Consultar Disponibilidad
+                            <button type="button" onclick="consultarDisponibilidad()" style="flex: 1; background: #667eea; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-phone" style="margin-right: 8px;"></i>Consultar Disponibilidad
                             </button>
                         </div>
                     </div>

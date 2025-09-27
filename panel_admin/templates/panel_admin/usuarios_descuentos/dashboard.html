@@ -1,0 +1,102 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/usuarios_descuentos/dashboard.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-users"></i>{% endblock %}
+{% block content_title %}Usuarios y Descuentos{% endblock %}
+
+{% block panel_content %}
+
+<!-- Configuración actual -->
+<div class="config-section">
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="config-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-cog"></i>Configuración Actual
+                    </h5>
+                    <a href="{% url 'panel_admin:usuarios_configuracion' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-edit"></i>Editar
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if config_activa %}
+                        <div class="config-item">
+                            <span class="config-label">Días de inactividad:</span>
+                            <span class="config-value">{{ config_activa.dias_inactividad }} días</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-label">Porcentaje descuento:</span>
+                            <span class="config-value">{{ config_activa.porcentaje_descuento }}%</span>
+                        </div>
+                        <div class="config-item">
+                            <span class="config-label">Estado:</span>
+                            <span class="config-value">
+                                {% if config_activa.activo %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                            <p>No hay configuración activa</p>
+                            <a href="{% url 'panel_admin:usuarios_configuracion' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i>Crear Configuración
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="quick-actions-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-bolt"></i>Acciones Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <a href="{% url 'panel_admin:usuarios_list' %}" class="quick-action-btn">
+                                <i class="fas fa-users"></i>
+                                <span>Ver Usuarios</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'panel_admin:codigos_list' %}" class="quick-action-btn">
+                                <i class="fas fa-ticket-alt"></i>
+                                <span>Ver Códigos</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'panel_admin:usuarios_enviar_codigos' %}" class="quick-action-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Enviar Códigos</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'panel_admin:crear_codigo' %}" class="quick-action-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Crear Código</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

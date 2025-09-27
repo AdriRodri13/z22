@@ -1,0 +1,341 @@
+{% extends 'panel_admin/base_panel.html' %}
+{% load static %}
+
+{% block panel_title %}{{ title }}{% endblock %}
+
+{% block panel_css %}
+<link rel="stylesheet" href="{% static 'panel_admin/css/usuarios_descuentos/codigos.css' %}">
+{% endblock %}
+
+{% block content_icon %}<i class="fas fa-ticket-alt"></i>{% endblock %}
+{% block content_title %}Códigos de Descuento{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'panel_admin:usuarios_descuentos_dashboard' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i>Volver al Dashboard
+</a>
+<a href="{% url 'panel_admin:crear_codigo' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i>Crear Código
+</a>
+{% endblock %}
+
+{% block panel_content %}
+
+<!-- Filtros y estadísticas -->
+<div class="filters-section">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <form method="GET" class="search-form">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" value="{{ request.GET.search }}"
+                           placeholder="Buscar por código, usuario o Instagram...">
+                    <select class="form-select" name="status">
+                        <option value="">Todos los estados</option>
+                        <option value="activo" {% if request.GET.status == 'activo' %}selected{% endif %}>Activos</option>
+                        <option value="usado" {% if request.GET.status == 'usado' %}selected{% endif %}>Usados</option>
+                        <option value="expirado" {% if request.GET.status == 'expirado' %}selected{% endif %}>Expirados</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>Buscar
+                    </button>
+                    {% if request.GET.search or request.GET.status %}
+                        <a href="{% url 'panel_admin:codigos_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>Limpiar
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="stats-mini">
+                <div class="stat-mini">
+                    <div class="stat-value">{{ total_codigos }}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-mini activo">
+                    <div class="stat-value">{{ codigos_activos }}</div>
+                    <div class="stat-label">Activos</div>
+                </div>
+                <div class="stat-mini usado">
+                    <div class="stat-value">{{ codigos_usados }}</div>
+                    <div class="stat-label">Usados</div>
+                </div>
+                <div class="stat-mini expirado">
+                    <div class="stat-value">{{ codigos_expirados }}</div>
+                    <div class="stat-label">Expirados</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de códigos -->
+<div class="codigos-section">
+    {% if codigos %}
+        <div class="codigos-table-responsive">
+            <table class="table codigos-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Usuario</th>
+                        <th>Descuento</th>
+                        <th>Estado</th>
+                        <th>Creado</th>
+                        <th>Expira</th>
+                        <th>Email</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for codigo in codigos %}
+                        <tr class="codigo-row {% if codigo.usado %}usado{% elif not codigo.esta_vigente %}expirado{% else %}activo{% endif %}">
+                            <td>
+                                <div class="codigo-cell">
+                                    <span class="codigo-text" onclick="copiarCodigo('{{ codigo.codigo }}', this)">
+                                        {{ codigo.codigo }}
+                                    </span>
+                                    <i class="fas fa-copy codigo-copy-icon" title="Click para copiar"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="usuario-cell">
+                                    <div class="usuario-avatar-mini">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="usuario-info-mini">
+                                        <div class="usuario-instagram">@{{ codigo.user.profile.instagram_account }}</div>
+                                        <div class="usuario-email">{{ codigo.user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="descuento-badge">{{ codigo.porcentaje }}%</span>
+                            </td>
+                            <td>
+                                <span class="estado-badge
+                                    {% if codigo.usado %}bg-success
+                                    {% elif codigo.esta_vigente %}bg-primary
+                                    {% else %}bg-danger{% endif %}">
+                                    {% if codigo.usado %}
+                                        <i class="fas fa-check-circle"></i>Usado
+                                    {% elif codigo.esta_vigente %}
+                                        <i class="fas fa-ticket-alt"></i>Activo
+                                    {% else %}
+                                        <i class="fas fa-times-circle"></i>Expirado
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fecha-cell">
+                                    <div class="fecha-principal">{{ codigo.fecha_creacion|date:"d/m/Y" }}</div>
+                                    <div class="fecha-hora">{{ codigo.fecha_creacion|date:"H:i" }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if codigo.fecha_expiracion %}
+                                    <div class="fecha-cell">
+                                        <div class="fecha-principal">{{ codigo.fecha_expiracion|date:"d/m/Y" }}</div>
+                                        <div class="fecha-hora">{{ codigo.fecha_expiracion|date:"H:i" }}</div>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">Sin expiración</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="email-badge {% if codigo.email_enviado %}bg-success{% else %}bg-warning{% endif %}">
+                                    {% if codigo.email_enviado %}
+                                        <i class="fas fa-check"></i>Enviado
+                                    {% else %}
+                                        <i class="fas fa-exclamation"></i>Pendiente
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="acciones-cell">
+                                    <a href="{% url 'panel_admin:usuario_detail' codigo.user.id %}"
+                                       class="btn btn-outline-primary btn-sm" title="Ver usuario">
+                                        <i class="fas fa-user"></i>
+                                    </a>
+                                    {% if not codigo.email_enviado %}
+                                        <button type="button" class="btn btn-outline-success btn-sm"
+                                                onclick="enviarCodigoEmail({{ codigo.id }})" title="Enviar email">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    {% endif %}
+                                    {% if not codigo.usado %}
+                                        <button type="button" class="btn btn-outline-warning btn-sm"
+                                                onclick="marcarComoUsado({{ codigo.id }})" title="Marcar como usado">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% if codigo.usado and codigo.fecha_uso %}
+                            <tr class="codigo-details">
+                                <td colspan="8">
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle"></i>
+                                        Código usado el {{ codigo.fecha_uso|date:"d/m/Y H:i" }}
+                                    </small>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if codigos.has_other_pages %}
+            <div class="pagination-section">
+                <nav aria-label="Navegación de páginas">
+                    <ul class="pagination justify-content-center">
+                        {% if codigos.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}page={{ codigos.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i>Anterior
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in codigos.paginator.page_range %}
+                            {% if codigos.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > codigos.number|add:'-3' and num < codigos.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if codigos.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}page={{ codigos.next_page_number }}">
+                                    Siguiente<i class="fas fa-chevron-right ms-1"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
+                <div class="pagination-info text-center mt-3">
+                    <small class="text-muted">
+                        Mostrando {{ codigos.start_index }} - {{ codigos.end_index }} de {{ codigos.paginator.count }} códigos
+                    </small>
+                </div>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <h4>
+                {% if request.GET.search or request.GET.status %}
+                    No se encontraron códigos
+                {% else %}
+                    No hay códigos de descuento
+                {% endif %}
+            </h4>
+            <p class="text-muted">
+                {% if request.GET.search or request.GET.status %}
+                    Intenta cambiar los filtros de búsqueda o
+                    <a href="{% url 'panel_admin:codigos_list' %}">ver todos los códigos</a>.
+                {% else %}
+                    Los códigos generados aparecerán aquí.
+                {% endif %}
+            </p>
+            <a href="{% url 'panel_admin:crear_codigo' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>Crear Primer Código
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block panel_js %}
+<script>
+function copiarCodigo(codigo, element) {
+    navigator.clipboard.writeText(codigo).then(function() {
+        const originalText = element.textContent;
+        element.textContent = '¡Copiado!';
+        element.classList.add('codigo-copiado');
+
+        setTimeout(function() {
+            element.textContent = originalText;
+            element.classList.remove('codigo-copiado');
+        }, 1500);
+    });
+}
+
+function enviarCodigoEmail(codigoId) {
+    if (confirm('¿Enviar este código por email al usuario?')) {
+        fetch(`/panel_admin/usuarios-descuentos/enviar-codigo-email/${codigoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Email enviado correctamente');
+                location.reload();
+            } else {
+                alert('Error al enviar email: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error de conexión');
+        });
+    }
+}
+
+function marcarComoUsado(codigoId) {
+    if (confirm('¿Marcar este código como usado?')) {
+        fetch(`/panel_admin/usuarios-descuentos/marcar-codigo-usado/${codigoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Código marcado como usado');
+                location.reload();
+            } else {
+                alert('Error al marcar código: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error de conexión');
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus en el campo de búsqueda
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput && !searchInput.value) {
+        searchInput.focus();
+    }
+
+    // Efectos hover en filas
+    document.querySelectorAll('.codigo-row').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(2px)';
+        });
+
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

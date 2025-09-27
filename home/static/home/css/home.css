@@ -1,41 +1,77 @@
 /* ================================
-   HOME PAGE STYLES - CATÁLOGO GENÉRICO
+   HOME PAGE STYLES - DISEÑO ULTRA MODERNO Y PREMIUM
    ================================ */
 
-/* Section Titles */
+/* Sección Principal con Gradiente */
+.secciones-section {
+  background: radial-gradient(ellipse at top, #0f0f0f 0%, #000000 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.secciones-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(245, 87, 108, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Section Titles - Premium */
 .section-title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: white;
-  margin-bottom: 0.25rem;
-  letter-spacing: -0.02em;
+  font-size: 2.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ffffff 0%, #667eea 50%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  position: relative;
+  text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
 }
 
 .section-subtitle {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 0;
-  font-weight: 400;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.5px;
 }
 
-/* Sección Cards - DISEÑO ELEGANTE Y GENÉRICO CON ALTURA FIJA */
+/* Sección Cards - CONTRASTE MEJORADO SOBRE FONDO NEGRO */
 .seccion-card {
-  background: white;
-  border-radius: 1.25rem;
-  padding: 1.5rem 1.25rem;
+  background: linear-gradient(145deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 249, 250, 0.9) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 2rem;
+  padding: 2rem 1.75rem;
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  height: 500px !important; /* Altura generosa para el botón */
-  min-height: 500px !important;
-  max-height: 500px !important;
+  height: 560px !important;
+  min-height: 560px !important;
+  max-height: 560px !important;
   position: relative;
   overflow: hidden;
 }
@@ -46,63 +82,95 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    #667eea 0%, 
-    #764ba2 25%, 
-    #f093fb 50%, 
-    #f5576c 75%, 
+  height: 3px;
+  background: linear-gradient(90deg,
+    #667eea 0%,
+    #764ba2 25%,
+    #f093fb 50%,
+    #f5576c 75%,
     #4facfe 100%);
   transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease;
+  transform-origin: center;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2rem 2rem 0 0;
+}
+
+.seccion-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center,
+    rgba(102, 126, 234, 0.03) 0%,
+    transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  border-radius: 2rem;
 }
 
 .seccion-card:hover::before {
   transform: scaleX(1);
 }
 
-.seccion-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 
-    0 14px 28px rgba(0, 0, 0, 0.25),
-    0 10px 10px rgba(0, 0, 0, 0.22);
-  border-color: rgba(0, 0, 0, 0.1);
+.seccion-card:hover::after {
+  opacity: 1;
 }
 
-/* Logo de la sección - MÁS GRANDE */
+.seccion-card:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.5),
+    0 15px 30px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  border-color: rgba(102, 126, 234, 0.4);
+  background: linear-gradient(145deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(248, 249, 250, 0.95) 100%);
+}
+
+/* Logo de la sección - CONTRASTE MEJORADO */
 .seccion-logo-container {
-  width: 110px;
-  height: 110px;
-  margin-bottom: 1rem;
+  width: 130px;
+  height: 130px;
+  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-  border-radius: 50%;
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+  border-radius: 2rem;
+  transition: all 0.4s ease;
   position: relative;
-  border: 2px solid rgba(102, 126, 234, 0.2);
+  border: 2px solid rgba(102, 126, 234, 0.15);
   overflow: hidden;
-  flex-shrink: 0; /* Evita que se reduzca */
+  flex-shrink: 0;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .seccion-card:hover .seccion-logo-container {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
   transform: scale(1.08);
   border-color: rgba(102, 126, 234, 0.3);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .seccion-logo {
-  width: 85px;
-  height: 85px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
-  transition: all 0.3s ease;
-  border-radius: 8px;
+  transition: all 0.4s ease;
+  border-radius: 12px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
 
 .seccion-card:hover .seccion-logo {
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(-5deg);
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
 }
 
 .seccion-logo-placeholder {
@@ -119,7 +187,7 @@
 
 /* Info de la sección - ALTURA FIJA Y CONTROLADA */
 .seccion-info {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -132,156 +200,199 @@
 }
 
 .seccion-nombre {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1a202c;
+  font-size: 1.3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg,
+    #1a202c 0%,
+    #2d3748 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 0.5rem;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  height: 2.4rem; /* Altura fija para 2 líneas máximo */
+  height: 2.4rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .seccion-descripcion {
-  font-size: 0.85rem;
-  color: #4a5568;
+  font-size: 0.9rem;
+  color: rgba(74, 85, 104, 0.9);
   margin-bottom: 0.75rem;
   line-height: 1.4;
-  opacity: 0.8;
-  height: 3.6rem; /* Altura fija para 3 líneas máximo */
+  font-weight: 500;
+  height: 3.6rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   flex-grow: 1;
+  letter-spacing: 0.2px;
 }
 
 .seccion-subsecciones {
-  font-size: 0.8rem;
-  color: #718096;
+  font-size: 0.85rem;
+  color: rgba(102, 126, 234, 0.9);
   margin-bottom: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  font-weight: 500;
-  background: rgba(102, 126, 234, 0.08);
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
+  gap: 0.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg,
+    rgba(102, 126, 234, 0.12) 0%,
+    rgba(118, 75, 162, 0.12) 100%);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1.2rem;
+  border-radius: 25px;
   align-self: center;
-  border: 1px solid rgba(102, 126, 234, 0.15);
+  border: 1px solid rgba(102, 126, 234, 0.2);
   flex-shrink: 0;
   white-space: nowrap;
+  letter-spacing: 0.3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .seccion-subsecciones i {
   font-size: 0.7rem;
 }
 
-/* Preview de subsecciones - ALTURA FIJA */
+/* Preview de subsecciones - CONTRASTE MEJORADO */
 .subsecciones-preview {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1.25rem;
-  padding: 0.75rem;
-  background: rgba(102, 126, 234, 0.03);
-  border-radius: 0.75rem;
-  height: 70px; /* Altura fija */
-  border: 1px solid rgba(102, 126, 234, 0.08);
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg,
+    rgba(102, 126, 234, 0.05) 0%,
+    rgba(118, 75, 162, 0.05) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  height: 100px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
   flex-shrink: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
 }
 
 .subseccion-mini {
-  width: 36px;
-  height: 36px;
-  transition: transform 0.2s ease;
+  width: 52px; /* Mucho más grande */
+  height: 52px;
+  transition: all 0.3s ease;
   flex-shrink: 0;
+  position: relative;
 }
 
 .seccion-card:hover .subseccion-mini {
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(3deg);
 }
 
 .subseccion-logo {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.subseccion-mini:hover .subseccion-logo {
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.3);
 }
 
 .subseccion-logo-placeholder {
   width: 100%;
   height: 100%;
-  background: rgba(102, 126, 234, 0.1);
-  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  color: rgba(102, 126, 234, 0.6);
-  border: 1px solid rgba(102, 126, 234, 0.15);
+  font-size: 1.2rem;
+  color: rgba(102, 126, 234, 0.7);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
 }
 
 .subsecciones-more {
-  width: 36px;
-  height: 36px;
-  background: rgba(102, 126, 234, 0.12);
-  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: rgba(102, 126, 234, 0.8);
-  border: 1px solid rgba(102, 126, 234, 0.2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(102, 126, 234, 0.9);
+  border: 2px solid rgba(102, 126, 234, 0.25);
   flex-shrink: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.seccion-card:hover .subsecciones-more {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(118, 75, 162, 0.25));
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
 }
 
 .no-subsecciones {
-  width: 36px;
-  height: 36px;
-  background: rgba(102, 126, 234, 0.05);
-  border: 1px dashed rgba(102, 126, 234, 0.2);
-  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+  border: 2px dashed rgba(102, 126, 234, 0.25);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  color: rgba(102, 126, 234, 0.4);
+  font-size: 1.2rem;
+  color: rgba(102, 126, 234, 0.5);
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
 /* Botón - DISEÑO MODERNO MEJORADO */
 .btn-explorar {
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  background: linear-gradient(135deg,
+    rgba(102, 126, 234, 0.9) 0%,
+    rgba(118, 75, 162, 0.9) 100%) !important;
+  backdrop-filter: blur(15px) !important;
   color: white !important;
-  border: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   padding: 0.75rem 1.5rem !important;
-  border-radius: 0.75rem !important;
-  font-weight: 600 !important;
+  border-radius: 15px !important;
+  font-weight: 700 !important;
   font-size: 0.85rem !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 0.5rem !important;
   width: 100% !important;
   max-width: 170px !important;
-  letter-spacing: 0.01em !important;
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3) !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  box-shadow:
+    0 8px 25px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
   position: relative !important;
   overflow: hidden !important;
   flex-shrink: 0 !important;
-  margin-top: auto !important; /* Empuja el botón hacia abajo */
-  z-index: 10 !important; /* Asegurar que esté visible */
+  margin-top: auto !important;
+  z-index: 10 !important;
 }
 
 .btn-explorar::before {
@@ -300,9 +411,14 @@
 }
 
 .btn-explorar:hover {
-  background: linear-gradient(135deg, #5a6fd8, #6b4c93);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg,
+    rgba(102, 126, 234, 1) 0%,
+    rgba(118, 75, 162, 1) 100%) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow:
+    0 12px 35px rgba(102, 126, 234, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .btn-explorar:active {
@@ -346,184 +462,211 @@
   font-size: 0.9rem;
 }
 
-/* Responsive - MOBILE FIRST CON ALTURAS FIJAS */
+/* Responsive - MOBILE FIRST CON ALTURAS UNIFICADAS - 2 COLUMNAS */
 @media (max-width: 575.98px) {
   .secciones-section {
     padding: 1rem 0 !important;
   }
-  
+
   .section-title {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
-  
+
   .section-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
-  
+
   .seccion-card {
-    height: 420px !important; /* Altura aumentada mobile */
-    min-height: 420px !important;
-    max-height: 420px !important;
-    padding: 1.25rem 1rem;
+    height: 300px !important; /* Aumentada para evitar solapamiento */
+    min-height: 300px !important;
+    max-height: 300px !important;
+    padding: 0.6rem 0.5rem;
   }
-  
+
   .seccion-logo-container {
-    width: 90px;
-    height: 90px;
-    margin-bottom: 0.75rem;
-  }
-  
-  .seccion-logo {
-    width: 70px;
-    height: 70px;
-  }
-  
-  .seccion-info {
-    height: 95px !important; /* Altura fija para mobile forzada */
-    min-height: 95px !important;
-    max-height: 95px !important;
-  }
-  
-  .seccion-nombre {
-    font-size: 1rem;
+    width: 50px;
+    height: 50px;
     margin-bottom: 0.4rem;
-    height: 2rem; /* Altura fija para mobile */
   }
-  
-  .seccion-descripcion {
+
+  .seccion-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .seccion-info {
+    height: 80px !important; /* Optimizada sin subsecciones */
+    min-height: 80px !important;
+    max-height: 80px !important;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .seccion-nombre {
     font-size: 0.8rem;
-    margin-bottom: 0.6rem;
-    height: 3rem; /* Altura fija para mobile */
-    -webkit-line-clamp: 2;
+    margin-bottom: 0.3rem;
+    height: 1.6rem;
+    line-height: 1.1;
+    font-weight: 700;
+    flex-shrink: 0;
   }
-  
-  .seccion-subsecciones {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.6rem;
+
+  .seccion-descripcion {
+    font-size: 0.7rem;
+    margin-bottom: 0;
+    height: 4.2rem;
+    -webkit-line-clamp: 3;
+    line-height: 1.3;
+    flex-shrink: 0;
   }
-  
+
   .subsecciones-preview {
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    gap: 0.5rem;
-    height: 60px; /* Altura fija mobile */
+    padding: 0.4rem;
+    margin-bottom: 0.5rem;
+    gap: 0.4rem;
+    height: 50px; /* Altura proporcional */
+    flex-shrink: 0;
   }
-  
+
   .subseccion-mini {
-    width: 32px;
-    height: 32px;
+    width: 28px; /* Ligeramente más grande */
+    height: 28px;
   }
-  
+
   .subsecciones-more {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     font-size: 0.65rem;
   }
-  
+
   .no-subsecciones {
-    width: 32px;
-    height: 32px;
-    font-size: 0.8rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
   }
-  
+
   .btn-explorar {
-    padding: 0.65rem 1.25rem;
-    font-size: 0.8rem;
-    max-width: 150px;
+    padding: 0.45rem 0.7rem;
+    font-size: 0.75rem;
+    max-width: 110px;
+    font-weight: 700;
+    margin-top: auto;
+    flex-shrink: 0;
   }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   .seccion-card {
-    height: 450px !important; /* Altura aumentada tablet pequeña */
-    min-height: 450px !important;
-    max-height: 450px !important;
+    height: 560px !important; /* Altura aumentada tablet pequeña */
+    min-height: 560px !important;
+    max-height: 560px !important;
   }
-  
+
   .seccion-info {
-    height: 100px !important;
-    min-height: 100px !important;
-    max-height: 100px !important;
+    height: 115px !important;
+    min-height: 115px !important;
+    max-height: 115px !important;
   }
-  
+
   .seccion-logo-container {
-    width: 95px;
-    height: 95px;
+    width: 115px;
+    height: 115px;
   }
-  
+
   .seccion-logo {
-    width: 75px;
-    height: 75px;
+    width: 90px;
+    height: 90px;
   }
-  
+
   .seccion-nombre {
-    height: 2.2rem;
+    height: 2.4rem;
   }
-  
+
   .seccion-descripcion {
-    height: 3.3rem;
+    height: 3.6rem;
+  }
+
+  .subsecciones-preview {
+    height: 90px;
+  }
+
+  .subseccion-mini {
+    width: 48px;
+    height: 48px;
+  }
+
+  .subsecciones-more {
+    width: 48px;
+    height: 48px;
+  }
+
+  .no-subsecciones {
+    width: 48px;
+    height: 48px;
   }
 }
 
 @media (min-width: 768px) {
   .seccion-card {
-    height: 500px !important; /* Altura aumentada desktop */
-    min-height: 500px !important;
-    max-height: 500px !important;
-    padding: 1.75rem 1.5rem;
+    height: 560px !important; /* Altura aumentada desktop */
+    min-height: 560px !important;
+    max-height: 560px !important;
+    padding: 2rem 1.75rem;
   }
-  
+
   .seccion-info {
     height: 120px !important;
     min-height: 120px !important;
     max-height: 120px !important;
   }
-  
+
   .seccion-logo-container {
-    width: 115px;
-    height: 115px;
-    margin-bottom: 1.25rem;
+    width: 130px;
+    height: 130px;
+    margin-bottom: 1.5rem;
   }
-  
+
   .seccion-logo {
-    width: 90px;
-    height: 90px;
+    width: 100px;
+    height: 100px;
   }
-  
+
   .seccion-nombre {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     height: 2.6rem;
   }
-  
+
   .seccion-descripcion {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     height: 3.8rem;
   }
-  
+
   .subsecciones-preview {
-    padding: 0.85rem;
+    padding: 1.25rem;
     margin-bottom: 1.5rem;
-    height: 75px;
+    height: 100px;
   }
-  
+
   .subseccion-mini {
-    width: 38px;
-    height: 38px;
+    width: 52px;
+    height: 52px;
   }
-  
+
   .subsecciones-more {
-    width: 38px;
-    height: 38px;
-    font-size: 0.75rem;
+    width: 52px;
+    height: 52px;
+    font-size: 0.85rem;
   }
-  
+
   .no-subsecciones {
-    width: 38px;
-    height: 38px;
+    width: 52px;
+    height: 52px;
   }
-  
+
   .section-title {
-    font-size: 2rem;
+    font-size: 2.25rem;
   }
 }
 
@@ -541,50 +684,70 @@
 /* Landscape móvil */
 @media (max-width: 767.98px) and (orientation: landscape) {
   .seccion-card {
-    height: 380px !important; /* Altura aumentada landscape */
-    min-height: 380px !important;
-    max-height: 380px !important;
-    padding: 1rem 0.85rem;
+    height: 450px !important; /* Altura unificada landscape */
+    min-height: 450px !important;
+    max-height: 450px !important;
+    padding: 1.2rem 1rem;
   }
-  
+
   .seccion-logo-container {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 0.5rem;
+    width: 90px;
+    height: 90px;
+    margin-bottom: 0.75rem;
   }
-  
+
   .seccion-logo {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
   }
-  
+
   .seccion-info {
-    margin-bottom: 0.75rem;
-    height: 85px !important;
-    min-height: 85px !important;
-    max-height: 85px !important;
+    margin-bottom: 1rem;
+    height: 95px !important;
+    min-height: 95px !important;
+    max-height: 95px !important;
   }
-  
+
   .seccion-nombre {
-    height: 1.8rem;
+    font-size: 1.1rem;
+    height: 2rem;
+    line-height: 1.8;
   }
-  
+
   .seccion-descripcion {
-    font-size: 0.75rem;
-    margin-bottom: 0.5rem;
-    height: 2.5rem;
-    -webkit-line-clamp: 2;
-  }
-  
-  .subsecciones-preview {
-    padding: 0.4rem;
+    font-size: 0.8rem;
     margin-bottom: 0.75rem;
-    height: 55px;
+    height: 3rem;
+    -webkit-line-clamp: 2;
+    line-height: 1.4;
   }
-  
+
+  .subsecciones-preview {
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    height: 68px;
+  }
+
+  .subseccion-mini {
+    width: 44px;
+    height: 44px;
+  }
+
+  .subsecciones-more {
+    width: 44px;
+    height: 44px;
+    font-size: 0.7rem;
+  }
+
+  .no-subsecciones {
+    width: 44px;
+    height: 44px;
+  }
+
   .btn-explorar {
-    padding: 0.5rem 1rem;
-    font-size: 0.75rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
   }
 }
 

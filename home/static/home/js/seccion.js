@@ -1,6 +1,6 @@
 /**
- * SUBSECCION.JS - JavaScript simple para la página de subsecciones
- * ===============================================================
+ * SECCION.JS - JavaScript para filtrado automático de subsecciones
+ * ================================================================
  */
 
 // Initialize when DOM is loaded
@@ -9,33 +9,73 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * SEARCH FUNCTIONALITY
- * ===================
+ * SEARCH FUNCTIONALITY - FILTRADO AUTOMÁTICO
+ * ==========================================
  */
 function initializeSearch() {
-    const searchInput = document.querySelector('.search-input');
+    const searchInput = document.getElementById('searchInput');
     const clearButton = document.querySelector('.clear-search');
-    
+    const cards = document.querySelectorAll('.subseccion-card');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            filterCards(query, cards, clearButton);
+        });
+    }
+
     if (clearButton) {
-        clearButton.addEventListener('click', clearSearch);
+        clearButton.addEventListener('click', function() {
+            clearSearch(searchInput, cards, clearButton);
+        });
     }
 }
 
-function clearSearch() {
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-        searchInput.value = '';
-        searchInput.focus();
+function filterCards(query, cards, clearButton) {
+    cards.forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const description = card.querySelector('.card-description');
+        const descText = description ? description.textContent.toLowerCase() : '';
+
+        const matches = title.includes(query) || descText.includes(query);
+
+        if (matches) {
+            card.style.display = 'block';
+            card.style.animation = 'fadeIn 0.3s ease-in-out';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Mostrar/ocultar botón clear
+    if (query) {
+        clearButton.style.display = 'block';
+    } else {
+        clearButton.style.display = 'none';
     }
-    
-    // Remove search parameter from URL and reload
-    const url = new URL(window.location);
-    url.searchParams.delete('search');
-    window.location.href = url.toString();
+}
+
+function clearSearch(searchInput, cards, clearButton) {
+    searchInput.value = '';
+    clearButton.style.display = 'none';
+
+    // Mostrar todas las tarjetas
+    cards.forEach(card => {
+        card.style.display = 'block';
+        card.style.animation = 'fadeIn 0.3s ease-in-out';
+    });
+
+    searchInput.focus();
 }
 
 /**
  * GLOBAL FUNCTIONS (called from templates)
  * =======================================
  */
-window.clearSearch = clearSearch;
+window.clearSearch = function() {
+    const searchInput = document.getElementById('searchInput');
+    const cards = document.querySelectorAll('.subseccion-card');
+    const clearButton = document.querySelector('.clear-search');
+
+    clearSearch(searchInput, cards, clearButton);
+};

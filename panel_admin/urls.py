@@ -47,8 +47,22 @@ urlpatterns = [
     path('usuarios-descuentos/', views.usuarios_descuentos_dashboard, name='usuarios_descuentos_dashboard'),
     path('usuarios/', views.usuarios_list, name='usuarios_list'),
     path('usuarios/<int:user_id>/', views.usuario_detail, name='usuario_detail'),
+
+    # Códigos de descuento - aliases múltiples para compatibilidad
     path('codigos-descuento/', views.codigos_descuento_list, name='codigos_descuento_list'),
+    path('codigos/', views.codigos_descuento_list, name='codigos_list'),  # Alias
+
+    # Crear código - aliases múltiples
     path('codigos-descuento/crear/', views.crear_codigo_descuento, name='crear_codigo_descuento'),
+    path('crear-codigo/', views.crear_codigo_descuento, name='crear_codigo'),  # Alias
+    path('usuarios/<int:user_id>/crear-codigo/', views.crear_codigo_usuario, name='crear_codigo_usuario'),  # Para usuario específico
+
+    # Configuración - aliases múltiples
     path('configuracion-descuentos/', views.configuracion_descuentos, name='configuracion_descuentos'),
+    path('usuarios-configuracion/', views.configuracion_descuentos, name='usuarios_configuracion'),  # Alias
+
+    # Envío de códigos - aliases múltiples
     path('enviar-codigos/', views.enviar_codigos_manual, name='enviar_codigos_manual'),
+    path('usuarios-enviar-codigos/', views.enviar_codigos_manual, name='usuarios_enviar_codigos'),  # Alias
+    path('enviar-codigo-individual/', views.enviar_codigo_usuario_individual, name='enviar_codigo_individual'),  # Para usuario específico
 ]

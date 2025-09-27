@@ -12,6 +12,8 @@ from django.contrib.auth.views import LogoutView
 from django.utils.decorators import method_decorator
 from datetime import datetime
 from django.http import JsonResponse
+from django.utils import timezone
+from django.conf import settings
 
 
 def is_staff_user(user):
@@ -667,54 +669,23 @@ def prenda_multiple_upload(request, subsubseccion_id):
 # USUARIOS Y DESCUENTOS
 # ====================
 
+@login_required
 @user_passes_test(is_staff_user)
 def usuarios_descuentos_dashboard(request):
     """Dashboard principal de usuarios y descuentos"""
 
-    # Estadísticas generales
-    total_usuarios = User.objects.filter(profile__isnull=False).count()
-    usuarios_con_carrito = User.objects.filter(carrito_items__isnull=False).distinct().count()
-    codigos_activos = CodigoDescuento.objects.filter(usado=False, fecha_expiracion__gt=timezone.now()).count()
-    codigos_usados = CodigoDescuento.objects.filter(usado=True).count()
-
     # Configuración actual
     config_activa = ConfiguracionDescuentos.objects.filter(activo=True).first()
 
-    # Usuarios con actividad reciente en carrito
-    from django.utils import timezone
-    from datetime import timedelta
-    hace_7_dias = timezone.now() - timedelta(days=7)
-
-    usuarios_recientes = User.objects.filter(
-        carrito_items__ultima_actividad__gte=hace_7_dias,
-        profile__isnull=False
-    ).annotate(
-        items_carrito=Count('carrito_items'),
-        ultima_actividad_carrito=Max('carrito_items__ultima_actividad')
-    ).order_by('-ultima_actividad_carrito')[:10]
-
-    # Códigos próximos a vencer
-    en_una_semana = timezone.now() + timedelta(days=7)
-    codigos_por_vencer = CodigoDescuento.objects.filter(
-        usado=False,
-        fecha_expiracion__lte=en_una_semana,
-        fecha_expiracion__gt=timezone.now()
-    ).select_related('user__profile')[:10]
-
     context = {
         'title': 'Usuarios y Descuentos - Dashboard',
-        'total_usuarios': total_usuarios,
-        'usuarios_con_carrito': usuarios_con_carrito,
-        'codigos_activos': codigos_activos,
-        'codigos_usados': codigos_usados,
         'config_activa': config_activa,
-        'usuarios_recientes': usuarios_recientes,
-        'codigos_por_vencer': codigos_por_vencer,
     }
 
     return render(request, 'panel_admin/usuarios_descuentos/dashboard.html', context)
 
 
+@login_required
 @user_passes_test(is_staff_user)
 def usuarios_list(request):
     """Lista de usuarios registrados"""
@@ -723,8 +694,8 @@ def usuarios_list(request):
     search = request.GET.get('search', '')
 
     usuarios_queryset = User.objects.filter(profile__isnull=False).select_related('profile').annotate(
-        items_carrito=Count('carrito_items'),
-        codigos_descuento_count=Count('codigos_descuento'),
+        items_carrito=Count('carrito_items', distinct=True),
+        codigos_descuento_count=Count('codigos_descuento', distinct=True),
         ultima_actividad_carrito=Max('carrito_items__ultima_actividad')
     )
 
@@ -821,9 +792,13 @@ def codigos_descuento_list(request):
     return render(request, 'panel_admin/usuarios_descuentos/codigos_list.html', context)
 
 
+@login_required
 @user_passes_test(is_staff_user)
 def crear_codigo_descuento(request):
     """Crear código de descuento manualmente"""
+
+    # Obtener usuario preseleccionado de la sesión (si viene de usuario_detail)
+    preselected_user_id = request.session.pop('crear_codigo_user_id', None)
 
     if request.method == 'POST':
         user_id = request.POST.get('user_id')
@@ -834,7 +809,6 @@ def crear_codigo_descuento(request):
             usuario = User.objects.get(id=user_id, profile__isnull=False)
 
             # Crear código
-            from django.utils import timezone
             from datetime import timedelta
 
             codigo = CodigoDescuento.objects.create(
@@ -844,20 +818,48 @@ def crear_codigo_descuento(request):
             )
 
             messages.success(request, f'Código {codigo.codigo} creado para @{usuario.profile.instagram_account}')
-            return redirect('panel_admin:codigos_descuento_list')
+            return redirect('panel_admin:usuario_detail', user_id=usuario.id)
 
         except Exception as e:
             messages.error(request, f'Error al crear código: {str(e)}')
 
     # Lista de usuarios para el formulario
-    usuarios = User.objects.filter(profile__isnull=False).select_related('profile').order_by('profile__instagram_account')
+    usuarios = User.objects.filter(profile__isnull=False).select_related('profile').annotate(
+        carrito_count=Count('carrito_items')
+    ).order_by('profile__instagram_account')
+
+    # Datos adicionales para el template
+    config_activa = ConfiguracionDescuentos.objects.filter(activo=True).first()
+
+    # Códigos activos - incluye los que no tienen fecha de expiración
+    codigos_activos = CodigoDescuento.objects.filter(
+        usado=False
+    ).filter(
+        Q(fecha_expiracion__isnull=True) | Q(fecha_expiracion__gt=timezone.now())
+    ).count()
 
     context = {
         'title': 'Crear Código de Descuento',
         'usuarios': usuarios,
+        'config_activa': config_activa,
+        'codigos_activos': codigos_activos,
+        'preselected_user_id': preselected_user_id,
     }
 
     return render(request, 'panel_admin/usuarios_descuentos/crear_codigo.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def crear_codigo_usuario(request, user_id):
+    """Crear código para un usuario específico (redirige a crear_codigo con usuario preseleccionado)"""
+    try:
+        usuario = get_object_or_404(User, id=user_id, profile__isnull=False)
+        request.session['crear_codigo_user_id'] = user_id
+        return redirect('panel_admin:crear_codigo_descuento')
+    except:
+        messages.error(request, 'Usuario no encontrado')
+        return redirect('panel_admin:usuarios_list')
 
 
 @user_passes_test(is_staff_user)
@@ -869,8 +871,12 @@ def configuracion_descuentos(request):
     if request.method == 'POST':
         dias_inactividad = request.POST.get('dias_inactividad')
         porcentaje_descuento = request.POST.get('porcentaje_descuento')
+        activo = request.POST.get('activo') == 'on'  # Checkbox value
 
         try:
+            # Importar funciones del scheduler
+            from home.scheduler import iniciar_scheduler, detener_scheduler
+
             # Desactivar configuraciones anteriores
             ConfiguracionDescuentos.objects.filter(activo=True).update(activo=False)
 
@@ -878,18 +884,36 @@ def configuracion_descuentos(request):
             nueva_config = ConfiguracionDescuentos.objects.create(
                 dias_inactividad=int(dias_inactividad),
                 porcentaje_descuento=int(porcentaje_descuento),
-                activo=True
+                activo=activo
             )
 
-            messages.success(request, 'Configuración actualizada correctamente')
+            # Controlar el scheduler automáticamente
+            if activo:
+                scheduler_resultado = iniciar_scheduler()
+                if scheduler_resultado:
+                    messages.success(request, '✅ Configuración guardada y sistema automático activado - Enviará códigos diariamente a las 10:00 AM')
+                else:
+                    messages.warning(request, '⚠️ Configuración guardada pero hubo un problema iniciando el sistema automático')
+            else:
+                detener_scheduler()
+                messages.success(request, '⏹️ Configuración guardada - Sistema automático desactivado')
+
             return redirect('panel_admin:configuracion_descuentos')
 
         except Exception as e:
-            messages.error(request, f'Error al actualizar configuración: {str(e)}')
+            messages.error(request, f'Error al guardar configuración: {str(e)}')
+
+    # Obtener estado del scheduler
+    try:
+        from home.scheduler import estado_scheduler
+        estado_sistema = estado_scheduler()
+    except Exception:
+        estado_sistema = {'activo': False, 'trabajos': 0, 'proximo_envio': None}
 
     context = {
         'title': 'Configuración de Descuentos',
         'config_activa': config_activa,
+        'scheduler_estado': estado_sistema,
     }
 
     return render(request, 'panel_admin/usuarios_descuentos/configuracion.html', context)
@@ -950,3 +974,136 @@ def enviar_codigos_manual(request):
     }
 
     return render(request, 'panel_admin/usuarios_descuentos/enviar_codigos.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def enviar_codigo_usuario_individual(request):
+    """Enviar código de descuento a un usuario específico"""
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+    try:
+        import json
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        force_send = data.get('force_send', False)
+
+
+        if not user_id:
+            return JsonResponse({'success': False, 'error': 'ID de usuario requerido'})
+
+        usuario = get_object_or_404(User, id=user_id, profile__isnull=False)
+
+        # Obtener configuración activa
+        config = ConfiguracionDescuentos.objects.filter(activo=True).first()
+        if not config:
+            return JsonResponse({'success': False, 'error': 'No hay configuración activa'})
+
+        # Verificar si ya tiene un código vigente
+        codigo_vigente = CodigoDescuento.objects.filter(
+            user=usuario,
+            usado=False,
+            fecha_expiracion__gt=timezone.now()
+        ).first()
+
+        enviar_existente = data.get('enviar_existente', False)
+
+
+        # Si hay código vigente y no se especifica qué hacer, preguntar al usuario
+        if codigo_vigente and not force_send and not enviar_existente:
+            return JsonResponse({
+                'success': False,
+                'error': 'codigo_vigente',
+                'codigo_actual': codigo_vigente.codigo,
+                'porcentaje': codigo_vigente.porcentaje,
+                'expiracion': codigo_vigente.fecha_expiracion.strftime('%d/%m/%Y'),
+                'has_vigente': True
+            })
+
+        # Obtener items del carrito
+        carrito_items = CarritoItem.objects.filter(user=usuario).select_related('prenda')
+        if not carrito_items.exists():
+            return JsonResponse({'success': False, 'error': 'El usuario no tiene items en el carrito'})
+
+        # Determinar qué código usar
+        if enviar_existente and codigo_vigente:
+            # Usar código existente
+            codigo_a_enviar = codigo_vigente
+        elif force_send and codigo_vigente:
+            # Desactivar código anterior (marcarlo como usado)
+            codigo_vigente.usado = True
+            codigo_vigente.save()
+            # Crear nuevo código
+            from datetime import timedelta
+            codigo_a_enviar = CodigoDescuento.objects.create(
+                user=usuario,
+                porcentaje=config.porcentaje_descuento,
+                fecha_expiracion=timezone.now() + timedelta(days=30)
+            )
+        else:
+            # Crear nuevo código (primera vez)
+            from datetime import timedelta
+            codigo_a_enviar = CodigoDescuento.objects.create(
+                user=usuario,
+                porcentaje=config.porcentaje_descuento,
+                fecha_expiracion=timezone.now() + timedelta(days=30)
+            )
+
+        # Preparar datos para el email
+        items_data = []
+        for item in carrito_items:
+            items_data.append({
+                'nombre': item.prenda.nombre or f"Prenda de {item.prenda.subsubseccion.nombre}",
+                'precio': f"{item.prenda.precio}€" if item.prenda.precio else 'Precio no disponible',
+                'imagen_url': item.prenda.imagen.url if item.prenda.imagen else '',
+                'subsubseccion': item.prenda.subsubseccion.nombre,
+                'subseccion': item.prenda.subsubseccion.subseccion.nombre,
+                'seccion': item.prenda.subsubseccion.subseccion.seccion.nombre,
+                'agregado_en': item.agregado_en,
+                'ultima_actividad': item.ultima_actividad
+            })
+
+        # Crear contexto para el email
+        context = {
+            'usuario': usuario,
+            'instagram_account': usuario.profile.instagram_account,
+            'codigo_descuento': codigo_a_enviar.codigo,
+            'porcentaje_descuento': codigo_a_enviar.porcentaje,
+            'items_carrito': items_data,
+            'cantidad_items': len(items_data),
+            'fecha_expiracion': codigo_a_enviar.fecha_expiracion,
+            'dias_inactivo': config.dias_inactividad
+        }
+
+        # Renderizar y enviar email
+        from django.core.mail import send_mail
+        from django.template.loader import render_to_string
+        from django.utils.html import strip_tags
+
+        html_message = render_to_string('emails/codigo_descuento.html', context)
+        plain_message = strip_tags(html_message)
+        subject = f'¡{codigo_a_enviar.porcentaje}% de descuento para ti! - Zone22'
+
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            html_message=html_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[usuario.email],
+            fail_silently=False,
+        )
+
+        # Marcar como enviado
+        codigo_a_enviar.email_enviado = True
+        codigo_a_enviar.save()
+
+        tipo_envio = "existente" if enviar_existente else ("nuevo (anterior desactivado)" if force_send else "nuevo")
+        return JsonResponse({
+            'success': True,
+            'message': f'Código {codigo_a_enviar.codigo} ({tipo_envio}) enviado a {usuario.profile.instagram_account}'
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

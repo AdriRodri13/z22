@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.contrib import messages
+from django.db import models
 import json
 from .models import *
 from .forms import RegistroForm
@@ -95,9 +96,26 @@ def consultar_disponibilidad(request):
     try:
         # Parsear datos del request
         data = json.loads(request.body)
-        nombre_cliente = data.get('nombre', '').strip()
-        instagram_cliente = data.get('instagram', '').strip()
+        usuario_autenticado = data.get('usuario_autenticado', False)
         productos_cesta = data.get('productos', [])
+
+        # Si es usuario autenticado, obtener datos del usuario
+        if usuario_autenticado and request.user.is_authenticated:
+            if hasattr(request.user, 'profile'):
+                nombre_cliente = f"{request.user.first_name} {request.user.last_name}".strip()
+                if not nombre_cliente:
+                    # Si no tiene nombre completo, usar el username
+                    nombre_cliente = request.user.username
+                instagram_cliente = request.user.profile.instagram_account
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Usuario no tiene perfil configurado'
+                }, status=400)
+        else:
+            # Usuario no autenticado - obtener datos del formulario
+            nombre_cliente = data.get('nombre', '').strip()
+            instagram_cliente = data.get('instagram', '').strip()
 
         # Validar datos
         if not nombre_cliente or not instagram_cliente:
@@ -112,8 +130,26 @@ def consultar_disponibilidad(request):
                 'error': 'La cesta está vacía'
             }, status=400)
 
+        # Buscar usuario por Instagram para verificar descuentos
+        usuario_descuento = None
+        codigo_vigente = None
+        try:
+            usuario_descuento = User.objects.select_related('profile').get(
+                profile__instagram_account=instagram_cliente
+            )
+            # Buscar código vigente activo
+            from django.utils import timezone
+            codigo_vigente = CodigoDescuento.objects.filter(
+                user=usuario_descuento,
+                usado=False,
+                fecha_expiracion__gt=timezone.now()
+            ).order_by('-fecha_creacion').first()
+        except User.DoesNotExist:
+            pass
+
         # Preparar datos para el email
         total = 0
+        total_con_descuento = 0
         productos_detalle = []
 
         for producto in productos_cesta:
@@ -122,9 +158,16 @@ def consultar_disponibilidad(request):
                 precio_num = float(producto['precio'].replace('€', '').replace(',', '.').strip())
                 total += precio_num
 
+                # Calcular precio con descuento si aplica
+                precio_con_descuento = precio_num
+                if codigo_vigente:
+                    precio_con_descuento = precio_num * (1 - codigo_vigente.porcentaje / 100)
+                    total_con_descuento += precio_con_descuento
+
                 productos_detalle.append({
                     'nombre': prenda.nombre,
                     'precio': producto['precio'],
+                    'precio_con_descuento': f"{precio_con_descuento:.2f}€" if codigo_vigente else None,
                     'imagen_url': prenda.imagen.url if prenda.imagen else '',
                     'subsubseccion': prenda.subsubseccion.nombre,
                     'subseccion': prenda.subsubseccion.subseccion.nombre,
@@ -139,7 +182,11 @@ def consultar_disponibilidad(request):
             'instagram_cliente': instagram_cliente,
             'productos': productos_detalle,
             'total': f"{total:.2f}€",
-            'cantidad_productos': len(productos_detalle)
+            'total_con_descuento': f"{total_con_descuento:.2f}€" if codigo_vigente else None,
+            'cantidad_productos': len(productos_detalle),
+            'codigo_descuento': codigo_vigente,
+            'porcentaje_descuento': codigo_vigente.porcentaje if codigo_vigente else None,
+            'ahorro_total': f"{(total - total_con_descuento):.2f}€" if codigo_vigente else None
         }
 
         # Renderizar email HTML
@@ -301,3 +348,80 @@ def obtener_carrito(request):
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': 'Error al obtener carrito'}, status=500)
+
+
+@login_required
+def obtener_descuentos_usuario(request):
+    """
+    Obtener códigos de descuento vigentes del usuario para mostrar en la cesta
+    """
+    try:
+        from django.utils import timezone
+
+        # Buscar códigos activos (no usados y no expirados)
+        codigos_activos = CodigoDescuento.objects.filter(
+            user=request.user,
+            usado=False
+        ).filter(
+            # Sin fecha de expiración O con fecha futura
+            models.Q(fecha_expiracion__isnull=True) |
+            models.Q(fecha_expiracion__gt=timezone.now())
+        ).order_by('-fecha_creacion')
+
+        descuentos_data = []
+        for codigo in codigos_activos:
+            descuentos_data.append({
+                'codigo': codigo.codigo,
+                'porcentaje': codigo.porcentaje,
+                'fecha_expiracion': codigo.fecha_expiracion.isoformat() if codigo.fecha_expiracion else None,
+                'fecha_creacion': codigo.fecha_creacion.isoformat()
+            })
+
+        return JsonResponse({
+            'success': True,
+            'descuentos': descuentos_data,
+            'count': len(descuentos_data)
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'Error al obtener descuentos'}, status=500)
+
+
+def login_usuario(request):
+    """
+    Vista de login específica para usuarios clientes (no administradores)
+    """
+    from django.contrib.auth import authenticate, login as django_login
+
+    if request.user.is_authenticated:
+        return redirect('home:home')
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if not email or not password:
+            messages.error(request, 'Por favor completa todos los campos')
+            return render(request, 'home/login_usuario.html')
+
+        # Intentar autenticar
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            django_login(request, user)
+            messages.success(request, f'¡Bienvenido de vuelta!')
+
+            # Redirigir según el tipo de usuario
+            if hasattr(user, 'profile') and user.profile:
+                # Usuario cliente normal
+                return redirect('home:perfil_usuario')
+            elif user.is_staff:
+                # Administrador logueado desde interfaz de cliente
+                return redirect('panel_admin:dashboard')
+            else:
+                # Usuario sin perfil
+                return redirect('home:home')
+        else:
+            messages.error(request, 'Email o contraseña incorrectos')
+
+    return render(request, 'home/login_usuario.html')
