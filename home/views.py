@@ -312,8 +312,7 @@ def remover_carrito(request):
             carrito_item.delete()
 
             return JsonResponse({
-                'success': True,
-                'message': 'Eliminado del carrito'
+                'success': True
             })
         except CarritoItem.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Item no encontrado en el carrito'}, status=404)
@@ -414,7 +413,7 @@ def login_usuario(request):
             # Redirigir según el tipo de usuario
             if hasattr(user, 'profile') and user.profile:
                 # Usuario cliente normal
-                return redirect('home:perfil_usuario')
+                return redirect('home:home')
             elif user.is_staff:
                 # Administrador logueado desde interfaz de cliente
                 return redirect('panel_admin:dashboard')

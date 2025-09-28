@@ -1074,7 +1074,9 @@ def enviar_codigo_usuario_individual(request):
             'items_carrito': items_data,
             'cantidad_items': len(items_data),
             'fecha_expiracion': codigo_a_enviar.fecha_expiracion,
-            'dias_inactivo': config.dias_inactividad
+            'dias_inactivo': config.dias_inactividad,
+            # Variables adicionales para compatibilidad con template
+            'codigo': codigo_a_enviar,  # Objeto completo para {{ codigo.codigo }}, {{ codigo.porcentaje }}
         }
 
         # Renderizar y enviar email

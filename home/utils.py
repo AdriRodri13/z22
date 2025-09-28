@@ -45,11 +45,16 @@ def enviar_email_codigo_descuento(usuario, codigo, items_carrito=None):
             'usuario': usuario,
             'codigo': codigo,
             'items_carrito': items_carrito,
-            'nombre_tienda': 'Cesta Trend',  # Personalizar según tu tienda
+            'nombre_tienda': 'Zone22',
+            # Variables adicionales para compatibilidad
+            'instagram_account': usuario.profile.instagram_account,
+            'codigo_descuento': codigo.codigo,
+            'porcentaje_descuento': codigo.porcentaje,
+            'fecha_expiracion': codigo.fecha_expiracion,
         }
 
         # Renderizar el email
-        asunto = f'🎁 ¡Tienes un descuento del {codigo.porcentaje}%! - Cesta Trend'
+        asunto = f'🎁 ¡Tienes un descuento del {codigo.porcentaje}%! - Zone22'
 
         # Mensaje de texto plano
         mensaje_texto = f"""
@@ -78,7 +83,7 @@ Visita nuestra tienda y completa tu compra ahora:
 [Enlace a tu tienda]
 
 ¡Gracias por elegirnos!
-El equipo de Cesta Trend
+El equipo de Zone22
 
 ---
 Si no deseas recibir estos emails, puedes darte de baja en cualquier momento.

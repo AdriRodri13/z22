@@ -117,7 +117,9 @@ class Command(BaseCommand):
                     'items_carrito': items_data,
                     'cantidad_items': len(items_data),
                     'fecha_expiracion': codigo_descuento.fecha_expiracion,
-                    'dias_inactivo': dias_inactividad
+                    'dias_inactivo': dias_inactividad,
+                    # Variables adicionales para compatibilidad con template
+                    'codigo': codigo_descuento,  # Objeto completo para {{ codigo.codigo }}, {{ codigo.porcentaje }}
                 }
 
                 # Renderizar email HTML

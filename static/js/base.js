@@ -523,7 +523,7 @@ function renderCestaModal() {
             <div class="cesta-empty">
                 <i class="fas fa-shopping-cart text-muted mb-3" style="font-size: 3rem;"></i>
                 <h5 class="text-white">Tu cesta está vacía</h5>
-                <p class="text-muted">Agrega algunas prendas para comenzar</p>
+                <p class="text-white">Agrega algunas prendas para comenzar</p>
             </div>
         `;
 
@@ -708,15 +708,13 @@ function removeFromCestaGlobal(prendaId) {
         updateCestaGlobalCounter();
         renderCestaModal();
 
-        // Mostrar feedback
-        showNotification(`${removedItem.nombre} eliminado de la cesta`, 'info', 3000);
+        // NO mostrar notificación al eliminar elementos individuales
     }
 }
 
 function clearCestaGlobal() {
     if (cestaGlobal.length === 0) {
-        showNotification('La cesta ya está vacía', 'info', 3000);
-        return;
+        return; // No hacer nada si ya está vacía
     }
 
     // Vaciar cesta directamente
@@ -727,8 +725,7 @@ function clearCestaGlobal() {
     updateCestaGlobalCounter();
     renderCestaModal();
 
-    // Mostrar feedback
-    showNotification('Cesta vaciada', 'success', 3000);
+    // NO mostrar notificación al vaciar
 }
 
 function consultarDisponibilidad() {
@@ -900,6 +897,7 @@ function enviarConsulta() {
 window.abrirModalCesta = abrirModalCesta;
 window.removeFromCestaGlobal = removeFromCestaGlobal;
 window.clearCesta = clearCestaGlobal;
+window.clearCestaGlobal = clearCestaGlobal; // Alias adicional
 window.consultarDisponibilidad = consultarDisponibilidad;
 window.enviarConsulta = enviarConsulta;
 
